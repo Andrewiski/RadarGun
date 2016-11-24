@@ -1,0 +1,9 @@
+﻿{
+  "updateHostDateTime": true,
+  "portName": "/dev/ttyO3",
+  "win32": {
+    "portName": "", 
+    "baudrate": 9600
+  },
+  "baudrate": 9600
+}

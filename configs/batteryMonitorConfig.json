@@ -1,0 +1,7 @@
+﻿{
+  "fakeBatteryVoltage": 12.001,
+  "fakeBatteryDecreaseValue": 0.001,
+  "analogPin": "P9_33",
+  "timerInterval": 60000,
+  "maxHistoryCount": 500
+}

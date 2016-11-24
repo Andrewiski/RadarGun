@@ -1,0 +1,3 @@
+D:\Users\adevries\sources\GitHub\RadarGun\obj\Debug\RadarGunMonitor.njsprojResolveAssemblyReference.cache
+D:\github\RadarGun\obj\Debug\RadarGunMonitor.njsprojResolveAssemblyReference.cache
+D:\github\RadarGun\bin\Microsoft.NodejsTools.WebRole.dll

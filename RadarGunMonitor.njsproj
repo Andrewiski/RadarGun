@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Name>ExpressApp7</Name>
+    <RootNamespace>ExpressApp7</RootNamespace>
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <Environment>DEBUG=app,radar,batteryMonitor,gpsMonitor
+</Environment>
+    <LaunchUrl>http://localhost:3000</LaunchUrl>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>83aac9f6-1094-40fc-8ce9-2ca0fe8ccbac</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>app.js</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <ProjectView>ShowAllFiles</ProjectView>
+    <NodejsPort>1337</NodejsPort>
+    <StartWebBrowser>True</StartWebBrowser>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="AdafruitLedBackpack.js" />
+    <Compile Include="app.js" />
+    <Compile Include="mcp9808.js" />
+    <Compile Include="modules\batteryMonitor.js" />
+    <Compile Include="modules\gpsMonitor.js" />
+    <Compile Include="modules\radarDatabase.js" />
+    <Compile Include="modules\radarStalker2.js" />
+    <Compile Include="public\app\js\app.js" />
+    <Compile Include="public\app\js\factories\radarMonitor.js" />
+    <Compile Include="public\app\js\modules\scoreboard\scoreboardController.js" />
+    <Compile Include="public\app\js\modules\modals\modalsController.js" />
+    <Compile Include="public\app\js\modules\scoreboard\scoreboardDirective.js" />
+    <Compile Include="public\app\js\providers\errorHandlerProvider.js" />
+    <Compile Include="public\app\js\views\scoreboardViewController.js" />
+    <Compile Include="public\javascripts\angular-route.min.js" />
+    <Compile Include="public\javascripts\angular-sanitize.min.js" />
+    <Compile Include="public\javascripts\angular-toggle-switch.min.js" />
+    <Compile Include="public\javascripts\angular-ui-router.js" />
+    <Compile Include="public\javascripts\angular.min.js" />
+    <Compile Include="public\javascripts\lodash.min.js" />
+    <Compile Include="public\javascripts\restangular.min.js" />
+    <Compile Include="public\javascripts\socket.io.js" />
+    <Compile Include="public\javascripts\ui-bootstrap-tpls-0.11.0.min.js" />
+    <Compile Include="public\javascripts\ui-bootstrap-tpls-dateandtimepickers-0.11.0.js" />
+    <Compile Include="public\javascripts\ui-date.js" />
+    <Compile Include="public\javascripts\ui-utils.min.js" />
+    <Compile Include="modules\radarEmulator.js" />
+    <Compile Include="routes\index.js" />
+    <Compile Include="routes\team.js" />
+    <Compile Include="routes\user.js" />
+    <Compile Include="testBone.js" />
+    <Compile Include="testLedbackPack.js" />
+    <Content Include="configs\gpsMonitorConfig.json" />
+    <Content Include="configs\batteryMonitorConfig.json" />
+    <Content Include="configs\radarEmulatorConfig.json" />
+    <Content Include="configs\radarGunMonitorConfig.json" />
+    <Content Include="configs\radarStalker2Config.json" />
+    <Content Include="package.json" />
+    <Content Include="public\app\html\partials\footer.html" />
+    <Content Include="public\app\html\partials\header.html" />
+    <Content Include="public\app\html\partials\modals\error-handler.html" />
+    <Content Include="public\app\html\views\scoreboard.html" />
+    <Content Include="public\app\img\ajax_loader_blue_350.gif" />
+    <Content Include="public\app\img\spinner.gif" />
+    <Content Include="public\app\js\modules\scoreboard\scoreboard.tpl.html" />
+    <Content Include="public\favicon.ico" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="public\javascripts\angular-route.min.js.map" />
+    <Content Include="public\javascripts\angular-sanitize.min.js.map" />
+    <Content Include="public\javascripts\angular.min.js.map" />
+    <Content Include="public\stylesheets\bootstrap-theme.min.css" />
+    <Content Include="public\stylesheets\bootstrap.min.css" />
+    <Content Include="public\stylesheets\style.css" />
+    <Content Include="README.md" />
+    <Content Include="public\index.html" />
+    <Content Include="StartRadarApp.sh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="modules\" />
+    <Folder Include="configs\" />
+    <Folder Include="public\" />
+    <Folder Include="public\app\html\" />
+    <Folder Include="public\app\html\partials\" />
+    <Folder Include="public\app\html\partials\modals\" />
+    <Folder Include="public\app\html\views\" />
+    <Folder Include="public\app\img\" />
+    <Folder Include="public\app\js\" />
+    <Folder Include="public\app\js\factories\" />
+    <Folder Include="public\app\js\filters\" />
+    <Folder Include="public\app\js\modules\" />
+    <Folder Include="public\app\js\modules\modals\" />
+    <Folder Include="public\app\js\modules\scoreboard\" />
+    <Folder Include="public\app\js\views\" />
+    <Folder Include="public\app\js\providers\" />
+    <Folder Include="public\app\js\services\" />
+    <Folder Include="public\fonts\" />
+    <Folder Include="public\images\" />
+    <Folder Include="public\javascripts\" />
+    <Folder Include="public\app\" />
+    <Folder Include="public\stylesheets\" />
+    <Folder Include="routes\" />
+    <Folder Include="typings\" />
+    <Folder Include="typings\angularjs\" />
+    <Folder Include="typings\body-parser\" />
+    <Folder Include="typings\bootstrap\" />
+    <Folder Include="typings\cookie-parser\" />
+    <Folder Include="typings\debug\" />
+    <Folder Include="typings\express-serve-static-core\" />
+    <Folder Include="typings\express\" />
+    <Folder Include="typings\extend\" />
+    <Folder Include="typings\jquery\" />
+    <Folder Include="typings\mathjs\" />
+    <Folder Include="typings\mime\" />
+    <Folder Include="typings\nconf\" />
+    <Folder Include="typings\node\" />
+    <Folder Include="typings\serialport\" />
+    <Folder Include="typings\serve-favicon\" />
+    <Folder Include="typings\serve-static\" />
+    <Folder Include="typings\socket.io\" />
+    <Folder Include="typings\stylus\" />
+    <Folder Include="typings\verror\" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="typings\angularjs\angular.d.ts" />
+    <TypeScriptCompile Include="typings\body-parser\body-parser.d.ts" />
+    <TypeScriptCompile Include="typings\bootstrap\bootstrap.d.ts" />
+    <TypeScriptCompile Include="typings\cookie-parser\cookie-parser.d.ts" />
+    <TypeScriptCompile Include="typings\debug\debug.d.ts" />
+    <TypeScriptCompile Include="typings\express-serve-static-core\express-serve-static-core.d.ts" />
+    <TypeScriptCompile Include="typings\express\express.d.ts" />
+    <TypeScriptCompile Include="typings\extend\extend.d.ts" />
+    <TypeScriptCompile Include="typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="typings\mathjs\mathjs.d.ts" />
+    <TypeScriptCompile Include="typings\mime\mime.d.ts" />
+    <TypeScriptCompile Include="typings\nconf\nconf.d.ts" />
+    <TypeScriptCompile Include="typings\node\node.d.ts" />
+    <TypeScriptCompile Include="typings\node\node.d.ts" />
+    <TypeScriptCompile Include="typings\serialport\serialport.d.ts" />
+    <TypeScriptCompile Include="typings\serve-favicon\serve-favicon.d.ts" />
+    <TypeScriptCompile Include="typings\serve-static\serve-static.d.ts" />
+    <TypeScriptCompile Include="typings\socket.io\socket.io.d.ts" />
+    <TypeScriptCompile Include="typings\stylus\stylus.d.ts" />
+    <TypeScriptCompile Include="typings\tsd.d.ts" />
+    <TypeScriptCompile Include="typings\tsd.d.ts" />
+    <TypeScriptCompile Include="typings\verror\verror.d.ts" />
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

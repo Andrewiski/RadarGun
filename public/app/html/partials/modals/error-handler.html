@@ -1,0 +1,38 @@
+﻿<div>
+    <div class="modal-header">
+        <h3>An Error has Occurred</h3><span style="float:right;" ng-show="displayMessageContent"><a ng-click="displayError = !displayError">show details</a></span>
+    </div>
+    <div class="modal-body">
+        <div style="height: 200px; width: 100%;">
+            <div id="errorHandler-Retry" ng-show="displayRetry">
+                <img src="/App/img/spinner.gif" /> Retrying Request
+            </div>
+            <div ng-show="displayMessageContent">
+                <div id="errorHandler-MessageContent" style="width:100%;height:200px" ng-hide="displayError">
+                    <span>
+                        An Error has occured that prevent the request from completing. We Appoligize for the issue and would like your feed back.<br />
+                        Please Click the Retry button to retry the request to the server or click the Send Error Email notify support of the issue.<br /><br />
+                        Thank you,<br />
+                        CTM Software Support Staff.
+                    </span>
+                </div>
+
+                <div id="errorHandler-errorMessageDetails" style="width:100%;height:200px;overflow:scroll" ng-show="displayError">
+                    <div><b>Error&nbsp;Message:&nbsp;</b>{{displayedErrorMessage}}</div>
+                    <div><b>Exception&nbsp;Type:&nbsp;</b>{{detailedErrorMessage.ExceptionType}}</div>
+                    <div><b>Error&nbsp;Details:&nbsp;</b>{{detailedErrorMessage.ExceptionMessage}}</div>
+                    <div><b>Stack&nbsp;Trace:&nbsp;</b>{{detailedErrorMessage.StackTrace}}</div>
+
+
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+    <div class="modal-footer">
+        
+        <button class="btn btn-primary" ng-click="retry()">Retry</button>
+        <button class="btn btn-warning" ng-click="$dismiss('cancel')">Cancel</button>
+    </div>
+</div>
