@@ -1,5 +1,5 @@
 ﻿# RadarGunMonitor
-# Beaglebone Server Room Hvac Controller #
+# Stalker Pro II Radar OEM Sensor Web Based Monitor #
 
 ### Intro ###
 This application is under active development by Andrew DeVries for Digital Example, LLC all rights reserved.
