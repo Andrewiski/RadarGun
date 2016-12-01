@@ -23,20 +23,31 @@ var RadarStalker2 = function (options){
         debug('radarStalker2 Event Listener: ' + listener);
     });
     
+    var emptySpeedData = {
+        liveSpeed: 0,
+        liveSpeedDirection: 0,
+        hitSpeed: 0,
+        hitSpeedDirection: 0,
+        peakSpeed: 0,
+        peakSpeedDirection: 0,
+        liveSpeed2: 0,
+        liveSpeed2Direction: 0,
+        peakSpeed2: 0,
+        peakSpeed2Direction: 0,
+        hitSpeed2: 0,
+        hitSpeed2Direction: 0,
+        pitchCount: 0,
+        speeds: []
+    }
+
     var commonData = {
-        currentRadarSpeedData: {
-            liveSpeeds: [],
-            hitSpeeds : [],
-            pitchCount: 0,
-            peakSpeed: 0
-        },
+        currentRadarSpeedData: {},
         lastValidRadarSpeedData: {
-            liveSpeeds: [],
-            hitSpeeds: [],
-            pitchCount: 0,
-            peakSpeed: 1
         }
     }
+
+    extend(commonData.currentRadarSpeedData, emptySpeedData);
+    extend(commonData.lastValidRadarSpeedData, emptySpeedData);
     var settings = {};
     extend(settings, objOptions);
 
@@ -259,7 +270,7 @@ var RadarStalker2 = function (options){
     this.radarConfigCommand = function (options) {
         var data = options.data;
         var socket = options.socket;
-        debug('radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client id:' +  socket.id );
+        debug('radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' +  socket.id );
         var sendSerialData = false;
         var mybuff = undefined;
 
@@ -480,7 +491,7 @@ var RadarStalker2 = function (options){
                     break;
             }
         }
-        if (speedData.liveSpeed > objOptions.radarConfig.LowSpeedThreshold || speedData.peakSpeed > objOptions.radarConfig.LowSpeedThreshold) {
+        if (speedData.liveSpeed > objOptions.radarConfig.LowSpeedThreshold.value || speedData.peakSpeed > objOptions.radarConfig.LowSpeedThreshold.value) {
             debug('Speed Data L' + speedData.liveSpeed + ' P' + speedData.peakSpeed + ' H' + speedData.hitSpeed);
             zeroCounter = 0;
         } else {
@@ -491,15 +502,12 @@ var RadarStalker2 = function (options){
         }
         //debug('data received ' + speedData.liveSpeed);
         // If PeakSpeed is Enabled then we can group packets with the exact same PeakSpeed as a baseball can't speed up only slow down.
-        if (speedData.liveSpeed > 0 || speedData.peakSpeed > 0 || speedData.liveSpeed2 > 0 || speedData.peakSpeed2 > 0 || speedData.hitSpeed > 0) {
-            debug("Andy Remove me p:" + speedData.peakSpeed + " l:" + speedData.liveSpeed + " h:" + speedData.liveSpeed + " p2:" + speedData.peakSpeed2 + " l2:" + speedData.liveSpeed2);
+        if (speedData.liveSpeed > 0 || speedData.peakSpeed > 0 || speedData.liveSpeed2 > 0 || speedData.hitSpeed > 0 || speedData.hitSpeed2 > 0) {
+            debug("Andy Remove me p:" + speedData.peakSpeed + " l:" + speedData.liveSpeed + " h:" + speedData.hitSpeed + " p2:" + speedData.peakSpeed2 + " l2:" + speedData.liveSpeed2 + " h2:" + speedData.liveSpeed2);
         }
-        commonData.lastValidRadarSpeedData = speedData;
-        if (speedData.peakSpeed == commonData.lastValidRadarSpeedData.peakSpeed) {
-            commonData.currentRadarSpeedData.liveSpeeds.push(speedData.liveSpeed)
-            commonData.currentRadarSpeedData.hitSpeeds.push(speedData.hitSpeed)
-            
-        } else {
+        
+        if (speedData.liveSpeed >= objOptions.radarConfig.LowSpeedThreshold.value || speedData.hitSpeed >= objOptions.radarConfig.LowSpeedThreshold.value) {
+            commonData.currentRadarSpeedData.speeds.push(speedData)
             //PeakSpeed has changed 
             if (speedData.peakSpeed == 0 && commonData.lastValidRadarSpeedData.peakSpeed > 0) {
                 //PeakSpeed is zero so this is a new Target so we need to log speed to Db and send the data to the clients
@@ -507,20 +515,20 @@ var RadarStalker2 = function (options){
                 //    radarSpeedDataStmt.run(speedData.time, radarSpeedRelatedData.GameID, radarSpeedRelatedData.PitcherPlayerID, radarSpeedRelatedData.HitterPlayerID, speedData.LiveSpeedDirection, speedData.LiveSpeed, speedData.LiveSpeed2Direction, speedData.LiveSpeed2, speedData.PeakSpeedDirection,  speedData.PeakSpeed, speedData.PeakSpeedDirection2, speedData.PeakSpeed2, speedData.HitSpeedDirection, speedData.HitSpeed, speedData.HitSpeedDirection2, speedData.HitSpeed2);
                 //}
                 pitchCounter++;
+                extend(commonData.currentRadarSpeedData, speedData);
                 commonData.currentRadarSpeedData.pitchCount = pitchCounter;
                 self.emit('radarSpeed', commonData.currentRadarSpeedData);
-                commonData.currentRadarSpeedData = {};
-                commonData.currentRadarSpeedData.liveSpeeds = [];
-                commonData.currentRadarSpeedData.hitSpeeds = [];
-                commonData.currentRadarSpeedData.pitchCount = 0;
-                commonData.currentRadarSpeedData.peakSpeed = 0;
+                extend(commonData.currentRadarSpeedData, emptySpeedData);
+                commonData.lastValidRadarSpeedData = commonData.currentRadarSpeedData;
+
             } else {
-                //PeakSpeed should be Zero as well as LiveSpeed so we increment our counter tell we get to 20 
+                //PeakSpeed should be Zero as well as LiveSpeed so we increment our counter tell we get to CounterLimit and send a zero to clear the speeds
                 if (zeroCounter == zeroCounterLimit) {
                     //send Zero Packet
                     self.emit('radarSpeed', commonData.currentRadarSpeedData);
                 }
             }
+            commonData.lastValidRadarSpeedData = speedData;
         }
         //if ( ((speedData.LiveSpeed > radarConfig.LowSpeedThreshold && speedData.PeakSpeed > radarConfig.LowSpeedThreshold) && (speedData.LiveSpeed != LastValidRadarSpeedData.LiveSpeed && speedData.PeakSpeed != LastValidRadarSpeedData.PeakSpeed && speedData.HitSpeed != LastValidRadarSpeedData.HitSpeed) ) || (LastValidRadarSpeedData.LiveSpeed > 0 && speedData.LiveSpeed == 0 && zeroCounter == zeroCounterLimit)){
         //    LastValidRadarSpeedData = speedData;

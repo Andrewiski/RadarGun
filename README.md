@@ -1,10 +1,10 @@
-﻿# RadarGunMonitor
+﻿# Digital Example LLC Radar Gun Monitor
 # Stalker Pro II Radar OEM Sensor Web Based Monitor #
 
 ### Intro ###
 This application is under active development by Andrew DeVries for Digital Example, LLC all rights reserved.
 
-The Radar Gun Monitor is a BeagleBone application using a Stalker Pro II OEM Speed Sensor as its primary speed sensor. Speed data is recorded and logged on local flassh memeory as well as presented to multiple clients over tcp web client.
+The Radar Gun Monitor is a BeagleBone application using a Stalker Pro II OEM Speed Sensor as its primary speed sensor. Speed data is recorded and logged on local flash memory as well as presented to multiple clients over tcp web client.
 
 Socket IO is used to give real time radar speed updates tot he web browser and works with Apple/Andriod mobile devices. 
 

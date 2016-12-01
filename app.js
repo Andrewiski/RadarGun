@@ -98,6 +98,11 @@ radarStalker2.on('radarCommand',function(data){
     io.emit('radarCommand', data);
 });
 
+radarStalker2.on('radarConfigProperty', function (data) {
+    io.emit('radarConfigProperty', data);
+});
+
+
 batteryMonitor.on("batteryVoltage",function(data){
     io.emit("batteryVoltage", data)
 })
