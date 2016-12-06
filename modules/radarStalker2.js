@@ -12,6 +12,7 @@ var RadarStalker2 = function (options){
     var self = this;
     var defaultOptions = {
         //loaded from the config file
+        emulator:false
     };
     nconf.file('./configs/radarStalker2Config.json');
     var configFileSettings = nconf.get();
@@ -24,6 +25,7 @@ var RadarStalker2 = function (options){
     });
     
     var emptySpeedData = {
+        id:0,
         liveSpeed: 0,
         liveSpeedDirection: 0,
         hitSpeed: 0,
@@ -36,8 +38,7 @@ var RadarStalker2 = function (options){
         peakSpeed2Direction: 0,
         hitSpeed2: 0,
         hitSpeed2Direction: 0,
-        pitchCount: 0,
-        speeds: []
+        pitchCount: 0
     }
 
     var commonData = {
@@ -61,7 +62,7 @@ var RadarStalker2 = function (options){
 
     var radarSerialPortName = '';
     
-
+    
 
     if (process.platform === 'win32') {
 
@@ -76,12 +77,9 @@ var RadarStalker2 = function (options){
         radarSerialPortName = objOptions.portName;
     }
 
-    debug('starting radarStalker2 on port ' + radarSerialPortName );
-
     
 
-    var LastValidRadarSpeedData = {};
-    var CurrentValidRadarSpeedData = {};
+    
 
 
 
@@ -422,7 +420,8 @@ var RadarStalker2 = function (options){
     var ProcessRadarDataPacket_BESpeed = function (data) {
         var UnitConfig = data.readUInt8(1);
         UnitConfig = { resolution: (8 == (8 & UnitConfig)), peakSpeed: (2 == (2 & UnitConfig)), forkMode: (1 == (1 & UnitConfig)) };
-        var speedData = { id: serialPacketCount, time: new Date(), PitcherPlayerID: radarSpeedRelatedData.PitcherPlayerID, BatterPlayerID: radarSpeedRelatedData.BatterPlayerID, unitConfig: UnitConfig, liveSpeedStatus: { primaryDirection: '', secondaryDirection: '', transmiterStatus: '' }, liveSpeed: 0, liveSpeed2: 0, peakSpeedStatus: { primaryDirection: '', secondaryDirection: '', transmiterStatus: '' }, peakSpeed: 0, peakSpeed2: 0, hitSpeedStatus: { primaryDirection: '', secondaryDirection: '', transmiterStatus: '' }, hitSpeed: 0, hitSpeed2: 0 };
+        var speedData = extend({},emptySpeedData);
+        speedData.id = serialPacketCount;
         var NumberOfSpeedBlocks = 0;
         switch (data.readUInt8(6)) {
             case 49: //'1':
@@ -492,7 +491,7 @@ var RadarStalker2 = function (options){
             }
         }
         if (speedData.liveSpeed > objOptions.radarConfig.LowSpeedThreshold.value || speedData.peakSpeed > objOptions.radarConfig.LowSpeedThreshold.value) {
-            debug('Speed Data L' + speedData.liveSpeed + ' P' + speedData.peakSpeed + ' H' + speedData.hitSpeed);
+            debug("Speed Data p:" + speedData.peakSpeed + " " + speedData.peakSpeedDirection + " l:" + speedData.liveSpeed + " " + speedData.liveSpeedDirection + " l2:" + speedData.liveSpeed2 + " " + speedData.liveSpeed2Direction);
             zeroCounter = 0;
         } else {
             if (zeroCounter <= zeroCounterLimit) {
@@ -503,33 +502,40 @@ var RadarStalker2 = function (options){
         //debug('data received ' + speedData.liveSpeed);
         // If PeakSpeed is Enabled then we can group packets with the exact same PeakSpeed as a baseball can't speed up only slow down.
         if (speedData.liveSpeed > 0 || speedData.peakSpeed > 0 || speedData.liveSpeed2 > 0 || speedData.hitSpeed > 0 || speedData.hitSpeed2 > 0) {
-            debug("Andy Remove me p:" + speedData.peakSpeed + " l:" + speedData.liveSpeed + " h:" + speedData.hitSpeed + " p2:" + speedData.peakSpeed2 + " l2:" + speedData.liveSpeed2 + " h2:" + speedData.liveSpeed2);
+            debug("Andy Remove me p:" + speedData.peakSpeed + " " + speedData.peakSpeedDirection + " l:" + speedData.liveSpeed + " " + speedData.liveSpeedDirection + " h:" + speedData.hitSpeed + " " + speedData.hitSpeedDirection + " p2:" + speedData.peakSpeed2 + " " + speedData.peakSpeed2Direction + " l2:" + speedData.liveSpeed2 + " " + speedData.liveSpeed2Direction + " h2:" + speedData.hitSpeed2 + " " + speedData.hitSpeed2Direction);
         }
         
-        if (speedData.liveSpeed >= objOptions.radarConfig.LowSpeedThreshold.value || speedData.hitSpeed >= objOptions.radarConfig.LowSpeedThreshold.value) {
-            commonData.currentRadarSpeedData.speeds.push(speedData)
-            //PeakSpeed has changed 
-            if (speedData.peakSpeed == 0 && commonData.lastValidRadarSpeedData.peakSpeed > 0) {
-                //PeakSpeed is zero so this is a new Target so we need to log speed to Db and send the data to the clients
-                //if (DbInited){
-                //    radarSpeedDataStmt.run(speedData.time, radarSpeedRelatedData.GameID, radarSpeedRelatedData.PitcherPlayerID, radarSpeedRelatedData.HitterPlayerID, speedData.LiveSpeedDirection, speedData.LiveSpeed, speedData.LiveSpeed2Direction, speedData.LiveSpeed2, speedData.PeakSpeedDirection,  speedData.PeakSpeed, speedData.PeakSpeedDirection2, speedData.PeakSpeed2, speedData.HitSpeedDirection, speedData.HitSpeed, speedData.HitSpeedDirection2, speedData.HitSpeed2);
-                //}
-                pitchCounter++;
-                extend(commonData.currentRadarSpeedData, speedData);
-                commonData.currentRadarSpeedData.pitchCount = pitchCounter;
-                self.emit('radarSpeed', commonData.currentRadarSpeedData);
-                extend(commonData.currentRadarSpeedData, emptySpeedData);
-                commonData.lastValidRadarSpeedData = commonData.currentRadarSpeedData;
-
-            } else {
-                //PeakSpeed should be Zero as well as LiveSpeed so we increment our counter tell we get to CounterLimit and send a zero to clear the speeds
-                if (zeroCounter == zeroCounterLimit) {
-                    //send Zero Packet
-                    self.emit('radarSpeed', commonData.currentRadarSpeedData);
-                }
+        if (speedData.liveSpeed >= objOptions.radarConfig.LowSpeedThreshold.value) {
+            if (commonData.currentRadarSpeedData.speeds == undefined) {
+                commonData.currentRadarSpeedData.speeds = [];
             }
-            commonData.lastValidRadarSpeedData = speedData;
+            commonData.currentRadarSpeedData.speeds.push(speedData)
+        }else if (speedData.liveSpeed == 0 && commonData.lastValidRadarSpeedData.liveSpeed > 0) {
+            //PeakSpeed is zero so this is a new Pitch so we need to log speed to Db and send the data to the clients
+            //if (DbInited){
+            //    radarSpeedDataStmt.run(speedData.time, radarSpeedRelatedData.GameID, radarSpeedRelatedData.PitcherPlayerID, radarSpeedRelatedData.HitterPlayerID, speedData.LiveSpeedDirection, speedData.LiveSpeed, speedData.LiveSpeed2Direction, speedData.LiveSpeed2, speedData.PeakSpeedDirection,  speedData.PeakSpeed, speedData.PeakSpeedDirection2, speedData.PeakSpeed2, speedData.HitSpeedDirection, speedData.HitSpeed, speedData.HitSpeedDirection2, speedData.HitSpeed2);
+            //}
+            pitchCounter++;
+            //extend(commonData.currentRadarSpeedData, speedData);
+            commonData.currentRadarSpeedData.time = new Date();
+            commonData.currentRadarSpeedData.PitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
+            commonData.currentRadarSpeedData.BatterPlayerID = radarSpeedRelatedData.BatterPlayerID,
+            commonData.currentRadarSpeedData.pitchCount = pitchCounter;
+            var LastSpeed = commonData.currentRadarSpeedData.speeds[commonData.currentRadarSpeedData.speeds.length - 1];
+            extend(commonData.currentRadarSpeedData, LastSpeed);
+            self.emit('radarSpeed', commonData.currentRadarSpeedData);
+            commonData.currentRadarSpeedData = extend({}, emptySpeedData);
+            //commonData.lastValidRadarSpeedData = extend({}, emptySpeedData);
+
+        } else {
+            //PeakSpeed should be Zero as well as LiveSpeed so we increment our counter tell we get to CounterLimit and send a zero to clear the speeds
+            if (zeroCounter == zeroCounterLimit) {
+                //send Zero Packet
+                self.emit('radarSpeed', emptySpeedData);
+            }
         }
+        commonData.lastValidRadarSpeedData = speedData;
+        
         //if ( ((speedData.LiveSpeed > radarConfig.LowSpeedThreshold && speedData.PeakSpeed > radarConfig.LowSpeedThreshold) && (speedData.LiveSpeed != LastValidRadarSpeedData.LiveSpeed && speedData.PeakSpeed != LastValidRadarSpeedData.PeakSpeed && speedData.HitSpeed != LastValidRadarSpeedData.HitSpeed) ) || (LastValidRadarSpeedData.LiveSpeed > 0 && speedData.LiveSpeed == 0 && zeroCounter == zeroCounterLimit)){
         //    LastValidRadarSpeedData = speedData;
         //    debug('data sent to clients');
@@ -540,7 +546,7 @@ var RadarStalker2 = function (options){
         //}
     };
     var recursiveTimerStart = function () {
-        debug("Timer Execute!");
+        debug("Keep alive Timer Execute!");
         configRequestPending = false;
         radarSerialPort.write(getRadarPacket(81,0,new Buffer([0])), function(err) {
             if (err == undefined){
@@ -552,17 +558,115 @@ var RadarStalker2 = function (options){
         setTimeout(recursiveTimerStart,60000);
     };
 
-    var radarSerialPort = new SerialPort.SerialPort(radarSerialPortName, {
-        baudrate: 38400, parser: radarPacketParser(1024)
-    }, false); // this is the openImmediately flag [default is true]
-    //
-    radarSerialPort.on('data', radarSerialPortDataHandler);
-    //set things in motion by opening the serial port and starting the keepalive timer
-    radarSerialPort.open(function (err) {
-        debug('open ' + err);
-        //Set things in motion by starting the recursiveTimer so we ask Software Version
-        recursiveTimerStart();
-    });
+    var emulatorSendZero = true;
+    var emulatorTimerStart = function () {
+        debug("Emulator Timer Execute!");
+        if (emulatorSendZero == true) {
+            self.emit('radarSpeed', emptySpeedData);
+            emulatorSendZero = false;
+        } else {
+            commonData.currentRadarSpeedData.pitchCount++;
+            self.emit('radarSpeed', commonData.currentRadarSpeedData);
+            emulatorSendZero = true;
+        }
+        setTimeout(emulatorTimerStart, 5000);
+    };
+
+    var radarSerialPort = null;
+    if (objOptions.emulator == true) {
+        debug('starting radarStalker2 emulator');
+        commonData.currentRadarSpeedData = 
+            {
+                liveSpeed: 98.99,
+                liveSpeedDirection: 1,
+                hitSpeed: 79.99,
+                hitSpeedDirection: 2,
+                peakSpeed: 99.99,
+                peakSpeedDirection: 1,
+                liveSpeed2: 78.99,
+                liveSpeed2Direction: 2,
+                peakSpeed2: 12.34,
+                peakSpeed2Direction: 2,
+                hitSpeed2: 2,
+                hitSpeed2Direction: 2,
+                pitchCount: 1,
+
+                speeds: [
+                    {
+                        liveSpeed: 98.99,
+                        liveSpeedDirection: 1,
+                        hitSpeed: 79.99,
+                        hitSpeedDirection: 2,
+                        peakSpeed: 99.99,
+                        peakSpeedDirection: 1,
+                        liveSpeed2: 78.99,
+                        liveSpeed2Direction: 2,
+                        peakSpeed2: 12.34,
+                        peakSpeed2Direction: 2,
+                        hitSpeed2: 2,
+                        hitSpeed2Direction: 2
+                    },
+                    {
+                        liveSpeed: 98.98,
+                        liveSpeedDirection: 1,
+                        hitSpeed: 79.99,
+                        hitSpeedDirection: 2,
+                        peakSpeed: 99.99,
+                        peakSpeedDirection: 1,
+                        liveSpeed2: 78.99,
+                        liveSpeed2Direction: 2,
+                        peakSpeed2: 12.34,
+                        peakSpeed2Direction: 2,
+                        hitSpeed2: 2,
+                        hitSpeed2Direction: 2
+                    },
+                    {
+                        liveSpeed: 98.97,
+                        liveSpeedDirection: 1,
+                        hitSpeed: 79.99,
+                        hitSpeedDirection: 2,
+                        peakSpeed: 99.99,
+                        peakSpeedDirection: 1,
+                        liveSpeed2: 78.99,
+                        liveSpeed2Direction: 2,
+                        peakSpeed2: 12.34,
+                        peakSpeed2Direction: 2,
+                        hitSpeed2: 2,
+                        hitSpeed2Direction: 2
+                    },
+                    {
+                        liveSpeed: 98.96,
+                        liveSpeedDirection: 1,
+                        hitSpeed: 79.99,
+                        hitSpeedDirection: 2,
+                        peakSpeed: 99.99,
+                        peakSpeedDirection: 1,
+                        liveSpeed2: 78.99,
+                        liveSpeed2Direction: 2,
+                        peakSpeed2: 12.34,
+                        peakSpeed2Direction: 2,
+                        hitSpeed2: 2,
+                        hitSpeed2Direction: 2
+                    },
+                ]
+            };
+
+    } else {
+        debug('starting radarStalker2 on serial port ' + radarSerialPortName);
+        radarSerialPort = new SerialPort.SerialPort(radarSerialPortName, {
+            baudrate: 38400, parser: radarPacketParser(1024)
+        }, false); // this is the openImmediately flag [default is true]
+        //
+        radarSerialPort.on('data', radarSerialPortDataHandler);
+        //set things in motion by opening the serial port and starting the keepalive timer
+        radarSerialPort.open(function (err) {
+            debug('open ' + err);
+            //Set things in motion by starting the recursiveTimer so we ask Software Version
+            recursiveTimerStart();
+        });
+    }
+
+    
     
 };
 // extend the EventEmitter class using our RadarMonitor class

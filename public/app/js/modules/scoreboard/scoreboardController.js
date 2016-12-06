@@ -66,7 +66,9 @@
                 console.debug(data);
                 $scope.commonData.radarSpeedData = data;
                 var datacopy = angular.copy(data);
-                $scope.commonData.radarSpeedDataHistory.push(datacopy);
+                if (data.liveSpeed > 0 || data.peakSpeed > 0) {
+                    $scope.commonData.radarSpeedDataHistory.push(datacopy);
+                }
                 $scope.$apply();
             });
             

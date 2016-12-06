@@ -2,23 +2,23 @@
     <div style="width:100%">
         <div class="speedBox">
             <div class="speedLabel">Peak</div>
-            <div class="speedDirection">{{radarSpeedData.peakSpeedDirection}}</div>
-            <div class="speedSecondary">{{radarSpeedData.peakSpeed2}}&nbsp;{{radarSpeedData.peakSpeed2Direction}}</div>
-            <div class="speed">{{radarSpeedData.peakSpeed}}</div>
+            <div class="speedDirection">{{commonData.radarSpeedData.peakSpeedDirection}}</div>
+            <div class="speedSecondary">{{commonData.radarSpeedData.peakSpeed2}}&nbsp;{{commonData.radarSpeedData.peakSpeed2Direction}}</div>
+            <div class="speed">{{commonData.radarSpeedData.peakSpeed}}</div>
 
         </div>
         <div class="speedBox">
             <div class="speedLabel">Live</div>
-            <div class="speedDirection">{{radarSpeedData.liveSpeedDirection}}</div>
-            <div class="speedSecondary">{{radarSpeedData.liveSpeed2}}&nbsp;{{radarSpeedData.liveSpeed2Direction}}</div>
-            <div class="speed">{{radarSpeedData.liveSpeed}}</div>
+            <div class="speedDirection">{{commonData.radarSpeedData.liveSpeedDirection}}</div>
+            <div class="speedSecondary">{{commonData.radarSpeedData.liveSpeed2}}&nbsp;{{commonData.radarSpeedData.liveSpeed2Direction}}</div>
+            <div class="speed">{{commonData.radarSpeedData.liveSpeed}}</div>
 
         </div>
         <div class="speedBox">
             <div class="speedLabel">Hit</div>
-            <div class="speedDirection">{{radarSpeedData.hitSpeedDirection}}</div>
-            <div class="speedSecondary">{{radarSpeedData.hitSpeed2}}&nbsp;{{radarSpeedData.hitSpeed2Direction}}</div>
-            <div class="speed">{{radarSpeedData.hitSpeed}}</div>
+            <div class="speedDirection">{{commonData.radarSpeedData.hitSpeedDirection}}</div>
+            <div class="speedSecondary">{{commonData.radarSpeedData.hitSpeed2}}&nbsp;{{commonData.radarSpeedData.hitSpeed2Direction}}</div>
+            <div class="speed">{{commonData.radarSpeedData.hitSpeed}}</div>
         </div>
     </div>
     <div>
@@ -28,7 +28,7 @@
                 <thead>
                     <tr><th>Time</th><th>Pitcher</th><th>Peak</th><th>Live</th><th>Batter</th><th>Hit</th><th>Peak2</th><th>Live2</th><th>Hit2</th></tr>
                 </thead>
-                <tr ng-repeat="rsdItem in radarSpeedDataHistory">
+                <tr ng-repeat="rsdItem in commonData.radarSpeedDataHistory">
                     <td>{{rsdItem.time | date : 'M/d/yy hh:mm:ss'}}</td>
                     <td>{{rsdItem.pitcher}}</td>
                     <td>{{rsdItem.peakSpeed}}<i class="icon-large icon-down-arrow"></i></td>
