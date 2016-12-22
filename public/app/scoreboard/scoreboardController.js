@@ -62,13 +62,13 @@
 
             $rootScope.$on('radarMonitor:radarSpeed', function(event, data) {
                 // use the data accordingly
-                console.log('radarMonitor:radarSpeed detected scoreboardController l:' + data.liveSpeed + ' p:' + data.peakSpeed + ' h:' + data.hitSpeed);
+                //console.log('radarMonitor:radarSpeed detected scoreboardController l:' + data.liveSpeed + ' p:' + data.peakSpeed + ' h:' + data.hitSpeed);
                 console.debug(data);
                 $scope.commonData.radarSpeedData = data;
                 var datacopy = angular.copy(data);
-                if (data.liveSpeed > 0 || data.peakSpeed > 0) {
+                //if (data.liveSpeed > 0 || data.peakSpeed > 0) {
                     $scope.commonData.radarSpeedDataHistory.push(datacopy);
-                }
+                //}
                 $scope.$apply();
             });
             
