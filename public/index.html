@@ -58,41 +58,33 @@
     <script src="/javascript/socket.io/socket.io.js"></script>
     
 
-    <!--<script src="/javascript/angular/angular.min.js"></script>
-    <script src="/javascript/angular-ui-router/angular-ui-router.min.js"></script>
-    <script src="javascripts/angular-sanitize.min.js"></script>
-    <script src="javascripts/ui-bootstrap-tpls-0.11.0.min.js"></script>
-    <script src="javascripts/angular-sanitize.min.js"></script>
-    <script src="javascripts/angular-ui-router.js"></script>
-    <script src="javascripts/lodash.min.js"></script>
-    <script src="javascripts/restangular.min.js"></script>
-    <script src="javascripts/ui-date.js"></script>
-    <script src="javascripts/ui-utils.min.js"></script>
-    <script src="javascripts/ui-bootstrap-tpls-dateandtimepickers-0.11.0.js"></script>
-    <script src="javascripts/socket.io.js"></script>
-    <script src="javascripts/angular-toggle-switch.min.js"></script>-->
     <!-- App Files -->
-    <script src="app/js/app.js"></script>
-    <script src="app/js/modules/scoreboard/scoreboardController.js"></script>
-    <script src="app/js/modules/scoreboard/scoreboardDirective.js"></script>
-    <script src="app/js/modules/modals/modalsController.js"></script>
-    <script src="app/js/factories/radarMonitor.js"></script>
-    <script src="app/js/providers/errorHandlerProvider.js"></script>
-    <script src="app/js/views/scoreboardViewController.js"></script>
-    <!--<script src="app/js/providers/_providers.js"></script>
-    <script src="app/js/factories/_factories.js"></script>
-    <script src="app/js/filters/_filters.js"></script>
-    <script src="app/js/modules/_controllers.js"></script>
-    <script src="app/js/modules/_directives.js"></script>
-    <script src="app/js/services/_services.js"></script>-->
+    <script src="app/app.js"></script>
+    <script src="app/scoreboard/scoreboardController.js"></script>
+    <script src="app/scoreboard/scoreboardDirective.js"></script>
+    <script src="app/scoreboard/scoreboardViewController.js"></script>
+    <script src="app/radarMonitor.js"></script>
+    <script src="app/errorHandlerProvider.js"></script>
     
-    
+ 
 </head>
 
 <body>
     <div id="errormsg"></div>
     <form name="radarmonitor" id="radarmonitor" class="sb">
-        <div data-ng-cloak data-ui-view></div>
+        <div class="header">Stalker Radar</div>
+        <div data-ng-cloak class="barsandmain">
+            
+            <div class="main">
+                <div data-ui-view>
+                    
+                </div>
+                
+                <div style="margin: auto; height: 100%; width: 100%; border: 1px solid red; ">&nbsp;</div>
+            </div>
+        </div>
+        
+        <div class="footer">Copyright &copy; 2013-2017, Digital Example, LLC </div>
     </form>
     
 </body>

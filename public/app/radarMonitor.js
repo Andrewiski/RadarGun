@@ -6,12 +6,8 @@
        .factory('radarMonitor', ['$q', '$rootScope', function($q, $rootScope) {
             // We return this object to anything injecting our service
             var Service = {};
-           
             // Create our socket.io object and connect it to express
             io = io.connect();
-
-            
-    
             io.on('Connected', function(message) {
                 console.log('radarMonitorService Connected Data', message);
                  $rootScope.$emit("radarMonitor:Connected", message);

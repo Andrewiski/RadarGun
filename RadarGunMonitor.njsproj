@@ -11,7 +11,7 @@
     <SccLocalPath>SAK</SccLocalPath>
     <Environment>DEBUG=app,radar,batteryMonitor,gpsMonitor
 </Environment>
-    <LaunchUrl>http://localhost:3000</LaunchUrl>
+    <LaunchUrl>http://localhost:12336</LaunchUrl>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -44,13 +44,12 @@
     <Compile Include="modules\gpsMonitor.js" />
     <Compile Include="modules\radarDatabase.js" />
     <Compile Include="modules\radarStalker2.js" />
-    <Compile Include="public\app\js\app.js" />
-    <Compile Include="public\app\js\factories\radarMonitor.js" />
-    <Compile Include="public\app\js\modules\scoreboard\scoreboardController.js" />
-    <Compile Include="public\app\js\modules\modals\modalsController.js" />
-    <Compile Include="public\app\js\modules\scoreboard\scoreboardDirective.js" />
-    <Compile Include="public\app\js\providers\errorHandlerProvider.js" />
-    <Compile Include="public\app\js\views\scoreboardViewController.js" />
+    <Compile Include="public\app\app.js" />
+    <Compile Include="public\app\radarMonitor.js" />
+    <Compile Include="public\app\scoreboard\scoreboardController.js" />
+    <Compile Include="public\app\scoreboard\scoreboardDirective.js" />
+    <Compile Include="public\app\errorHandlerProvider.js" />
+    <Compile Include="public\app\scoreboard\scoreboardViewController.js" />
     <Compile Include="public\javascripts\angular-route.min.js" />
     <Compile Include="public\javascripts\angular-sanitize.min.js" />
     <Compile Include="public\javascripts\angular-toggle-switch.min.js" />
@@ -77,11 +76,11 @@
     <Content Include="package.json" />
     <Content Include="public\app\html\partials\footer.html" />
     <Content Include="public\app\html\partials\header.html" />
-    <Content Include="public\app\html\partials\modals\error-handler.html" />
-    <Content Include="public\app\html\views\scoreboard.html" />
+    <Content Include="public\app\error-handler.html" />
     <Content Include="public\app\img\ajax_loader_blue_350.gif" />
     <Content Include="public\app\img\spinner.gif" />
-    <Content Include="public\app\js\modules\scoreboard\scoreboard.tpl.html" />
+    <Content Include="public\app\scoreboard\configView.html" />
+    <Content Include="public\app\scoreboard\scoreboard.tpl.html" />
     <Content Include="public\favicon.ico" />
     <Content Include="public\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="public\fonts\glyphicons-halflings-regular.svg" />
@@ -101,20 +100,8 @@
     <Folder Include="modules\" />
     <Folder Include="configs\" />
     <Folder Include="public\" />
-    <Folder Include="public\app\html\" />
-    <Folder Include="public\app\html\partials\" />
-    <Folder Include="public\app\html\partials\modals\" />
-    <Folder Include="public\app\html\views\" />
     <Folder Include="public\app\img\" />
-    <Folder Include="public\app\js\" />
-    <Folder Include="public\app\js\factories\" />
-    <Folder Include="public\app\js\filters\" />
-    <Folder Include="public\app\js\modules\" />
-    <Folder Include="public\app\js\modules\modals\" />
-    <Folder Include="public\app\js\modules\scoreboard\" />
-    <Folder Include="public\app\js\views\" />
-    <Folder Include="public\app\js\providers\" />
-    <Folder Include="public\app\js\services\" />
+    <Folder Include="public\app\scoreboard\" />
     <Folder Include="public\fonts\" />
     <Folder Include="public\images\" />
     <Folder Include="public\javascripts\" />

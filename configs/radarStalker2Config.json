@@ -5,7 +5,7 @@
   "win32": {
     "portName": "COM8"
   },
-  "baudrate": 38400,
+  "baudrate": 115200,
   "radarConfig": {
     "TargetDirection": {
       "id": 2,

@@ -46,8 +46,13 @@
           $stateProvider
               .state('scoreboard', {
                  url: '/scoreboard',
-                 templateUrl: 'app/html/views/scoreboard.html',
+                 template: '<div data-scoreboard></div>',
                  controller: 'scoreboardViewController'
+              })
+              .state('scoreboard.config', {
+                  url: '/config',
+                  templateUrl: 'app/scoreboard/configView.html',
+                  controller: 'scoreboardViewController'
               })
              
 
@@ -71,7 +76,7 @@
        //})
 
       //Prefetch the ErrorHtml and stick it in cache so if the server is down we have a template to use.
-      $http.get('app/html/partials/modals/error-handler.html', { cache: $templateCache });
+      $http.get('app/error-handler.html', { cache: $templateCache });
 
 
 
