@@ -5,8 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <title>Stalker Radar Baseball</title>
-    <link href="stylesheets/style.css" rel="stylesheet" />
+    <base href="/">
+    <link href="/stylesheets/style.css" rel="stylesheet" />
     <!--<link href="stylesheets/bootstrap.min.css" rel="stylesheet" />
     <link href="stylesheets/bootstrap-theme.min.css" rel="stylesheet" />-->
     <link href="/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
@@ -59,12 +61,12 @@
     
 
     <!-- App Files -->
-    <script src="app/app.js"></script>
-    <script src="app/scoreboard/scoreboardController.js"></script>
-    <script src="app/scoreboard/scoreboardDirective.js"></script>
-    <script src="app/scoreboard/scoreboardViewController.js"></script>
-    <script src="app/radarMonitor.js"></script>
-    <script src="app/errorHandlerProvider.js"></script>
+    <script src="/app/app.js"></script>
+    <script src="/app/scoreboard/scoreboardController.js"></script>
+    <script src="/app/scoreboard/scoreboardDirective.js"></script>
+    <script src="/app/scoreboard/scoreboardViewController.js"></script>
+    <script src="/app/radarMonitor.js"></script>
+    <script src="/app/errorHandlerProvider.js"></script>
     
  
 </head>
@@ -72,20 +74,14 @@
 <body>
     <div id="errormsg"></div>
     <form name="radarmonitor" id="radarmonitor" class="sb">
-        <div class="header">Stalker Radar</div>
+        <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2017</div>
         <div data-ng-cloak class="barsandmain">
-            
             <div class="main">
-                <div data-ui-view>
-                    
+                <div data-ui-view>                    
                 </div>
-                
-                <div style="margin: auto; height: 100%; width: 100%; border: 1px solid red; ">&nbsp;</div>
             </div>
         </div>
-        
-        <div class="footer">Copyright &copy; 2013-2017, Digital Example, LLC </div>
+       
     </form>
-    
 </body>
 </html>

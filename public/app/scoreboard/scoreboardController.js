@@ -11,28 +11,18 @@
                radarSpeedData: {
                    id: 0,
                    time: new Date(),
-                   unitConfig: {
-                       resolution: false,
-                       peakSpeed: false,
-                       forkMode: false
-                   },
-                   liveSpeedDirection: '',
-                   liveSpeed2Direction: '',
-                   liveSpeed: 0,
-                   liveSpeed2: 0,
-                   peakSpeedDirection: '',
-                   peakSpeed2Direction: '',
-                   peakSpeed: 0,
-                   peakSpeed2: 0,
-                   hitSpeedDirection: '',
-                   hitSpeed2Direction: '',
-                   hitSpeed: 0,
-                   hitSpeed2: 0,
-                   speeds:[]
+                   
+                   inMinSpeed: 0,
+                   inMaxSpeed: 0,
+                   outMinSpeed: 0,
+                   outMaxSpeed: 0,
+                   inSpeeds: [],
+                   outSpeeds:[]
                },
                radarConfig: {},
                batteryVoltage: -0.01,
-               isradarCommandPending : false
+               isradarCommandPending: false,
+               showConfig: false
            }
           
             $rootScope.$on('radarMonitor:Connected', function(event, data) {
@@ -100,6 +90,9 @@
                     }
                 }
                 $scope.commonData.isradarCommandPending = false;
+            }
+            $scope.showConfig = function () {
+                $scope.commonData.showConfig = !$scope.commonData.showConfig;
             }
           }
        ]);

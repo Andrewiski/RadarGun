@@ -15,32 +15,9 @@
            //'toggle-switch',
             'ngSanitize'
        ])
-       .config(['$stateProvider', '$anchorScrollProvider', '$urlRouterProvider', 'errorHandlerProvider', function ($stateProvider, $anchorScrollProvider, $urlRouterProvider, errorHandlerProvider) {
+       .config(['$stateProvider', '$anchorScrollProvider', '$urlRouterProvider', '$locationProvider', 'errorHandlerProvider', function ($stateProvider, $anchorScrollProvider, $urlRouterProvider, $locationProvider, errorHandlerProvider) {
           $anchorScrollProvider.disableAutoScrolling();
 
-
-          //DatePicker Global Defaults
-          //datepickerConfig.showWeeks = false;
-          //datepickerPopupConfig.datepickerPopup = "MM/dd/yyyy";
-          //datepickerPopupConfig.showButtonBar = false;
-          //TimePicker Global Defaults
-          //timepickerConfig.minuteStep = 15;
-          //timepickerPopupConfig.timepickerPopup = "hh:mm a"
-          //datetimepickerPopupConfig.datetimepickerPopup = "MM/dd/yyyy hh:mm a"
-
-          //$locationProvider.html5Mode(true).hashPrefix('!');
-
-          //$routeProvider
-          //   .when('/contract-list', {
-          //       templateUrl: '/app/html/views/contract-list.html',
-          //       controller: 'contractListController'
-          //   })
-          //   .when('/contract/:ContractGuid', {
-          //       templateUrl: '/app/html/views/contract.html',
-          //       controller: 'contractController',
-          //       reloadOnSearch: false
-          //   })
-          //   .otherwise({ redirectTo: "/contract-list" });
 
 
           $stateProvider
@@ -49,48 +26,20 @@
                  template: '<div data-scoreboard></div>',
                  controller: 'scoreboardViewController'
               })
-              .state('scoreboard.config', {
-                  url: '/config',
-                  templateUrl: 'app/scoreboard/configView.html',
-                  controller: 'scoreboardViewController'
-              })
+              
              
 
           $urlRouterProvider.otherwise("/scoreboard");
-
+          $locationProvider.html5Mode(true);
           errorHandlerProvider.setDefaultErrorMessage('An Error has occured on the server. Error Code NER100');
 
-          //RestangularProvider.setBaseUrl('api');
-          //RestangularProvider.setDefaultHttpFields({ cache: true });
 
        }])
    .run(['$templateCache', '$http', 'errorHandler',function ($templateCache, $http, errorHandler) {
 
 
-      //Wire up Restangular to use our Error Handler Calls
-       //Restangular.setErrorInterceptor(errorHandler.RestangularErrorInterceptor);
-
-       //Wire up Restangular to handle the submit of Contract Data that are of Type Date as they must be sent in UTC with no Time Shift.
-       //Restangular.addRequestInterceptor(function (element, operation, what, url) {
-           
-       //})
-
-      //Prefetch the ErrorHtml and stick it in cache so if the server is down we have a template to use.
+      
       $http.get('app/error-handler.html', { cache: $templateCache });
-
-
-
-
-
-      //$rootScope.$on('$routeChangeSuccess', function (newRoute, oldRoute) {
-
-
-      //});
-      //$templateCache.put('/App/html/views/contract-list.html');
-      //$templateCache.put('/App/html/views/contract.html');
-      //$templateCache.put('/App/js/directives/contractList.tpl.html');
-      //$templateCache.put('/App/js/directives/contract.tpl.html');
-      //$templateCache.put('/App/js/directives/thumbNav.tpl.html');
 
    }]);
 

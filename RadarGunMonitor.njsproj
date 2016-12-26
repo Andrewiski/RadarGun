@@ -63,6 +63,7 @@
     <Compile Include="public\javascripts\ui-date.js" />
     <Compile Include="public\javascripts\ui-utils.min.js" />
     <Compile Include="modules\radarEmulator.js" />
+    <Compile Include="radarMonitorClient.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\team.js" />
     <Compile Include="routes\user.js" />
@@ -70,6 +71,7 @@
     <Compile Include="testLedbackPack.js" />
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
+    <Content Include="configs\radarMonitorClientConfig.json" />
     <Content Include="configs\radarEmulatorConfig.json" />
     <Content Include="configs\radarGunMonitorConfig.json" />
     <Content Include="configs\radarStalker2Config.json" />
@@ -100,6 +102,8 @@
     <Folder Include="modules\" />
     <Folder Include="configs\" />
     <Folder Include="public\" />
+    <Folder Include="public\app\html\" />
+    <Folder Include="public\app\html\partials\" />
     <Folder Include="public\app\img\" />
     <Folder Include="public\app\scoreboard\" />
     <Folder Include="public\fonts\" />

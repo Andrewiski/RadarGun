@@ -69,6 +69,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.get('/', routes.index);
+app.get('/scoreboard', routes.index);
 app.get('/users', user.list);
 app.get('/teams', team.list);
 
@@ -87,7 +88,9 @@ io.on('connection', function(socket){
         debug('radarCommand:' + data.cmd + ', value:' + data.data + ', client id:' +  socket.id );
         radarStalker2.radarConfigCommand({ data: data, socket: socket });
     });
-    io.emit('radarConfig', radarStalker2.getRadarConfig());
+    if (socket.client.request.headers["origin"] != "ArduinoSocketIo") {
+        io.emit('radarConfig', radarStalker2.getRadarConfig());
+    }
     io.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
 });
 
