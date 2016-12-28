@@ -2,7 +2,7 @@
 var boneScript;
   
 try {
-     boneScript = require('bonescript');
+    boneScript = require('bonescript');
     boneScript.getPlatform(function (x) {
         console.log('bonescript getPlatform');
         console.log('name = ' + x.name);

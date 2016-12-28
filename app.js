@@ -26,6 +26,7 @@ var configFileSettings = nconf.get();
 var defaultOptions = {
     //loaded from the config file
 };
+var bonescript;
 var objOptions = extend({}, defaultOptions, configFileSettings);
 var app = express();
 // all environments
@@ -62,6 +63,16 @@ if (process.platform === 'win32') {
     //app.use(express.methodOverride());
     //app.use(app.router);
     //app.use(express.errorHandler());
+} else {
+    boneScript = require('bonescript');
+    boneScript.getPlatform(function (x) {
+        console.log('bonescript getPlatform');
+        console.log('name = ' + x.name);
+        console.log('bonescript = ' + x.bonescript);
+        console.log('serialNumber = ' + x.serialNumber);
+        console.log('dogtag = ' + x.dogtag);
+        console.log('os = ', x.os);
+    });
 }
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
