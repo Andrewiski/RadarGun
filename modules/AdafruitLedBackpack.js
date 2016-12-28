@@ -54,7 +54,7 @@ var adafruitLedBackpack = function () {
     var exports = module.exports = {};
     var i2cdevice;
 
-    self.Initialize = function (options, Callback) {
+    self.Initialize = function (options, Callback, callbackData) {
         objOptions = extend({}, defaultOptions, options);
         //sets up the device
         //needed to open the cape manager port
@@ -73,7 +73,7 @@ var adafruitLedBackpack = function () {
                         debug('bonescript i2c.open error %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                         isInited = false;
                         if (Callback) {
-                            Callback(err);
+                            Callback(err, callbackData);
                         }
                     } else {
                         // Turn on the LED Ocillator
@@ -83,7 +83,7 @@ var adafruitLedBackpack = function () {
                                 if (err) {
                                     debug('Error in init DisplayOn %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                                     if (Callback) {
-                                        Callback(err);
+                                        Callback(err, callbackData);
                                     }
                                 } else {
                                     debug('ocillator enabled ' + objOptions.I2CDevice + '/' + +objOptions.I2CAddress);
@@ -91,7 +91,7 @@ var adafruitLedBackpack = function () {
                                         if (err) {
                                             debug('Error in init setBlinkRate %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                                             if (Callback) {
-                                                Callback(err);
+                                                Callback(err, callbackData);
                                             }
                                         } else {
                                             debug('display enabled ' + objOptions.I2CDevice + '/' + +objOptions.I2CAddress);
@@ -107,7 +107,7 @@ var adafruitLedBackpack = function () {
                                                             debug('cleared display ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
                                                             isInited = true;
                                                             if (Callback) {
-                                                                Callback(err);
+                                                                Callback(err, callbackData);
                                                             }
                                                         }
                                                     });
@@ -123,25 +123,25 @@ var adafruitLedBackpack = function () {
         } else {
             debug("no i2c on win32");
             if (Callback) {
-                Callback("AdafruitLedBackpack no i2c on win32");
+                Callback("AdafruitLedBackpack no i2c on win32", callbackData);
             }
             
         }
     }  //Intilize Function Close
 
-    self.setBrightness = function (brightness, Callback) {
+    self.setBrightness = function (brightness, Callback, callbackData) {
         debug('setBrightness %s', brightness);
-        WriteData(HT16K33_CMD_BRIGHTNESS | brightness, [0x00], Callback);
+        WriteData(HT16K33_CMD_BRIGHTNESS | brightness, [0x00], Callback, callbackData);
     }
 
-    self.setBlinkRate = function (rate, Callback) {
+    self.setBlinkRate = function (rate, Callback, callbackData) {
         debug('setBlinkRate %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, rate);
-        WriteData(HT16K33_BLINK_CMD | 0x01 | rate, [0x00], Callback);
+        WriteData(HT16K33_BLINK_CMD | 0x01 | rate, [0x00], Callback, callbackData);
     }
 
-    self.writeDisplay = function (Callback) {
+    self.writeDisplay = function (Callback, callbackData) {
         debug('writeDisplay ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
-        WriteData(0x00, buffer, Callback);
+        WriteData(0x00, buffer, Callback, callbackData);
     }
 
     function setBufferRow(row, value) {
@@ -156,7 +156,7 @@ var adafruitLedBackpack = function () {
 
     }
 
-    self.clear = function (Callback) {
+    self.clear = function (Callback, callbackData) {
         debug('clear ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
         for (var i = 0; i < 16; i++) {
             buffer[i] = 0;
@@ -166,26 +166,26 @@ var adafruitLedBackpack = function () {
 
    
 
-    self.writeDigit = function (charNumber, value, dot, Callback) {
+    self.writeDigit = function (charNumber, value, dot, Callback, callbackData) {
         debug('writeDigit ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, charNumber, value, dot);
         
-        setBufferRow(charNumber, digits[value] | (dot << 7), Callback);
-        self.writeDisplay(Callback);
+        setBufferRow(charNumber, digits[value] | (dot << 7), Callback, callbackData);
+        self.writeDisplay(Callback, callbackData);
         
     }
 
-    self.setColon = function (colonOn, Callback) {
+    self.setColon = function (colonOn, Callback, callbackData) {
         debug('setColon ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, colonOn);
         if (colonOn) {
-            setBufferRow(2, 0xFF, Callback);
+            setBufferRow(2, 0xFF, Callback, callbackData);
         }
         else {
-            setBufferRow(2, 0, Callback);
+            setBufferRow(2, 0, Callback, callbackData);
         }
-        self.writeDisplay(Callback);
+        self.writeDisplay(Callback, callbackData);
     }
 
-    function ReadData(Register, Bytes, Callback) {
+    function ReadData(Register, Bytes, Callback, callbackData) {
         if (i2cdevice && isInited) {
             i2cdevice.readBytes(Register, Bytes, function (err, data) {
                 var ParsedData;
@@ -202,24 +202,24 @@ var adafruitLedBackpack = function () {
         } else {
             debug('ReadData No i2cDevice ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
             if (Callback) {
-                Callback('No i2cDevice ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, null);
+                Callback('No i2cDevice ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, callbackData);
             }
         }
     }
 
     //sends the LSB first. The device wants the MSB first. 
-    function WriteData(Register, ByteArray, Callback) {
+    function WriteData(Register, ByteArray, Callback, callbackData) {
         if (i2cdevice && isInited) {
             debug('WriteData ', Register)
             i2cdevice.writeBytes(Register, ByteArray, function (err) {
                 if (Callback) {
-                    Callback(err);
+                    Callback(err, callbackData);
                 }
             });
         } else {
             debug('WriteData No i2cDevice ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress)
             if (Callback) {
-                Callback('No i2cDevice ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, null);
+                Callback('No i2cDevice ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, callbackData);
             }
         }
     }
@@ -262,7 +262,7 @@ var adafruitLedBackpack = function () {
         }
 }
 
-   self.writeNumber = function(number, displayColon, Callback){
+    self.writeNumber = function(number, displayColon, Callback, callbackData){
        try {
                 debug('writeNumber %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, number)
                 var digitsToWrite = number.toString();
@@ -297,11 +297,11 @@ var adafruitLedBackpack = function () {
                     }  
                                
                 }
-                self.writeDisplay(Callback);
+                self.writeDisplay(Callback, callbackData);
         } catch (err) {
 
             if (Callback) {
-                Callback(err);
+                Callback(err, callbackData);
             }
         }
 

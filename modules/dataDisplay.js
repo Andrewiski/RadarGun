@@ -129,27 +129,29 @@ var dataDisplay = function (options) {
 
     var commonData = { ledDisplays: [], lcdDisplays: [] };
     
-        //this is no i2c on Windows so init Adafruit var here
-        AdafruitLedBackpack = require('./AdafruitLedBackpack.js');
-        if (objOptions.ledDisplays) {
+    //this is no i2c on Windows so init Adafruit var here
+    AdafruitLedBackpack = require('./AdafruitLedBackpack.js');
+    if (objOptions.ledDisplays) {
 
-            for (var i = 0; i < objOptions.ledDisplays.length; i++) {
-                var ledDisplay = objOptions.ledDisplays[i];
-                var adafruitLedBackpack = new AdafruitLedBackpack();
-                debug('attempting adafruitLedBackpack init', ledDisplay);
-                if (ledDisplay.enabled == true) {
-                    adafruitLedBackpack.Initialize({ I2CAddress: ledDisplay.I2CAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
-                        debug('i2c adafruitLedBackpack Inited ', err);
+        for (var i = 0; i < objOptions.ledDisplays.length; i++) {
+            var ledDisplay = extend({},objOptions.ledDisplays[i]);
+            var ledData = { ledDisplay: ledDisplay, index: i };
+            commonData.ledDisplays.push[ledData];
+            ledData.led = new AdafruitLedBackpack();
+            debug('attempting adafruitLedBackpack init', ledDisplay);
+            if (ledDisplay.enabled == true) {
+                ledData.led.Initialize({ I2CAddress: ledDisplay.I2CAddress, I2CDevice: ledDisplay.I2CDevice }, function (err, ledData) {
+                    debug('i2c adafruitLedBackpack Inited ', err, ledData.index);
                         
-                        adafruitLedBackpack.writeNumber(i.toString(), false, function (err) {
-                            debug('i2c adafruitLedBackpack ledDisplay ' + i + ' writeNumber ', err);
-                        });
+                    ledData.led.writeNumber(ledData.index, false, function (err, ledData) {
+                        debug('i2c adafruitLedBackpack ledDisplay ' + ledData.index + ' writeNumber ', err);
+                    }, ledData);
                        
-                    });
-                }
-                commonData.ledDisplays.push[adafruitLedBackpack];
+                }, ledData);
             }
+                
         }
+    }
 
     
 
