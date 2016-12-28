@@ -142,14 +142,16 @@ var dataDisplay = function (options) {
                     i2cAddress = parseInt(i2cAddress);
                 }
                 console.log(ledDisplay.I2CAddress + ' i2cAddress converted to int ' + i2cAddress);
-                adafruitLedBackpack.Initialize({ I2CAddress: i2cAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
-                    debug('i2c adafruitLedBackpack Inited ', err);
-                    if (!err) {
-                        adafruitLedBackpack.writeNumber(i.toString(), false, function (err) {
-                            debug('i2c adafruitLedBackpack ledDisplay ' + i + ' writeNumber ', err);
-                        });
-                    }
-                });
+                if (ledDisplay.enabled == true) {
+                    adafruitLedBackpack.Initialize({ I2CAddress: i2cAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
+                        debug('i2c adafruitLedBackpack Inited ', err);
+                        if (!err) {
+                            adafruitLedBackpack.writeNumber(i.toString(), false, function (err) {
+                                debug('i2c adafruitLedBackpack ledDisplay ' + i + ' writeNumber ', err);
+                            });
+                        }
+                    });
+                }
                 commonData.ledDisplays.push[adafruitLedBackpack];
             }
         }

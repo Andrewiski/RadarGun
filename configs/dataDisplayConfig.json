@@ -11,19 +11,19 @@
         "name": "Led 1",
         "I2CAddress": "0x71",
         "I2CDevice": "/dev/i2c-2",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "Led 2",
         "I2CAddress": "0x72",
         "I2CDevice": "/dev/i2c-2",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "Led 3",
         "I2CAddress": "0x77",
         "I2CDevice": "/dev/i2c-2",
-        "enabled": true
+        "enabled": false
       }
     ]
   ,
@@ -32,7 +32,7 @@
       "name": "Led 0",
       "I2CAddress": "0x37",
       "I2CDevice": "/dev/i2c-2",
-      "enabled": true
+      "enabled": false
     }
   ],
   "displayLocation": {
