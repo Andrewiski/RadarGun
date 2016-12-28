@@ -56,9 +56,11 @@ var adafruitLedBackpack = function () {
         //sets up the device
         //needed to open the cape manager port
         debug('i2c new Address ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
-        if (typeof (objOptions.I2CDevice) === "string") {   //if string convert to int
-            objOptions.I2CDevice = parseInt(objOptions.I2CDevice);
+        if (typeof (objOptions.I2CAddress) === "string") {   //if string convert to int
+            console.log('I2CAddress must be int parsing ' + objOptions.I2CAddress);
+            objOptions.I2CAddress = parseInt(objOptions.I2CAddress);
         }
+        console.log('I2CAddress set to ' + objOptions.I2CAddress);
         i2cdevice = new i2c(objOptions.I2CAddress, { I2CDevice: objOptions.I2CDevice, debug: false }); 
         i2cdevice.open(objOptions.I2CDevice,
             function (err, port) {
