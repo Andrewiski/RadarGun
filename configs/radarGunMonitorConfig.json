@@ -1,3 +1,25 @@
 ﻿{
-  "webserverPort": 12336
+  "webserverPort": 12336,
+  "ledDisplays": {
+    "inMaxSpeed": {
+      "I2CAddress": "0x70",
+      "I2CDevice": "/dev/i2c-2"
+    },
+    "inMinSpeed": {
+      "I2CAddress": "0x71",
+      "I2CDevice": "/dev/i2c-2"
+    },
+    "outMaxSpeed": {
+      "I2CAddress": "0x72",
+      "I2CDevice": "/dev/i2c-2"
+    },
+    "outMinSpeed": {
+      "I2CAddress": "0x77",
+      "I2CDevice": "/dev/i2c-2"
+    }
+  },
+  "lcdDisplay": {
+    "I2CAddress": "0x37",
+      "I2CDevice": "/dev/i2c-2"
+  }
 }

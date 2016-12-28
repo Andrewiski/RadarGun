@@ -20,6 +20,7 @@ var debug = require('debug')('app');
 var RadarStalker2 = require("./modules/radarStalker2.js");
 var BatteryMonitor = require("./modules/batteryMonitor.js");
 var GpsMonitor = require("./modules/gpsMonitor.js");
+var DataDisplay = require("./modules/dataDisplay.js");
 nconf.file('./configs/radarGunMonitorConfig.json');
 var configFileSettings = nconf.get();
 var defaultOptions = {
@@ -81,6 +82,7 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 var radarStalker2 = new RadarStalker2({});
 var batteryMonitor = new BatteryMonitor({});
 var gpsMonitor = new GpsMonitor({});
+var dataDisplay = new DataDisplay({});
 var io = require('socket.io')(server);
 io.on('connection', function(socket){
     debug('socket.io client Connection');
@@ -95,7 +97,9 @@ io.on('connection', function(socket){
 });
 
 radarStalker2.on('radarSpeed', function(data){
-    io.emit('radarSpeed',data);
+    dataDisplay.updateSpeedData(data);
+    io.emit('radarSpeed', data);
+    
 });
 radarStalker2.on('radarCommand',function(data){
     io.emit('radarCommand', data);

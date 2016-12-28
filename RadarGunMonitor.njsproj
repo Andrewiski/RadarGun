@@ -37,10 +37,11 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AdafruitLedBackpack.js" />
+    <Compile Include="modules\AdafruitLedBackpack.js" />
     <Compile Include="app.js" />
-    <Compile Include="mcp9808.js" />
+    <Compile Include="modules\mcp9808.js" />
     <Compile Include="modules\batteryMonitor.js" />
+    <Compile Include="modules\dataDisplay.js" />
     <Compile Include="modules\gpsMonitor.js" />
     <Compile Include="modules\radarDatabase.js" />
     <Compile Include="modules\radarStalker2.js" />
@@ -71,6 +72,7 @@
     <Compile Include="testLedbackPack.js" />
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
+    <Content Include="configs\dataDisplayConfig.json" />
     <Content Include="configs\radarMonitorClientConfig.json" />
     <Content Include="configs\radarEmulatorConfig.json" />
     <Content Include="configs\radarGunMonitorConfig.json" />
