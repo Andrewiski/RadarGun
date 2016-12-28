@@ -128,7 +128,7 @@ var dataDisplay = function (options) {
     var objOptions = extend({}, defaultOptions, configFileSettings);
 
     var commonData = { ledDisplays: [], lcdDisplays: [] };
-    if (process.platform != 'win32') {
+    
         //this is no i2c on Windows so init Adafruit var here
         AdafruitLedBackpack = require('./AdafruitLedBackpack.js');
         if (objOptions.ledDisplays) {
@@ -136,27 +136,22 @@ var dataDisplay = function (options) {
             for (var i = 0; i < objOptions.ledDisplays.length; i++) {
                 var ledDisplay = objOptions.ledDisplays[i];
                 var adafruitLedBackpack = new AdafruitLedBackpack();
-                debug('attempting adafruitLedBackpack init');
-                var i2cAddress = ledDisplay.I2CAddress;
-                if (typeof (i2cAddress) === "string") {
-                    i2cAddress = parseInt(i2cAddress);
-                }
-                console.log(ledDisplay.I2CAddress + ' i2cAddress converted to int ' + i2cAddress);
+                debug('attempting adafruitLedBackpack init', ledDisplay);
                 if (ledDisplay.enabled == true) {
-                    adafruitLedBackpack.Initialize({ I2CAddress: i2cAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
+                    adafruitLedBackpack.Initialize({ I2CAddress: ledDisplay.I2CAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
                         debug('i2c adafruitLedBackpack Inited ', err);
-                        if (!err) {
-                            adafruitLedBackpack.writeNumber(i.toString(), false, function (err) {
-                                debug('i2c adafruitLedBackpack ledDisplay ' + i + ' writeNumber ', err);
-                            });
-                        }
+                        
+                        adafruitLedBackpack.writeNumber(i.toString(), false, function (err) {
+                            debug('i2c adafruitLedBackpack ledDisplay ' + i + ' writeNumber ', err);
+                        });
+                       
                     });
                 }
                 commonData.ledDisplays.push[adafruitLedBackpack];
             }
         }
 
-    }
+    
 
 }
 util.inherits(dataDisplay, EventEmitter);

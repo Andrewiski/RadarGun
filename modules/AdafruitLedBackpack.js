@@ -8,7 +8,7 @@ var util = require('util');
 var extend = require('extend');
 var EventEmitter = require('events').EventEmitter;
 //var bonescript = require('octalbonescript');
-var i2c = require('i2c');
+var i2c;
 var debug = require('debug')('adafruitLedBackpack');
 
 var adafruitLedBackpack = function () {
@@ -16,6 +16,9 @@ var adafruitLedBackpack = function () {
     var defaultOptions = {
         I2CAddress: "0x70", //the i2c address of the LedBackpack
         I2CDevice: '/dev/i2c-2'
+    }
+    if (process.platform != 'win32') {
+        i2c = require('i2c');
     }
     var objOptions = {};
     var isInited = false;
@@ -61,61 +64,69 @@ var adafruitLedBackpack = function () {
             objOptions.I2CAddress = parseInt(objOptions.I2CAddress);
         }
         console.log('I2CAddress set to ' + objOptions.I2CAddress);
-        i2cdevice = new i2c(objOptions.I2CAddress, { I2CDevice: objOptions.I2CDevice, debug: false }); 
-        i2cdevice.open(objOptions.I2CDevice,
-            function (err, port) {
+        if (process.platform != 'win32') {
+            i2cdevice = new i2c(objOptions.I2CAddress, { I2CDevice: objOptions.I2CDevice, debug: false });
+            i2cdevice.open(objOptions.I2CDevice,
+                function (err, port) {
 
-                if (err) {
-                    debug('bonescript i2c.open error %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
-                    isInited = false;
-                    if (Callback) {
-                        Callback(err);
-                    }
-                } else {
-                    // Turn on the LED Ocillator
-                    //i2cdevice.setAddress(objOptions.I2CAddress);
-                    i2cdevice.writeBytes(HT16K33_CMD_SYSTEM | HT16K33_BLINK_DISPLAYON, [0x00],
-                        function (err) {
-                            if (err) {
-                                debug('Error in init DisplayOn %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
-                                if (Callback) {
-                                    Callback(err);
-                                }
-                            } else {
-                                debug('ocillator enabled ' + objOptions.I2CDevice + '/' + + objOptions.I2CAddress);
-                                i2cdevice.writeBytes(HT16K33_BLINK_CMD | 0x01, [0x00], function (err) {
-                                    if (err) {
-                                        debug('Error in init setBlinkRate %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
-                                        if (Callback) {
-                                            Callback(err);
-                                        }
-                                    } else {
-                                        debug('display enabled ' + objOptions.I2CDevice + '/' + + objOptions.I2CAddress);
-                                        i2cdevice.writeBytes(HT16K33_CMD_BRIGHTNESS | 15, [0x00], function (err) {
-                                            if (err) {
-                                                debug('Error in init setBrightness %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
-                                            } else {
-                                                debug('Brightness set to high ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
-                                                i2cdevice.writeBytes([0x00], [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], function (err) {
-                                                    if (err) {
-                                                        debug('Error in init clear ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
-                                                    } else {
-                                                        debug('cleared display ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
-                                                        isInited = true;
-                                                        if (Callback) {
-                                                            Callback(err);
-                                                        }
-                                                    }
-                                                });
-                                                
-                                            }
-                                        }); // setBrightness
+                    if (err) {
+                        debug('bonescript i2c.open error %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
+                        isInited = false;
+                        if (Callback) {
+                            Callback(err);
+                        }
+                    } else {
+                        // Turn on the LED Ocillator
+                        //i2cdevice.setAddress(objOptions.I2CAddress);
+                        i2cdevice.writeBytes(HT16K33_CMD_SYSTEM | HT16K33_BLINK_DISPLAYON, [0x00],
+                            function (err) {
+                                if (err) {
+                                    debug('Error in init DisplayOn %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
+                                    if (Callback) {
+                                        Callback(err);
                                     }
-                                }); // setBlinkRate
-                            }
-                        }); //WriteData    // oscillator on
-                }
-             });//i2cOpen
+                                } else {
+                                    debug('ocillator enabled ' + objOptions.I2CDevice + '/' + +objOptions.I2CAddress);
+                                    i2cdevice.writeBytes(HT16K33_BLINK_CMD | 0x01, [0x00], function (err) {
+                                        if (err) {
+                                            debug('Error in init setBlinkRate %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
+                                            if (Callback) {
+                                                Callback(err);
+                                            }
+                                        } else {
+                                            debug('display enabled ' + objOptions.I2CDevice + '/' + +objOptions.I2CAddress);
+                                            i2cdevice.writeBytes(HT16K33_CMD_BRIGHTNESS | 15, [0x00], function (err) {
+                                                if (err) {
+                                                    debug('Error in init setBrightness %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
+                                                } else {
+                                                    debug('Brightness set to high ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
+                                                    i2cdevice.writeBytes([0x00], [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], function (err) {
+                                                        if (err) {
+                                                            debug('Error in init clear ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
+                                                        } else {
+                                                            debug('cleared display ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
+                                                            isInited = true;
+                                                            if (Callback) {
+                                                                Callback(err);
+                                                            }
+                                                        }
+                                                    });
+
+                                                }
+                                            }); // setBrightness
+                                        }
+                                    }); // setBlinkRate
+                                }
+                            }); //WriteData    // oscillator on
+                    }
+                });//i2cOpen
+        } else {
+            debug("no i2c on win32");
+            if (Callback) {
+                Callback("AdafruitLedBackpack no i2c on win32");
+            }
+            
+        }
     }  //Intilize Function Close
 
     self.setBrightness = function (brightness, Callback) {
@@ -157,8 +168,10 @@ var adafruitLedBackpack = function () {
 
     self.writeDigit = function (charNumber, value, dot, Callback) {
         debug('writeDigit ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, charNumber, value, dot);
+        
         setBufferRow(charNumber, digits[value] | (dot << 7), Callback);
         self.writeDisplay(Callback);
+        
     }
 
     self.setColon = function (colonOn, Callback) {
