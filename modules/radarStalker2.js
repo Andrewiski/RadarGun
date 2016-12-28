@@ -7,6 +7,9 @@ var extend = require('extend');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('radar');
 var nconf = require('nconf');
+var SerialPort = require("serialport").SerialPort;
+// version 4 syntax 
+//var SerialPort = require("serialport");
 
 var RadarStalker2 = function (options){
     var self = this;
@@ -48,9 +51,8 @@ var RadarStalker2 = function (options){
     var isBeagleBone = false
     var boneScript;
 
-
-    var SerialPort = require("serialport");
-    //var SerialPort = require("serialport").SerialPort
+    
+    
     //use Global so we can access our instance of Serial Port from RadarCommandFiles
 
     var radarSerialPortName = '';
@@ -58,7 +60,8 @@ var RadarStalker2 = function (options){
     
 
     if (process.platform === 'win32') {
-
+        
+        
         radarSerialPortName = objOptions.win32.portName;
         //radarSerialPortNameFakeRadar = "COM8";
         //radarSerialPortName = "COM1"; 
@@ -67,6 +70,7 @@ var RadarStalker2 = function (options){
         //radarSerialPortNameFakeRadar = "COM8";  
 
     } else {
+        //
         radarSerialPortName = objOptions.portName;
     }
 
@@ -610,11 +614,16 @@ var RadarStalker2 = function (options){
 
     } else {
         debug('starting radarStalker2 on serial port ' + radarSerialPortName);
+        //version 4 syntax
+        //radarSerialPort = new SerialPort(radarSerialPortName, {
+        //    baudrate: settings.baudrate,
+        //    parser: radarPacketParser(1024),
+        //    autoOpen:false}); 
+        //
         radarSerialPort = new SerialPort(radarSerialPortName, {
             baudrate: settings.baudrate,
             parser: radarPacketParser(1024),
-            autoOpen:false}); 
-        //
+        }, false);
         radarSerialPort.on('data', radarSerialPortDataHandler);
         //set things in motion by opening the serial port and starting the keepalive timer
         radarSerialPort.open(function (err) {
