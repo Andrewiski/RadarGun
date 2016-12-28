@@ -31,8 +31,8 @@ var GpsMonitor = function (options) {
     var boneScript;
     var isEnabled = false;
 
-    var SerialPort = require("serialport");
-    //var SerialPort = require("serialport").SerialPort
+    //var SerialPort = require("serialport");   v4 syntax
+    var SerialPort = require("serialport").SerialPort
     //use Global so we can access our instance of Serial Port from RadarCommandFiles
 
     var gpsSerialPortName = '';
@@ -42,7 +42,7 @@ var GpsMonitor = function (options) {
         if (process.platform === 'win32') {
             gpsSerialPortName = objOptions.win32.portName;
             if (gpsSerialPortName) {
-                gpsSerialPort = new SerialPort.SerialPort(gpsSerialPortName, {
+                gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.win32.baudrate,
                     parser: SerialPort.parsers.readline('\r\n')
                 }, true); // this is the openImmediately flag [default is true]
@@ -54,12 +54,16 @@ var GpsMonitor = function (options) {
             var b = require('bonescript');
             isBeagleBone == true;
             if (gpsSerialPortName) {
-                gpsSerialPort = b.serialOpen(gpsSerialPortName, {
+                //gpsSerialPort = b.serialOpen(gpsSerialPortName, {
+                //    baudrate: objOptions.baudrate,
+                //    parser: SerialPort.parsers.readline('\r\n') //SerialPort.parsers.readline('\n')
+                //}, function () {
+                //    debug('bonescript serial device activated');
+                //});
+                gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.baudrate,
-                    parser: SerialPort.parsers.readline('\r\n') //SerialPort.parsers.readline('\n')
-                }, function () {
-                    debug('bonescript serial device activated');
-                });
+                    parser: SerialPort.parsers.readline('\r\n')
+                }, true); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             }
 
