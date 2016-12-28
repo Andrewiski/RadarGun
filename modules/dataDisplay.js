@@ -141,6 +141,7 @@ var dataDisplay = function (options) {
                 if (typeof (i2cAddress) === "string") {
                     i2cAddress = parseInt(i2cAddress);
                 }
+                console.log(ledDisplay.I2CAddress + ' i2cAddress converted to int ' + i2cAddress);
                 adafruitLedBackpack.Initialize({ I2CAddress: i2cAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
                     debug('i2c adafruitLedBackpack Inited ', err);
                     if (!err) {
