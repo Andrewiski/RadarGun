@@ -133,8 +133,8 @@ var dataDisplay = function (options) {
         AdafruitLedBackpack = require('./AdafruitLedBackpack.js');
         if (objOptions.ledDisplays) {
 
-            for (var i = 0; i < ledDisplays.length; i++) {
-                var ledDisplay = ledDisplays[i];
+            for (var i = 0; i < objOptions.ledDisplays.length; i++) {
+                var ledDisplay = objOptions.ledDisplays[i];
                 var adafruitLedBackpack = new AdafruitLedBackpack();
                 debug('attempting adafruitLedBackpack init');
                 adafruitLedBackpack.Initialize({ I2CAddress: ledDisplay.I2CAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
