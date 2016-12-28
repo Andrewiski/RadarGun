@@ -610,9 +610,10 @@ var RadarStalker2 = function (options){
 
     } else {
         debug('starting radarStalker2 on serial port ' + radarSerialPortName);
-        radarSerialPort = new SerialPort.SerialPort(radarSerialPortName, {
-            baudrate: settings.baudrate, parser: radarPacketParser(1024)
-        }, false); // this is the openImmediately flag [default is true]
+        radarSerialPort = new SerialPort(radarSerialPortName, {
+            baudrate: settings.baudrate,
+            parser: radarPacketParser(1024),
+            autoOpen:false}); 
         //
         radarSerialPort.on('data', radarSerialPortDataHandler);
         //set things in motion by opening the serial port and starting the keepalive timer
