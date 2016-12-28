@@ -137,7 +137,11 @@ var dataDisplay = function (options) {
                 var ledDisplay = objOptions.ledDisplays[i];
                 var adafruitLedBackpack = new AdafruitLedBackpack();
                 debug('attempting adafruitLedBackpack init');
-                adafruitLedBackpack.Initialize({ I2CAddress: ledDisplay.I2CAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
+                var i2cAddress = ledDisplay.I2CAddress;
+                if (typeof (i2cAddress) === "string") {
+                    i2cAddress = parseInt(i2cAddress);
+                }
+                adafruitLedBackpack.Initialize({ I2CAddress: i2cAddress, I2CDevice: ledDisplay.I2CDevice }, function (err) {
                     debug('i2c adafruitLedBackpack Inited ', err);
                     if (!err) {
                         adafruitLedBackpack.writeNumber(i.toString(), false, function (err) {
