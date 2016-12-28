@@ -15,7 +15,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var nconf = require('nconf');
-require('nconf-strip-json-comments')(nconf);
+
 var debug = require('debug')('app');
 var RadarStalker2 = require("./modules/radarStalker2.js");
 var BatteryMonitor = require("./modules/batteryMonitor.js");
