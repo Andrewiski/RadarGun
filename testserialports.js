@@ -42,9 +42,9 @@ try {
             port1Write = true;
             serialPort2.write("Port2->Port1 " + teststring, function (err) {
                 if (err == undefined) {
-                    console.log("Port1 Wrote Data");
+                    console.log("Port2 Wrote Data");
                 } else {
-                    console.log('Port1 Write Error' + err);
+                    console.log('Port2 Write Error' + err);
                 }
             });
         }
