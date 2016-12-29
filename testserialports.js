@@ -1,57 +1,73 @@
-﻿var boneScript;
+﻿//var SerialPort = require("serialport");   v4 syntax
+var serialPort = require("serialport")
+var SerialPort = serialPort.SerialPort
 
 try {
-    boneScript = require('bonescript');
-    boneScript.getPlatform(function (x) {
-        console.log('bonescript getPlatform');
-        console.log('name = ' + x.name);
-        console.log('bonescript = ' + x.bonescript);
-        console.log('serialNumber = ' + x.serialNumber);
-        console.log('dogtag = ' + x.dogtag);
-        console.log('os = ', x.os);
+
+    var port1;
+    var port2;
+    if (process.platform === 'win32') {
+        port1 = 'COM7';
+        port2 = 'COM12';
+    }else{
+        port1 = '/dev/ttyO1';
+        port2 = '/dev/ttyO4';
+    }
+    var options = { baudrate: 115200, parser: serialPort.parsers.readline('\n') };
+    var teststring = "This is the string I'm sending out as a test\n";
+    var serialPort1 = new SerialPort(port1, options, false);
+    var serialPort2 = new SerialPort(port2, options, false);
+
+    var serialPort1DataHandler = function (data) {
+        console.log("Serial Port1 Data ", data);
+    }
+
+    var serialPort2DataHandler = function (data) {
+        console.log("Serial Port2 Data ", data);
+    }
+    var port1Write = true;
+    var recursiveTimerStart = function () {
+        debug("Timer Execute!");
+        
+        if (serialPort1 == true) {
+            port1Write = false;
+            serialPort1.write("Port1->Port2 " + teststring, function (err) {
+                if (err == undefined) {
+                    console.log("Port1 Wrote Data") ;
+                } else {
+                    console.log('Port1 Write Error' + err);
+                }
+            });
+        } else {
+            port1Write = true;
+            serialPort2.write("Port2->Port1 " + teststring, function (err) {
+                if (err == undefined) {
+                    console.log("Port1 Wrote Data");
+                } else {
+                    console.log('Port1 Write Error' + err);
+                }
+            });
+        }
+       
+        setTimeout(recursiveTimerStart, 2000);
+    };
+
+    serialPort1.on('data', serialPort1DataHandler);
+    serialPort2.on('data', serialPort2DataHandler);
+    //set things in motion by opening the serial port and starting the keepalive timer
+    serialPort1.open(function (err) {
+        if (err) {
+            console.log('open serialPort1 Error' + err);
+        }
+        
     });
-    var rxport = '/dev/ttyO1';
-    var txport = '/dev/ttyO4';
-    var options = { baudrate: 115200, parser: boneScript.serialParsers.readline('\n') };
-    var teststring = "This is the string I'm sending out as a test";
-    boneScript.serialOpen(rxport, options, onRxSerial);
-
-    function onRxSerial(x) {
-        console.log('rx.event = ' + x.event);
-        if (x.err) throw ('***FAIL*** ' + JSON.stringify(x));
-        if (x.event == 'open') {
-            boneScript.serialOpen(txport, options, onTxSerial);
+    serialPort2.open(function (err) {
+        if (err) {
+            console.log('open serialPort2 Error' + err);
         }
-        if (x.event == 'data') {
-            console.log('rx (' + x.data.length +
-                        ') = ' + x.data.toString('ascii'));
-        }
-    }
 
-    function onTxSerial(x) {
-        console.log('tx.event = ' + x.event);
-        if (x.err) throw ('***FAIL*** ' + JSON.stringify(x));
-        if (x.event == 'open') {
-            writeRepeatedly();
-        }
-        if (x.event == 'data') {
-            console.log('tx (' + x.data.length +
-                        ') = ' + x.data.toString('ascii'));
-        }
-    }
-
-    function printJSON(x) {
-        console.log(JSON.stringify(x));
-    }
-
-    function writeRepeatedly() {
-        boneScript.serialWrite(txport, teststring, onSerialWrite);
-    }
-
-    function onSerialWrite(x) {
-        if (x.err) console.log('onSerialWrite err = ' + x.err);
-        if (x.event == 'callback') setTimeout(writeRepeatedly, 1000);
-    }
+    });
+    
 } catch (e) {
     console.log(e);
 }
