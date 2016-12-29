@@ -51,7 +51,7 @@ sudo apt-get install -y nodejs
 
  If you are missing the universal cape which in example above is slot 4 then
 
-To Fix the console image so it loads capes at boot via the /opt/scripts/boot/am335x_evm.sh that excutes at boot
+To Fix the console image so it loads universial capes at boot via the /opt/scripts/boot/am335x_evm.sh that excutes at boot
 do the following
  ```
  cd /opt/source/
@@ -128,6 +128,47 @@ The radar should be setup with direction to both,  hit and peak speeds disabled,
  
 
  ### UART Setup and Testing ###
+ 
+ we are using three of the uarts so we need to load the overlays so we can access them
+
+ ```
+ sudo nano /boot/uEnv.txt
+ ```
+
+ find and add to the cape_enable=bone_capemgr.enable_partno=
+   BB-UART1,BB-UART2,BB-UART4  so we can use the three uarts.  UART2 (/dev/ttyO2) is on BBG main board where we connect the stalker radar via a rs232 level converter
+
+   UART1 and UART4 are exposed on the seed studio groove v2 cape [https://www.seeedstudio.com/Grove-Base-Cape-for-Beaglebone-v2.0-p-2644.html].
+   I am using a GPS to give me location and Time data at UART1 (/dev/tty01)
+   I am currently not using UART4 but added it for future use sure as remote scoreboard control. (More to come on this idea)
+
+   We are using /dev/i2c-2 to control our adafruit I2C ledDisplays so we need BB-I2C2 as well
+
+   We are using the ADC to measure batter voltage as well as I need battery voltage monitor for my portable unit etc so need analog pins. Nee BB-ADC
+
+
+ ```
+       
+##Example v4.1.x
+#cape_disable=bone_capemgr.disable_partno=
+cape_enable=bone_capemgr.enable_partno=BB-UART1,BB-UART2,BB-UART4,BB-I2C2,BB-ADC
+
+ ```
+
+ after a reboot you should now see the universal cape and Uarts loaded on boot
+ ```
+ cat /sys/devices/platform/bone_capemgr/slots
+ ```
+results should show a univ cape loaded
+```
+ 0: PF----  -1
+ 1: PF----  -1
+ 2: PF----  -1
+ 3: PF----  -1
+ 4: P-O-L-   0 Override Board Name,00A0,Override Manuf,univ-emmc
+ 
+ ```
+
 
  ```
  sudo apt-get install minicom

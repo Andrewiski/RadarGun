@@ -79,6 +79,7 @@
     <Content Include="configs\radarEmulatorConfig.json" />
     <Content Include="configs\radarGunMonitorConfig.json" />
     <Content Include="configs\radarStalker2Config.json" />
+    <Content Include="dts\BB-BONE-RADAR-00A0.dts" />
     <Content Include="package.json" />
     <Content Include="public\app\html\partials\footer.html" />
     <Content Include="public\app\html\partials\header.html" />
@@ -105,6 +106,7 @@
   <ItemGroup>
     <Folder Include="modules\" />
     <Folder Include="configs\" />
+    <Folder Include="dts\" />
     <Folder Include="public\" />
     <Folder Include="public\app\html\" />
     <Folder Include="public\app\html\partials\" />
