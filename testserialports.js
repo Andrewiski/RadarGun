@@ -66,8 +66,9 @@ try {
             console.log('open serialPort2 Error' + err);
         }
 
+
     });
-    
+    setTimeout(recursiveTimerStart, 2000);
 } catch (e) {
     console.log(e);
 }
