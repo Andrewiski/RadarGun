@@ -105,6 +105,7 @@ io.on('connection', function(socket){
         io.emit('radarConfig', radarStalker2.getRadarConfig());
     }
     io.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
+    console.log("gpsState", gpsMonitor.getGpsState())
 });
 
 radarStalker2.on('radarSpeed', function(data){

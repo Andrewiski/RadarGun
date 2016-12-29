@@ -581,6 +581,7 @@ var RadarStalker2 = function (options){
                 debug('Serial Port Write Error Software Version Keep Alive' + err);
             }
         });
+        
         setTimeout(recursiveTimerStart,60000);
     };
 

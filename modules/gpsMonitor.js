@@ -96,7 +96,7 @@ var GpsMonitor = function (options) {
     });
 
     var handleGpsSerialData =  function (data) {
-        debug("Gps Data" + data.toString());
+        //debug("Gps Data" + data.toString());
         gps.update(data);
     }
 
