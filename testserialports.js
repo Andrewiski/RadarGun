@@ -27,7 +27,7 @@ try {
     }
     var port1Write = true;
     var recursiveTimerStart = function () {
-        debug("Timer Execute!");
+        console.log("Timer Execute!");
         
         if (serialPort1 == true) {
             port1Write = false;
@@ -58,12 +58,16 @@ try {
     serialPort1.open(function (err) {
         if (err) {
             console.log('open serialPort1 Error' + err);
+        } else {
+            console.log("Serial Port1 opened ");
         }
         
     });
     serialPort2.open(function (err) {
         if (err) {
             console.log('open serialPort2 Error' + err);
+        } else {
+            console.log("Serial Port2 opened ");
         }
 
 
