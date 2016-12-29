@@ -68,6 +68,7 @@
     <Compile Include="routes\index.js" />
     <Compile Include="routes\team.js" />
     <Compile Include="routes\user.js" />
+    <Compile Include="testserialports.js" />
     <Compile Include="testBone.js" />
     <Compile Include="testLedbackPack.js" />
     <Content Include="configs\gpsMonitorConfig.json" />
