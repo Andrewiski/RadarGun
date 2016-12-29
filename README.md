@@ -139,7 +139,7 @@ The radar should be setup with direction to both,  hit and peak speeds disabled,
    BB-UART1,BB-UART2,BB-UART4  so we can use the three uarts.  UART2 (/dev/ttyO2) is on BBG main board where we connect the stalker radar via a rs232 level converter
 
    UART1 and UART4 are exposed on the seed studio groove v2 cape [https://www.seeedstudio.com/Grove-Base-Cape-for-Beaglebone-v2.0-p-2644.html].
-   I am using a GPS to give me location and Time data at UART1 (/dev/tty01)
+   I am using a GPS to give me location and Time data at UART1 (/dev/ttyO1)
    I am currently not using UART4 but added it for future use sure as remote scoreboard control. (More to come on this idea)
 
    We are using /dev/i2c-2 to control our adafruit I2C ledDisplays so we need BB-I2C2 as well

@@ -28,7 +28,7 @@ var GpsMonitor = function (options) {
         needToUpdateHostDateTime: objOptions.updateHostDateTime
     }
     var isBeagleBone = false
-    var boneScript;
+    //var boneScript;
     var isEnabled = false;
 
     //var SerialPort = require("serialport");   v4 syntax
@@ -69,7 +69,7 @@ var GpsMonitor = function (options) {
 
         }
     } catch (ex) {
-        debug('error  ' + gpsSerialPortName);
+        debug('error  ' + gpsSerialPortName, ex);
     }
 
 
@@ -94,7 +94,7 @@ var GpsMonitor = function (options) {
         }
     });
 
-    var handleGpsSerialData =    function (data) {
+    var handleGpsSerialData =  function (data) {
         debug("Gps Data" + data.toString());
         gps.update(data);
     }
@@ -103,6 +103,11 @@ var GpsMonitor = function (options) {
     // come from the serial port or stream-reader normally
     if (gpsSerialPort) {
         gpsSerialPort.on('data', handleGpsSerialData);
+        gpsSerialPort.open(function (err) {
+            if (err) {
+                debug('open Error' + err);
+            }
+        });
     }
 
     this.getGpsState = function () {
