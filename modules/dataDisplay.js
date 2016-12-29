@@ -85,12 +85,16 @@ var dataDisplay = function (options) {
                         case "ledDisplays":
                             var ledDisplays = commonData[objOptions.displayLocation.outMaxSpeed.type];
                             if (ledDisplays && ledDisplays[objOptions.displayLocation.inMaxSpeed.index]) {
-                                    debug('inMaxSpeed ledDisplays ');
-                                    var myAdafruitLedbackPack = commonData[objOptions.displayLocation.inMaxSpeed.type][objOptions.displayLocation.inMaxSpeed.index].led;
+                                debug('inMaxSpeed ledDisplays ');
+                                var myLed =  ledDisplays[objOptions.displayLocation.inMaxSpeed.index];
+                                if (myLed.ledDisplay.enabled == true) {
+                                    var myAdafruitLedbackPack = myLed.led;
                                     myAdafruitLedbackPack.writeNumber(speedData.inMaxSpeed, false, function (err, speedData) {
                                         debug('inMaxSpeed ledDisplay ' + objOptions.displayLocation.inMaxSpeed.index + ' writeNumber ' + speedData.inMaxSpeed, err);
                                     }, speedData);
-                            
+                            } else {
+                                    debug("ledDisplay not yet ready");
+                            }
                             }
                             break;
                     }
@@ -104,10 +108,15 @@ var dataDisplay = function (options) {
                             var ledDisplays = commonData[objOptions.displayLocation.outMaxSpeed.type];
                             if (ledDisplays && ledDisplays[objOptions.displayLocation.outMaxSpeed.index]) {
                                 debug('outMaxSpeed ledDisplays ');
-                                var myAdafruitLedbackPack = commonData[objOptions.displayLocation.outMaxSpeed.type][objOptions.displayLocation.outMaxSpeed.index].led;
-                                myAdafruitLedbackPack.writeNumber(speedData.outMaxSpeed, false, function (err, speedData) {
-                                    debug('outMaxSpeed ledDisplay ' + objOptions.displayLocation.outMaxSpeed.index + ' writeNumber ' + speedData.outMaxSpeed, err);
-                                }, speedData);
+                                var myLed =  ledDisplays[objOptions.displayLocation.outMaxSpeed.index];
+                                if (myLed.ledDisplay.enabled == true) {
+                                    var myAdafruitLedbackPack = myLed.led;
+                                    myAdafruitLedbackPack.writeNumber(speedData.outMaxSpeed, false, function (err, speedData) {
+                                        debug('outMaxSpeed ledDisplay ' + objOptions.displayLocation.outMaxSpeed.index + ' writeNumber ' + speedData.outMaxSpeed, err);
+                                    }, speedData);
+                                } else {
+                                    debug("ledDisplay not yet ready ");
+                                }
                             }
                             break;
                     }
@@ -132,10 +141,12 @@ var dataDisplay = function (options) {
             ledData.led = new AdafruitLedBackpack();
             debug('attempting adafruitLedBackpack init', ledDisplay);
             if (ledDisplay.enabled == true) {
+                ledDisplay.enabled = false; //set to false tell we are done initing
                 ledData.led.Initialize({ I2CAddress: ledDisplay.I2CAddress, I2CDevice: ledDisplay.I2CDevice }, function (err, ledData) {
-                    debug('i2c adafruitLedBackpack Inited ', err, ledData.index);
+                    debug('i2c adafruitLedBackpack Inited ' + ledData.index, err );
                         
                     ledData.led.writeNumber(ledData.index, false, function (err, ledData) {
+                        ledData.ledDisplay.enabled = true;
                         debug('i2c adafruitLedBackpack ledDisplay ' + ledData.index + ' writeNumber ', err);
                     }, ledData);
                        
