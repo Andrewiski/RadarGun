@@ -32,7 +32,8 @@ var GpsMonitor = function (options) {
     var isEnabled = false;
 
     //var SerialPort = require("serialport");   v4 syntax
-    var SerialPort = require("serialport").SerialPort
+    var serialPort = require("serialport")
+    var SerialPort = serialPort.SerialPort
     //use Global so we can access our instance of Serial Port from RadarCommandFiles
 
     var gpsSerialPortName = '';
@@ -44,7 +45,7 @@ var GpsMonitor = function (options) {
             if (gpsSerialPortName) {
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.win32.baudrate,
-                    parser: SerialPort.parsers.readline('\r\n')
+                    parser: serialPort.parsers.readline('\r\n')
                 }, false); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             } 
@@ -62,7 +63,7 @@ var GpsMonitor = function (options) {
                 //});
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.baudrate,
-                    parser: SerialPort.parsers.readline('\r\n')
+                    parser: serialPort.parsers.readline('\r\n')
                 }, false); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             }
