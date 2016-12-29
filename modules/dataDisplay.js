@@ -83,8 +83,9 @@ var dataDisplay = function (options) {
                     debug('inMaxSpeed enabled ', objOptions.displayLocation.inMaxSpeed);
                     switch (objOptions.displayLocation.inMaxSpeed.type) {
                         case "ledDisplays":
-                            if (commonData[objOptions.displayLocation.inMaxSpeed.type] && commonData[objOptions.displayLocation.inMaxSpeed.type][objOptions.displayLocation.inMaxSpeed.index]) {
-                            
+                            var ledDisplays = commonData[objOptions.displayLocation.outMaxSpeed.type];
+                            if (ledDisplays && ledDisplays[objOptions.displayLocation.inMaxSpeed.index]) {
+                                    debug('inMaxSpeed ledDisplays ');
                                     var myAdafruitLedbackPack = commonData[objOptions.displayLocation.inMaxSpeed.type][objOptions.displayLocation.inMaxSpeed.index].led;
                                     myAdafruitLedbackPack.writeNumber(speedData.inMaxSpeed, false, function (err, speedData) {
                                         debug('inMaxSpeed ledDisplay ' + objOptions.displayLocation.inMaxSpeed.index + ' writeNumber ' + speedData.inMaxSpeed, err);
@@ -97,13 +98,16 @@ var dataDisplay = function (options) {
                 }
 
                 if (objOptions.displayLocation.outMaxSpeed && objOptions.displayLocation.outMaxSpeed.enabled == true) {
+                    debug('outMaxSpeed enabled ', objOptions.displayLocation.outMaxSpeed);
                     switch (objOptions.displayLocation.outMaxSpeed.type) {
                         case "ledDisplays":
-                            if (commonData[objOptions.displayLocation.outMaxSpeed.type] && commonData[objOptions.displayLocation.outMaxSpeed.type][objOptions.displayLocation.outMaxSpeed.index]) {
+                            var ledDisplays = commonData[objOptions.displayLocation.outMaxSpeed.type];
+                            if (ledDisplays && ledDisplays[objOptions.displayLocation.outMaxSpeed.index]) {
+                                debug('outMaxSpeed ledDisplays ');
                                 var myAdafruitLedbackPack = commonData[objOptions.displayLocation.outMaxSpeed.type][objOptions.displayLocation.outMaxSpeed.index].led;
-                                myAdafruitLedbackPack.writeNumber(speedData.outMaxSpeed, false, function (err) {
+                                myAdafruitLedbackPack.writeNumber(speedData.outMaxSpeed, false, function (err, speedData) {
                                     debug('outMaxSpeed ledDisplay ' + objOptions.displayLocation.outMaxSpeed.index + ' writeNumber ' + speedData.outMaxSpeed, err);
-                                });
+                                }, speedData);
                             }
                             break;
                     }
