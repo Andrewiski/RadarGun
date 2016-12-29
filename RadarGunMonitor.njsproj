@@ -58,7 +58,6 @@
     <Compile Include="public\javascripts\angular.min.js" />
     <Compile Include="public\javascripts\lodash.min.js" />
     <Compile Include="public\javascripts\restangular.min.js" />
-    <Compile Include="public\javascripts\socket.io.js" />
     <Compile Include="public\javascripts\ui-bootstrap-tpls-0.11.0.min.js" />
     <Compile Include="public\javascripts\ui-bootstrap-tpls-dateandtimepickers-0.11.0.js" />
     <Compile Include="public\javascripts\ui-date.js" />
