@@ -128,7 +128,7 @@ var dataDisplay = function (options) {
         for (var i = 0; i < objOptions.ledDisplays.length; i++) {
             var ledDisplay = extend({},objOptions.ledDisplays[i]);
             var ledData = { ledDisplay: ledDisplay, index: i };
-            commonData.ledDisplays.push[ledData];
+            commonData.ledDisplays.push(ledData);
             ledData.led = new AdafruitLedBackpack();
             debug('attempting adafruitLedBackpack init', ledDisplay);
             if (ledDisplay.enabled == true) {
