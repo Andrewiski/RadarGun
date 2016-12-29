@@ -45,13 +45,13 @@ var GpsMonitor = function (options) {
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.win32.baudrate,
                     parser: SerialPort.parsers.readline('\r\n')
-                }, true); // this is the openImmediately flag [default is true]
+                }, false); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             } 
             //
         } else {
             gpsSerialPortName = objOptions.portName;
-            var b = require('bonescript');
+            //var b = require('bonescript');
             isBeagleBone == true;
             if (gpsSerialPortName) {
                 //gpsSerialPort = b.serialOpen(gpsSerialPortName, {
@@ -63,7 +63,7 @@ var GpsMonitor = function (options) {
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.baudrate,
                     parser: SerialPort.parsers.readline('\r\n')
-                }, true); // this is the openImmediately flag [default is true]
+                }, false); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             }
 
@@ -94,14 +94,17 @@ var GpsMonitor = function (options) {
         }
     });
 
+    var handleGpsSerialData =    function (data) {
+        debug("Gps Data" + data.toString());
+        gps.update(data);
+    }
+
     // Call the update routine directly with a NMEA sentence, which would
     // come from the serial port or stream-reader normally
     if (gpsSerialPort) {
-        gpsSerialPort.on('data', function (data) {
-            debug("Gps Data" + data.toString());
-            gps.update(data);
-        });
+        gpsSerialPort.on('data', handleGpsSerialData);
     }
+
     this.getGpsState = function () {
         if (isEnabled == true) {
             return gps.state;
