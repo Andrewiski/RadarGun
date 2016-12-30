@@ -74,7 +74,6 @@
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
     <Content Include="configs\dataDisplayConfig.json" />
-    <Content Include="configs\radarMonitorClientConfig.json" />
     <Content Include="configs\radarEmulatorConfig.json" />
     <Content Include="configs\radarGunMonitorConfig.json" />
     <Content Include="configs\radarStalker2Config.json" />

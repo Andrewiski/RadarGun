@@ -80,10 +80,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.get('/', routes.index);
-app.get('/scoreboard', routes.index);
-app.get('/users', user.list);
-app.get('/teams', team.list);
+app.use('/', routes);
+//app.get('/', routes.index);
+//app.get('/scoreboard', routes.index);
+//app.get('/users', user.list);
+//app.get('/teams', team.list);
 
 var server = http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
