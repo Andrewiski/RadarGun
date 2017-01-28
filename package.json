@@ -27,7 +27,7 @@
   "description": "Digital Example BeagleBone based Radar Gun ",
   "main": "app.js",
   "engines": {
-    "node": ">= 4.0.0"
+    "node": ">= 0.12.13"
   },
   "author": {
     "name": "adevries",
@@ -61,7 +61,7 @@
     "mathjs": "^2.4.0",
     "morgan": "^1.7.0",
     "nconf": "^0.8.4",
-    "serialport": "4.0.7",
+    "serialport": "3.1.2",
     "serve-favicon": "^2.3.0",
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.7.2",
