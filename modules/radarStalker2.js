@@ -7,9 +7,9 @@ var extend = require('extend');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('radar');
 var nconf = require('nconf');
-var SerialPort = require("serialport").SerialPort;
+//var SerialPort = require("serialport").SerialPort;
 // version 4 syntax 
-//var SerialPort = require("serialport");
+var SerialPort = require("serialport");
 
 var RadarStalker2 = function (options){
     var self = this;
@@ -616,15 +616,15 @@ var RadarStalker2 = function (options){
     } else {
         debug('starting radarStalker2 on serial port ' + radarSerialPortName);
         //version 4 syntax
-        //radarSerialPort = new SerialPort(radarSerialPortName, {
-        //    baudrate: settings.baudrate,
-        //    parser: radarPacketParser(1024),
-        //    autoOpen:false}); 
-        //
         radarSerialPort = new SerialPort(radarSerialPortName, {
             baudrate: settings.baudrate,
             parser: radarPacketParser(1024),
-        }, false);
+            autoOpen:false}); 
+        
+        //radarSerialPort = new SerialPort(radarSerialPortName, {
+        //    baudrate: settings.baudrate,
+        //    parser: radarPacketParser(1024),
+        //}, false);
         radarSerialPort.on('data', radarSerialPortDataHandler);
         //set things in motion by opening the serial port and starting the keepalive timer
         radarSerialPort.open(function (err) {

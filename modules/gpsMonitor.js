@@ -31,9 +31,9 @@ var GpsMonitor = function (options) {
     //var boneScript;
     var isEnabled = false;
 
-    //var SerialPort = require("serialport");   v4 syntax
-    var serialPort = require("serialport")
-    var SerialPort = serialPort.SerialPort
+    var SerialPort = require("serialport");   //v4 syntax
+    //var serialPort = require("serialport")
+    //var SerialPort = serialPort.SerialPort
     //use Global so we can access our instance of Serial Port from RadarCommandFiles
 
     var gpsSerialPortName = '';
