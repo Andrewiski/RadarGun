@@ -59,9 +59,10 @@ Make it run as a service using Forever
 ```
  sudo npm install -g forever
 
- sudo cp /var/radar/service/radarMonitor
+ sudo cp /var/radar/service/radarMonitor /etc/init.d/radarMonitor
  sudo chmod a+x /etc/init.d/radarMonitor
- update-rc.d radarMonitor defaults
+ sudo update-rc.d radarMonitor defaults
+ sudo service radarMonitor start
 ```
 
 Now Open a web browser and connect to the Beaglebone.
