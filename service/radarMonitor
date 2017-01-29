@@ -1,0 +1,17 @@
+﻿#!/bin/sh
+
+export PATH=$PATH:/usr/local/bin
+export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules
+export SERVER_PORT=80
+
+case "$1" in
+  start)
+  exec forever --sourceDir=/var/radar -p /var/run/forever start app.js
+  ;;
+
+  stop)
+  exec forever stop --sourceDir=/var/radar app.js
+  ;;
+esac
+
+exit 0

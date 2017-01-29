@@ -31,48 +31,7 @@ curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
 sudo apt-get install -y nodejs
  ```
 
- Do to missing files in the current console image the following needs to be ran to fix the universal image not being loaded
- which can be tested by viewing the loaded cape slots.
- We need the universial cape so that we can access the io pins for i2c and drive the relays.
- If output does not show  a universal cape then you may have load the universial cape manual or fix the image so it loads at boot.
-
- ```
- #show loaded Capes
- cat /sys/devices/platform/bone_capemgr/slots
- ```
-
-  ```
- 0: PF----  -1
- 1: PF----  -1
- 2: PF----  -1
- 3: PF----  -1
- 4: P-O-L-   0 Override Board Name,00A0,Override Manuf,univ-emmc
- ```
-
- If you are missing the universal cape which in example above is slot 4 then
-
-To Fix the console image so it loads universial capes at boot via the /opt/scripts/boot/am335x_evm.sh that excutes at boot
-do the following
- ```
- cd /opt/source/
- sudo  git clone https://github.com/cdsteinkuehler/beaglebone-universal-io.git
- sudo chmod a+rwx /opt/source/beaglebone-universal-io/config-pin
- cd /usr/local/bin/
- sudo ln -s /opt/source/beaglebone-universal-io/config-pin config-pin
-```
-after a reboot you should now see the universal cape loaded on boot
- ```
- cat /sys/devices/platform/bone_capemgr/slots
- ```
-results should show a univ cape loaded
-```
- 0: PF----  -1
- 1: PF----  -1
- 2: PF----  -1
- 3: PF----  -1
- 4: P-O-L-   0 Override Board Name,00A0,Override Manuf,univ-emmc
  
- ```
 
  if we are using i2c ledDisplays lets make sure we can detect them on the i2c bus
 
@@ -93,6 +52,16 @@ Setup hvac Controller
  npm install
  sudo DEBUG=app,dataDisplay,radar,adafruitLedBackck,gpsMonitor npm start
 
+```
+
+Make it run as a service using Forever
+
+```
+ sudo npm install -g forever
+
+ sudo cp /var/radar/service/radarMonitor
+ sudo chmod a+x /etc/init.d/radarMonitor
+ update-rc.d radarMonitor defaults
 ```
 
 Now Open a web browser and connect to the Beaglebone.
@@ -159,13 +128,18 @@ cape_enable=bone_capemgr.enable_partno=BB-UART1,BB-UART2,BB-UART4,BB-I2C2,BB-ADC
  ```
  cat /sys/devices/platform/bone_capemgr/slots
  ```
-results should show a univ cape loaded
+results should show are UARTS I@C and ADC are loaded
 ```
  0: PF----  -1
  1: PF----  -1
  2: PF----  -1
  3: PF----  -1
- 4: P-O-L-   0 Override Board Name,00A0,Override Manuf,univ-emmc
+ 4: P-O-L-   2 Override Board Name,00A0,Override Manuf,BB-UART1
+ 5: P-O-L-   0 Override Board Name,00A0,Override Manuf,BB-UART2
+ 6: P-O-L-   1 Override Board Name,00A0,Override Manuf,BB-UART4
+ 7: P-O-L-   3 Override Board Name,00A0,Override Manuf,BB-I2C2
+ 8: P-O-L-   4 Override Board Name,00A0,Override Manuf,BB-ADC
+
  
  ```
 
@@ -180,4 +154,5 @@ results should show a univ cape loaded
  ```
  minicom -D /dev/ttyO2 -b 9600
  minicom -D /dev/ttyO4 -b 9600
+ 
  ```

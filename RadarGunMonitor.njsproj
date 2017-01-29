@@ -99,12 +99,14 @@
     <Content Include="public\stylesheets\style.css" />
     <Content Include="README.md" />
     <Content Include="public\index.html" />
+    <Content Include="service\radarMonitor" />
     <Content Include="StartRadarApp.sh" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="modules\" />
     <Folder Include="configs\" />
     <Folder Include="dts\" />
+    <Folder Include="service\" />
     <Folder Include="public\" />
     <Folder Include="public\app\html\" />
     <Folder Include="public\app\html\partials\" />
