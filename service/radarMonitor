@@ -24,6 +24,18 @@ stop() {
     RETVAL=$?
 }
 
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    *)
+        echo "Usage:  {start|stop}"
+        exit 1
+        ;;
+
 esac
 
 exit $RETVAL
