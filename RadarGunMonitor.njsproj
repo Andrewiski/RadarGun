@@ -99,7 +99,6 @@
     <Content Include="public\stylesheets\style.css" />
     <Content Include="README.md" />
     <Content Include="public\index.html" />
-    <Content Include="service\forever.json" />
     <Content Include="service\radarMonitor" />
     <Content Include="StartRadarApp.sh" />
   </ItemGroup>

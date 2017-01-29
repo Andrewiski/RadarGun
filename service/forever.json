@@ -1,8 +1,0 @@
-﻿{
-    // Comments are supported
-    "uid": "radarMonitor",
-    "append": true,
-    "watch": true,
-    "script": "app.js",
-    "sourceDir": "/var/radar"
-}
