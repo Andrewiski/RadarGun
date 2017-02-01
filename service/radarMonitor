@@ -15,13 +15,13 @@ export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules
 
 start() {
     echo "Starting radarMonitor node instance: "
-    $forever --uid radarMonitor --sourceDir=/var/radar -p /var/radar/service -l /var/radar/service/radarMonitor.log start app.js
+    forever --uid radarMonitor --sourceDir=/var/radar -p /var/radar/service -l /var/radar/service/radarMonitor.log start app.js
     RETVAL=$?
 }
 
 stop() {
     echo -n "Shutting down radarMonitor node instance : "
-    $forever stop radarMonitor
+    forever stop radarMonitor
     RETVAL=$?
 }
 
