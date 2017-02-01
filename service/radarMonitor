@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 #
 ### BEGIN INIT INFO
 # Provides:          radarMonitor
@@ -15,22 +15,24 @@ export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules
 
 start() {
     echo "Starting radarMonitor node instance: "
-    forever --uid radarMonitor --sourceDir=/var/radar -p /var/radar/service -l /var/radar/service/radarMonitor.log start app.js
-    RETVAL=$?
+    forever --uid radarMonitor --sourceDir=/var/radar -p /var/radar/service -l /var/radar/service/radarMonitor.log -a --minUptime 1000 --spinSleepTime 60000 start app.js
+    exit 0
 }
 
 stop() {
     echo -n "Shutting down radarMonitor node instance : "
     forever stop radarMonitor
-    RETVAL=$?
+    exit 0
 }
 
 case "$1" in
     start)
         start
+	exit 0
         ;;
     stop)
         stop
+	exit 0
         ;;
     *)
         echo "Usage:  {start|stop}"
@@ -39,4 +41,4 @@ case "$1" in
 
 esac
 
-exit $RETVAL
+exit 0
