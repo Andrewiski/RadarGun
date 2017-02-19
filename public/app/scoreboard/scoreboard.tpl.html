@@ -2,17 +2,24 @@
     <div class="speedsContainer">
         <div class="speedBox">
             <div class="speedLabel">In</div>
-            <div class="speedSecondary">{{commonData.radarSpeedData.inMinSpeed}}</div>
-            <div class="speed">{{commonData.radarSpeedData.inMaxSpeed}}</div>
+            <div class="speedSecondary">{{commonData.radarSpeedData.inMinSpeed | number : 2}}</div>
+            <div class="speed">{{commonData.radarSpeedData.inMaxSpeed | number : 2}}</div>
         </div>
         <div class="speedBox">
             <div class="speedLabel">Out</div>
-            <div class="speedSecondary">{{commonData.radarSpeedData.outMinSpeed}}</div>
-            <div class="speed">{{commonData.radarSpeedData.outMaxSpeed}}</div>
+            <div class="speedSecondary">{{commonData.radarSpeedData.outMinSpeed | number : 2}}</div>
+            <div class="speed">{{commonData.radarSpeedData.outMaxSpeed | number : 2}}</div>
         </div>
     </div>
+    <div>
+         {{commonData.batteryVoltage.batteryVoltage | number : 2}}V&nbsp;<i class="fa fa-battery-full"></i>
+        <!--<i class="fa fa-battery-quarter"></i>
+        <i class="fa fa-battery-half"></i>
+        <i class="fa fa-battery-three-quarters" aria-hidden="true"></i> 
+        <i class="fa fa-battery-empty" aria-hidden="true"></i>-->
+    </div>
     <div style="float:right"><button ng-click="showConfig()" class="btn btn-primary">Config</button></div>
-    <div >
+    <div>
         <h3>History</h3>
         <div>
             <table>
@@ -30,8 +37,9 @@
                 </tr>
             </table>
         </div>
-        
+
     </div>
+    
     
     <div class="config" ng-show="commonData.showConfig">
         <div>
@@ -106,7 +114,9 @@
                     </div>
                 </div>
             </div>
-            <div style="margin: auto;  width: 100%;border:1px solid red;">&nbsp;</div>
+            
         </div>
+        
     </div>
+    
 </div>

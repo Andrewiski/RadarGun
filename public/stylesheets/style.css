@@ -1,17 +1,13 @@
 
 html,
 body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-body {
-  overflow-y: scroll;
-  background-color: #646464;
-  color: #004b91;
+  margin: 2px;
+  padding: 2px;
+  
+  
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
-  height: 100%;
+  min-height:100%
 }
 #radarmonitor {
   position: relative;
@@ -41,21 +37,7 @@ body {
 }
 
 
-.sb .barsandmain{
-  height:100%;
-  width:100%;
-  position:fixed;
-  top: 30px;
-  bottom: 30px;
-  
-}
-.sb .main {
 
-  padding: 0px;
-  background: #FFF;
-  height:100%;
-  
-}
 
 
 
@@ -65,43 +47,37 @@ body {
     border:solid 3px black;
     min-height: 100px;
     min-width: 100px;
+    
 }
 
 
 
 .sb .speedBox .speedLabel{
-    font-size:small;
     color:black;
     display:inline-block;
     margin:2px;
     width:45%;
+    font-size: 15pt;
 }
-.sb .speedBox .speedDirection{
-    font-size:medium;
-    color:black;
-    display:inline-block;
-    margin:2px;
-    width:45%;
-    
-}
+
 .sb .speedBox .speedSecondary{
-    font-size:smaller;
     color:black;
-    width:98%;
+    display:inline-block;
     margin:2px;
+    font-size: 15pt;
 }
 .sb .speedBox .speed{
     color:black;
     width:98%;
     text-align:right;
     vertical-align:top;
-    font-size: 40pt;
+    font-size:40pt;
 }
 
 
 
 .sb .speedHistory{
-    overflow:scroll;
+    overflow-y: scroll;
     min-height:250px;
     min-width:250px;
     
@@ -123,9 +99,17 @@ body {
         min-height:250px;
         min-width:500px;
     }
-     .sb .speedBox .speed {
-        font-size: 75pt;
-        
+
+    .sb .speedBox .speedLabel{
+        font-size: 30pt;
+    }
+    
+    .sb .speedBox .speedSecondary{
+        font-size: 30pt;
+    }
+
+     .sb .speedBox .speed{
+        font-size: 200pt; 
     }
 }
 
