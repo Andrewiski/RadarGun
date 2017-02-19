@@ -1,3 +1,4 @@
 ﻿{
-  "webserverPort": 12336
+  "webserverPort": 12336,
+  "win32WebserverPort": 12336
 }

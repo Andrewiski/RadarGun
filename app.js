@@ -31,7 +31,7 @@ var objOptions = extend({}, defaultOptions, configFileSettings);
 var app = express();
 // all environments
 
-app.set('port', objOptions.webserverPort);
+
 
 //app.set('views', path.join(__dirname, 'views'));
 //app.set('view engine', 'jade');
@@ -56,6 +56,7 @@ app.use('/javascript/bootstrap', express.static(path.join(__dirname, 'node_modul
 app.use('/javascript/jquery', express.static(path.join(__dirname, 'node_modules', 'jquery', 'dist')));
 // development only
 if (process.platform === 'win32') {
+    app.set('port', objOptions.win32WebserverPort);
     //app.use(express.favicon());
    // app.use(express.logger('dev'));
     //app.use(express.json());
@@ -64,6 +65,7 @@ if (process.platform === 'win32') {
     //app.use(app.router);
     //app.use(express.errorHandler());
 } else {
+    app.set('port', objOptions.webserverPort);
     //boneScript = require('bonescript');
     //boneScript.getPlatform(function (x) {
     //    console.log('bonescript getPlatform');
