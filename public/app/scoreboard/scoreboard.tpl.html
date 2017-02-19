@@ -11,6 +11,7 @@
             <div class="speed">{{commonData.radarSpeedData.outMaxSpeed}}</div>
         </div>
     </div>
+    <div style="float:right"><button ng-click="showConfig()" class="btn btn-primary">Config</button></div>
     <div >
         <h3>History</h3>
         <div>
@@ -29,7 +30,7 @@
                 </tr>
             </table>
         </div>
-        <div style="float:right"><button ng-click="showConfig()" class="btn btn-primary">Config</button></div>
+        
     </div>
     
     <div class="config" ng-show="commonData.showConfig">
