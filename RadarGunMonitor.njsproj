@@ -58,6 +58,7 @@
     <Compile Include="public\javascripts\angular.min.js" />
     <Compile Include="public\javascripts\lodash.min.js" />
     <Compile Include="public\javascripts\restangular.min.js" />
+    <Compile Include="public\app\ssid.js" />
     <Compile Include="public\javascripts\ui-bootstrap-tpls-0.11.0.min.js" />
     <Compile Include="public\javascripts\ui-bootstrap-tpls-dateandtimepickers-0.11.0.js" />
     <Compile Include="public\javascripts\ui-date.js" />
@@ -71,6 +72,14 @@
     <Compile Include="testserialports.js" />
     <Compile Include="testBone.js" />
     <Compile Include="testLedbackPack.js" />
+    <Compile Include="wifidog\button.js" />
+    <Compile Include="wifidog\connman.js" />
+    <Compile Include="wifidog\hostapd.js" />
+    <Compile Include="wifidog\led.js" />
+    <Compile Include="wifidog\logger.js" />
+    <Compile Include="wifidog\socket_bk.js" />
+    <Compile Include="wifidog\wifi.js" />
+    <Compile Include="wifidog\wifidog.js" />
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
     <Content Include="configs\dataDisplayConfig.json" />
@@ -106,6 +115,7 @@
     <Folder Include="modules\" />
     <Folder Include="configs\" />
     <Folder Include="dts\" />
+    <Folder Include="wifidog\" />
     <Folder Include="service\" />
     <Folder Include="public\" />
     <Folder Include="public\app\html\" />

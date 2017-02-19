@@ -51,6 +51,17 @@
             </div>-->
                 <div data-accordion-group data-heading="Radar Settings" data-is-open="true">
 
+                    <div class="wifidog">
+                        <form class="wifidogform" style="display: ;" action="config?act=config" name="wifi_info" method="post">
+                            <select id='ssid' name="ssid" onclick='select_click()'>
+                                <option value="note">click to select ssid</option>
+                            </select>
+                            <input type="password" name="password" placeholder="Password" />
+                            <input type="hidden" name="admin" placeholder="Your board password" />
+                            <input type="button" class='btn' size="15" style="background-color: transparent; border: 0;" onclick="check()" value="OK" />
+                        </form>
+                    </div>
+
                     <div>
                         <div ng-hide="commonData.radarConfig.TransmiterControl.value == 1"><a class="btn btn-sm btn-danger" ng-click="radarCommand('TransmiterControl',1)">Off</a>(Click to Turn On)</div>
                         <div ng-show="commonData.radarConfig.TransmiterControl.value == 1"><a class="btn btn-sm btn-success" ng-click="radarCommand('TransmiterControl',0)">On</a> (Click to Turn Off)</div>

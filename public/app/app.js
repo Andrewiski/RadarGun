@@ -22,14 +22,14 @@
 
           $stateProvider
               .state('scoreboard', {
-                 url: '/scoreboard',
+                 url: '/',
                  template: '<div data-scoreboard></div>',
                  controller: 'scoreboardViewController'
               })
               
              
 
-          $urlRouterProvider.otherwise("/scoreboard");
+          $urlRouterProvider.otherwise("/");
           $locationProvider.html5Mode(true);
           errorHandlerProvider.setDefaultErrorMessage('An Error has occured on the server. Error Code NER100');
 
