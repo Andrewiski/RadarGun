@@ -22,7 +22,15 @@
                radarConfig: {},
                batteryVoltage: -0.01,
                isradarCommandPending: false,
-               showConfig: false
+               showConfig: false,
+               googleMap: {
+                   inited:false,
+                   map: null,
+                   state: null,
+                   alpha: null,
+                   marker:null
+               },
+               gpsPosition : null
            }
           
             $rootScope.$on('radarMonitor:Connected', function(event, data) {
@@ -94,6 +102,48 @@
             $scope.showConfig = function () {
                 $scope.commonData.showConfig = !$scope.commonData.showConfig;
             }
+
+            $rootScope.$on('radarMonitor:gpsPosition', function (event, data) {
+                $scope.commonData.gpsPosition = data;
+                
+                if (googleMapInited == true && $scope.common.googleMapInited == false) {
+                    $scope.commonData.googleMap.alpha = 0.4;
+                    $scope.commonData.googleMap.state = { lat: data.lat, lng: data.lon };
+
+                    $scope.commonData.googleMap.map = new google.maps.Map(document.getElementById('googleMap'), {
+                        center: $scope.commonData.googleMap.state,
+                        zoom: 15
+                    });
+
+                    $scope.commonData.googleMap.marker = new google.maps.Marker({
+                        position: $scope.commonData.googleMap.state,
+                        map: $scope.commonData.googleMap.map,
+                        title: 'Live Position'
+                    });
+                    $scope.common.googleMap.inited = true;
+                }
+                if ($scope.common.googleMap.inited == true) {
+                    console.log('radarMonitor:gpsPosition ' + data);
+                    console.debug(data);
+                    if (data.lat === null || data.lon === null) {
+                        return;
+                    }
+
+                    if ($scope.common.googleMap.state.lat === 0 && $scope.common.googleMap.state.lng === 0) {
+                        $scope.common.googleMap.state.lat = data.lat;
+                        $scope.common.googleMap.state.lng = data.lon;
+                    } else {
+                        $scope.common.googleMap.state.lat = (1 - $scope.commonData.googleMap.alpha) * $scope.common.googleMap.state.lat + alpha * data.lat;
+                        $scope.common.googleMap.state.lng = (1 - $scope.commonData.googleMap.alpha) * $scope.common.googleMap.state.lng + alpha * data.lon;
+                    }
+
+                    $scope.common.googleMap.map.setCenter($scope.common.googleMap.state);
+                    $scope.common.googleMap.marker.setPosition($scope.common.googleMap.state);
+                }
+                //$scope.commonData.gpsPosition = data;
+                $scope.$apply();
+            });
+            
           }
        ]);
 })();

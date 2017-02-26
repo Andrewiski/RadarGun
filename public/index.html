@@ -67,7 +67,15 @@
     <script src="/app/scoreboard/scoreboardViewController.js"></script>
     <script src="/app/radarMonitor.js"></script>
     <script src="/app/errorHandlerProvider.js"></script>
-    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyADf2Ss5DEZdZMFEJ0f8fmi1KcYRZMYLZI&callback=initMap" async defer></script>
+    <script>
+        var googleIsInited = false;
+        function initMap() {
+            googleIsInited = true;
+            console.log("initMap Complete");
+        }
+
+    </script>
  
 </head>
 

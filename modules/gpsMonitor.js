@@ -90,11 +90,21 @@ var GpsMonitor = function (options) {
                     // Clock should be set now
                     commonData.needToUpdateHostDateTime == true
                     debug("Set host time to " + data.time.toString());
+                    self.emit('gpsHostTime', { msg: "Set host time to " + data.time.toString(), data: data });
                 }
             });
         }
+
+        if (this.needGpsUpdate(data) == true) {
+            debug("Set host time to " + data.time.toString());
+            self.emit('gpsHostTime', { msg: "Set host time to " + data.time.toString(), data: data });
+        }
+
     });
 
+    this.needGpsUpdate = function (data) {
+        return true;
+    }
     var handleGpsSerialData =  function (data) {
         //debug("Gps Data" + data.toString());
         gps.update(data);
