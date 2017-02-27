@@ -46,8 +46,9 @@ var GpsMonitor = function (options) {
             if (gpsSerialPortName) {
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.win32.baudrate,
-                    parser: SerialPort.parsers.readline('\r\n')
-                }, false); // this is the openImmediately flag [default is true]
+                    parser: SerialPort.parsers.readline('\r\n'),
+                    autoOpen: false
+                }); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             } 
             //
@@ -64,8 +65,9 @@ var GpsMonitor = function (options) {
                 //});
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.baudrate,
-                    parser: SerialPort.parsers.readline('\r\n')
-                }, false); // this is the openImmediately flag [default is true]
+                    parser: SerialPort.parsers.readline('\r\n'),
+                    autoOpen:false
+                }); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             }
 
