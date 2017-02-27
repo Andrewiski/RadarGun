@@ -8,6 +8,7 @@ var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('gpsMonitor');
 var nconf = require('nconf');
 var exec = require('child_process').exec;
+var SerialPort = require("serialport");
 
 var GpsMonitor = function (options) {
     var self = this;
@@ -31,7 +32,7 @@ var GpsMonitor = function (options) {
     //var boneScript;
     var isEnabled = false;
 
-    var SerialPort = require("serialport");   //v4 syntax
+       //v4 syntax
     //var serialPort = require("serialport")
     //var SerialPort = serialPort.SerialPort
     //use Global so we can access our instance of Serial Port from RadarCommandFiles
@@ -45,7 +46,7 @@ var GpsMonitor = function (options) {
             if (gpsSerialPortName) {
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.win32.baudrate,
-                    parser: serialPort.parsers.readline('\r\n')
+                    parser: SerialPort.parsers.readline('\r\n')
                 }, false); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             } 
@@ -63,7 +64,7 @@ var GpsMonitor = function (options) {
                 //});
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
                     baudrate: objOptions.baudrate,
-                    parser: serialPort.parsers.readline('\r\n')
+                    parser: SerialPort.parsers.readline('\r\n')
                 }, false); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             }
