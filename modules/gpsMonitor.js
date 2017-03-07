@@ -79,7 +79,7 @@ var GpsMonitor = function (options) {
 
     debug('started gpsMonitor on port ' + gpsSerialPortName);
     var GPS = require('gps');
-    var gps = new GPS;
+    var gps = new GPS();
     gps.on('data', function (data) {
         //debug(data, gps.state);
         
@@ -99,7 +99,7 @@ var GpsMonitor = function (options) {
         }
 
         if (this.needGpsUpdate(data) == true) {
-            debug("Set host time to " + data.time.toString());
+            debug("Gps " + data.time.toString());
             self.emit('gpsHostTime', { msg: "Set host time to " + data.time.toString(), data: data });
         }
 

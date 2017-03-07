@@ -68,10 +68,10 @@ body {
 }
 .sb .speedBox .speed{
     color:black;
-    width:98%;
+    width:90%;
     text-align:right;
     vertical-align:top;
-    font-size:40pt;
+    font-size:36pt;
 }
 
 
@@ -109,7 +109,7 @@ body {
     }
 
      .sb .speedBox .speed{
-        font-size: 200pt; 
+        font-size: 160pt; 
     }
 }
 
