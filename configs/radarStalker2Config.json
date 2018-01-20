@@ -6,6 +6,7 @@
     "portName": "COM7"
   },
   "baudrate": 115200,
+  "radarSpeedTimeOutMinutes":30,
   "radarConfig": {
     "TargetDirection": {
       "id": 2,
