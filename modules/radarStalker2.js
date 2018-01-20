@@ -40,7 +40,7 @@ var RadarStalker2 = function (options){
 
     var commonData = {
         currentRadarSpeedData: {},
-        
+        lastSpeedDataTimestamp: new Date()
     }
 
     extend(commonData.currentRadarSpeedData, emptySpeedData);
@@ -559,6 +559,7 @@ var RadarStalker2 = function (options){
             commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
             commonData.currentRadarSpeedData.pitchCount = pitchCounter;
             self.emit('radarSpeed', commonData.currentRadarSpeedData);
+            commonData.lastSpeedDataTimestamp = new Date();
             commonData.currentRadarSpeedData = extend({}, emptySpeedData);
         } 
         
@@ -574,13 +575,21 @@ var RadarStalker2 = function (options){
     var recursiveTimerStart = function () {
         debug("Keep alive Timer Execute!");
         configRequestPending = false;
-        radarSerialPort.write(getRadarPacket(81,0,new Buffer([0])), function(err) {
-            if (err == undefined){
-                debug('request Radar Software Version Keep Alive');
-            }else{
-                debug('Serial Port Write Error Software Version Keep Alive' + err);
-            }
-        });
+        
+
+        var lastSpeedTimeOut = new Date();
+        lastSpeedTimeOut = new Date(lastSpeedTimeOut.getTime() - (settings.radarSpeedTimeOutMinutes * 60 * 1000));
+        if (commonData.lastSpeedDataTimestamp < lastSpeedTimeOut) {
+            //send power down radar coommand
+        } else {
+            radarSerialPort.write(getRadarPacket(81, 0, new Buffer([0])), function (err) {
+                if (err == undefined) {
+                    debug('request Radar Software Version Keep Alive');
+                } else {
+                    debug('Serial Port Write Error Software Version Keep Alive' + err);
+                }
+            });
+        }
         
         setTimeout(recursiveTimerStart,60000);
     };
