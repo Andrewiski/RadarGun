@@ -3,7 +3,7 @@
    'use strict';
 
     angular.module('scoreboardapp')
-       .controller('scoreboardController', ['$rootScope', '$scope', '$uibModal', '$filter', 'radarMonitor', function ($rootScope, $scope, $uibModal, $filter, radarMonitor) {
+       .controller('scoreboardController', ['$rootScope', '$scope', '$uibModal', '$filter', '$log', 'radarMonitor', function ($rootScope, $scope, $uibModal, $filter, $log, radarMonitor) {
            $scope.commonData = {
                teams:[{ TeamID: 1, Name: 'Marrons' }, { TeamID: 2, Name: 'PrimeTime' }],
                radarSpeedDataHistory:[],
@@ -45,9 +45,45 @@
                 console.log('radarMonitor:radarConfig detected');
                 console.debug(data);
                 $scope.commonData.radarConfig = data;
-                
+                if ($scope.commonData.radarConfig.TransmiterControl.value == 0) {
+                    $scope.showRadarOffModal();
+                }
                 $scope.$apply();
             });
+
+            var radarOffModalInstance = null;
+
+            $scope.showRadarOffModal = function () {
+                if (radarOffModalInstance == null) {
+                    radarOffModalInstance = $uibModal.open({
+                        animation: $scope.animationsEnabled,
+                        templateUrl: '/app/scoreboard/radarOffModal.html',
+                        controller: function ($scope) {
+                            $scope.turnRadarOn = function () {
+                                $scope.$close({ turnOn: true });
+                            }
+                        },
+                        controllerAs: '$ctrl',
+
+                        resolve: {
+                            item: function () {
+                                return { turnOn: true };
+                            }
+                        }
+                    });
+
+                    radarOffModalInstance.result.then(function (selectedItem) {
+                        if (selectedItem) {
+                            $scope.radarCommand('TransmiterControl', 1);
+                        }
+                    }, function () {
+                        $log.info('Modal dismissed at: ' + new Date());
+                        $scope.radarCommand('TransmiterControl', 1);
+                    });
+                } else {
+                    //radarOffModalInstance.show();
+                }
+            }
 
             $rootScope.$on('radarMonitor:radarConfigProperty', function(event, data) {
                 // use the data accordingly
@@ -55,6 +91,19 @@
                 console.log('radarMonitor:radarConfigProperty detected ' + data.Property + ' ' + data.data);
                 console.debug(data);
                 $scope.commonData.radarConfig[data.Property].value = data.data;
+                //Handle Radar Off Pop the Dialog
+                if (data.Property == "TransmiterControl") {
+                    if (data.data == 0) {
+                        $scope.showRadarOffModal();
+                    } else {
+                       // $('#radarOffDialog').modal('hide')
+                        //$uibModalStack.dismissAll();
+                        if (radarOffModalInstance) {
+                            radarOffModalInstance.dismiss();
+                            radarOffModalInstance = null;
+                        }
+                    }
+                }
                 $scope.$apply();
             });
 

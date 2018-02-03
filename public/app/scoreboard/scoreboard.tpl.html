@@ -80,7 +80,7 @@
                     </div>
                     <div>{{editRadarConfig}}</div>
                     <div ng-hide="editRadarConfig == true">
-                        <div>{{commonData.radarConfig.ProductID.value}}</div>
+                        <div>Radar Model: {{commonData.radarConfig.ProductID.value}}</div>
                         <div>Low Speed Threshold:{{commonData.radarConfig.LowSpeedThreshold.value}}</div>
                         <div>High Speed Threshold:{{commonData.radarConfig.HighSpeedThreshold.value}}</div>
                         <div>Left Right Angle:{{commonData.radarConfig.CosignAngle1.value}}</div>
@@ -105,22 +105,16 @@
                         <div>Auto Clear Delay:<input style="width:45px" type="number" ng-model="commonData.radarConfig.AutoClearDelay.value" ng-change="commonData.radarConfig.AutoClearDelay.isDirty = true" /></div>
                         <div>Hit Speed Enable:{<input style="width:45px" type="number" ng-model="vradarConfig.HitSpeedEnable.value" ng-change="commonData.radarConfig.HitSpeedEnable.isDirty = true" /></div>
                         <div>Target Direction:<input style="width:45px" type="number" ng-model="commonData.radarConfig.TargetDirection.value" ng-change="commonData.radarConfig.TargetDirection.isDirty = true" />0 Outbound, 1 InBound, 2 Both</div>
-
                         <div style="float:right"><a href="" ng-click="updateRadarConfig(); editRadarConfig = false;">save</a></div>
-
                     </div>
                     <div>
                         <div>Battery Voltage: {{commonData.batteryVoltage.batteryVoltage}}</div>
                         <div>{{commonData.batteryVoltage.time | date : 'M/d/yy hh:mm:ss'}}</div>
                     </div>
-                    
-                    <div id="googleMap"></div>
-                    
+                    <div id="googleMap"></div>  
                 </div>
             </div>
-            
         </div>
-        
     </div>
     
 </div>
