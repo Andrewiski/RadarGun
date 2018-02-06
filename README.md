@@ -9,30 +9,31 @@ The Radar Gun Monitor is a BeagleBone application using a Stalker Pro II OEM Spe
 Socket IO is used to give real time radar speed updates tot he web browser and works with Apple/Andriod mobile devices. 
 
 ### Installation and Setup ###
-Due to the current state of rapid changes to Beaglebone Debian images with the move to Cape Manager and Jessie. I decided to go with the bleeding edge release
-of Debian 8.6 2016-12-13.   Since there is a web front end I have no need for HDMI I used a Beaglebone Green Wireless as its cheaper and I have no plans to use the HDMI port.
-That being said any version of the Beaglebone can be used but having built in wifi makes it easier for mounting external antenna
+Due to the current state of rapid changes to Beaglebone Debian images with the move to Cape Manager on Jessie, now moving to Stretch. I decided to go with the latest release
+of Debian 9.2 IOT 2017-10-10. Since there is a web front end I have no need for HDMI I used a Beaglebone Green Wireless as its cheaper and I have no plans to use the HDMI port.
+That being said any version of the Beaglebone can be used but having built in wifi makes it easier for mounting external antenna. For my always on in the cage setups I use the ethernet versions of
+beagle bone black rev b or rev c boards as they are wired to the switch sit in my office and are conencted to the stalker pro units at the back of the chages via 200 foot serial cables. We have tv monitors in each cage runing andriod tv boxs for showing swing recordings
+and also a web browser for speed display. When we setup on the field for game display the web interface is used by coaches in the dugout via there smart phones as well as parents fans in the stand as the softAP is also running.
+
+The GPS is used to set the time so the logs are timestamped.  MongoDB is the plan for loggin with work on export to Google Sheets per session planned for charting graphing over time.
+
 
 Tested setup is as follows.
 
-Download and flash a micro sd or onboard emmc with the following debian 8.6 console image (Instruction on how to flash the image can be found here <https://beagleboard.org/getting-started#update>)
+bone-debian-9.2-iot-armhf-2017-10-10-4gb  image from beagleboard.org
 
-<https://rcn-ee.com/rootfs/bb.org/testing/2016-12-18/console/BBB-blank-debian-8.6-console-armhf-2016-12-18-2gb.img.xz>
+Connect the BeagleBone to the internet as we need to install some software. Node 6.0 is now included in latest release so does not need to be installed.
 
-Connect the BeagleBone to the internet as we need to install some software including nodejs version 4.0 for now as bonescript just moved there.
+Also note as of 2/06/2016 we are using released bonescript ^0.6.2 to check what version you have installed run.
 
-Also note as of 12/28/2016 we are using beta bonescript 6.0 as packages config is pointed directly to master branch as not yet published to npm
+```
+node -pe "require('bonescript').getPlatform().bonescript"
+```
 
 ```
  sudo apt-get update
 sudo apt-get install -y git curl i2c-tools
-sudo apt-get install -y build-essential g++ python-setuptools python2.7-dev
-curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-sudo apt-get install -y nodejs
  ```
-
- 
-
  if we are using i2c ledDisplays lets make sure we can detect them on the i2c bus
 
 ```
@@ -41,7 +42,8 @@ ls -l /dev/i2c*
 sudo i2cdetect -l
 sudo i2cdetect -r 2
 ```
-Setup hvac Controller
+
+Download Setup the Radar Controller NPM Project
 
 ```
  sudo mkdir /var/radar
@@ -50,7 +52,7 @@ Setup hvac Controller
  git clone https://github.com/Andrewiski/RadarGun.git .
  # no sudo for this one
  npm install
- sudo DEBUG=app,dataDisplay,radar,adafruitLedBackck,gpsMonitor npm start
+ sudo DEBUG=app,dataDisplay,radar,adafruitLedBackck,gpsMonitor,radarEmulator npm start
 
 ```
 
