@@ -98,13 +98,20 @@ var dataDisplay = new DataDisplay({});
 var io = require('socket.io')(server);
 io.on('connection', function(socket){
     debug('socket.io client Connection');
-    socket.on('radarCommand',function(data){
-        debug('radarCommand:' + data.cmd + ', value:' + data.data + ', client id:' +  socket.id );
+    socket.on('radarConfigCommand',function(data){
+        debug('radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client id:' +  socket.id );
         radarStalker2.radarConfigCommand({ data: data, socket: socket });
     });
+    socket.on('radarEmulatorCommand', function (data) {
+        debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
+        radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
+    });
+    
     if (socket.client.request.headers["origin"] != "ArduinoSocketIo") {
+        //send the current Config to the new client Connections
         io.emit('radarConfig', radarStalker2.getRadarConfig());
     }
+    //send the current Battery Voltage
     io.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
     console.log("gpsState", gpsMonitor.getGpsState())
 });

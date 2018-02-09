@@ -12,6 +12,7 @@ var RadarEmulator = function (fakePortName, options) {
 
     var self = this;
     var defaultOptions = {
+        portIsOpen: false,
         mode: 'in',  //in, out, inout, outin
         inSpeed: 65,
         outSpeed: 70
@@ -133,8 +134,8 @@ var RadarEmulator = function (fakePortName, options) {
                         }
                         //Send back the config setting value
                         var mybuff = getRadarConfigResponsePacket(ConfigProperty);
-
-                        self.emit('data', mybuff);
+                        sendData(mybuff);
+                        //self.emit('data', mybuff);
                     } else {
                         debug('Invalid Config ID ' + PacketConfigID);
                     }
@@ -155,14 +156,151 @@ var RadarEmulator = function (fakePortName, options) {
     };
     this.open = function (callback) {
         debug('open');
+        objOptions.portIsOpen = true;
         if (callback) { callback.call(this, null) };
+        recursiveTimerStartFakeRadar();
+    };
+    this.close = function (callback) {
+        debug('close');
+        objOptions.portIsOpen = false;
+        if (callback) { callback.call(this, null) };
+        
     };
 
-    this.simulateRadarSpeedData = function (options) {
-
+    this.radarEmulatorCommand = function (options) {
+        var data = options.data;
+        var socket = options.socket;
+        var socketid
+        if (socket) {
+            socketid = socket.id;
+        } else {
+            socketid = "radar"
+        }
+        debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+        switch (data.cmd) {
+            case "radarEmulatorSpeed":
+                //We are going to emulate a pitch coming in with roll out
+                //followed by a hit with slow down as it goes out if hit greater then 0
+                var inSpeed = parseFloat(data.data.in);
+                var outSpeed = parseFloat(data.data.out);
+                for (var i = 0; i < 5; i++){
+                    //
+                    sendData(getRadarSpeedPacket(inSpeed, 0.0, true, true));
+                    //self.emit('data', getRadarSpeedPacket(inSpeed, 0.0, true, true));
+                    inSpeed = inSpeed - 1.3;
+                }
+                for (var i = 0; i < 5; i++){
+                    //
+                    sendData(getRadarSpeedPacket(outSpeed, 0.0, false, false));
+                    //self.emit('data', getRadarSpeedPacket(outSpeed, 0.0, false, false));
+                    outSpeed = outSpeed - 1.3;
+                }
+                //need to send a zero at the end
+                sendData(getRadarSpeedPacket(0.0, 0.0, false, false));
+                break;
+        }
     };
 
+    //Speed1 and Speed 2 should always be floats
+    var getRadarSpeedPacket = function (Speed1, Speed2, Speed1DirectionIsIn, Speed2DirectionIsIn) {
+        /*
+        bE Format – All Speeds + Status
+            Byte # Description Value
+            1 Message Type 0x88
+            2 Unit Configuration (see detail below)
+            3 Unit Status (see detail below)
+            4 - 6 reserved bytes ASCII ‘0’ or space
+            7 Number of Speed Blocks Reported ASCII ‘1’ through ‘3’: One for live
+            speed + one for Peak Speed if
+            enabled + one for Hit Speed if
+            enabled.
+            Fifteen bytes for each Speed Block:
+            1 Speed ID ASCII ‘4’: Live Speed Block
+            ASCII ‘5’: Peak Speed Block
+            ASCII ‘6’: Hit Speed Block
+            2 Speed Block Status (see detail below)
+            3 Primary speed hundreds digit ASCII ‘0’ through ‘9’ or space
+            4 Primary speed tens digit ASCII ‘0’ through ‘9’ or space
+            5 Primary speed ones digit ASCII ‘0’ through ‘9’ or space
+            6 Primary speed tenths digit ASCII ‘0’ through ‘9’ or space
+            7 Secondary speed hundreds digit ASCII ‘0’ through ‘9’ or space
+            8 Secondary speed tens digit ASCII ‘0’ through ‘9’ or space
+            9 Secondary speed ones digit ASCII ‘0’ through ‘9’ or space
+            10 Secondary speed tenths digit ASCII ‘0’ through ‘9’ or space
+            11-15 reserved bytes ASCII Space (0x20)
+            Last Byte Carriage Return 0x0D
+            The bE Format can report multiple speeds in each message (live, peak, hit) as well as
+            configuration and status information. It always contains a live speed block. It also
+            contains a peak speed block if peak speeds are enabled (using the Peak Speed Enable
+            setting 13) and a hit speed block if hit speeds are enabled (using the Hit Speed Enable
+            setting 105).
 
+
+        Unit Configuration byte
+            Bit 7-6: always = 01 (to force displayable ASCII characters)
+            Bit 5: always = 0
+            Bit 4: unit resolution (0=ones, 1=tenths)
+            Bit 3-2: always = 00
+            Bit 1: peak speeds enabled (0=disabled, 1=enabled)
+            Bit 0: fork mode (0=off/normal, 1=fork mode enabled)
+        Unit Status byte
+            Bit 7-6: always = 01 (to force displayable ASCII characters)
+            Bit 5-0: always = 000100
+        Speed Block Status byte
+            Bit 7-6: always = 01 (to force displayable ASCII characters)
+            Bit 5-3: always = 000
+            Bit 2: secondary target direction (0=outbound, 1=inbound)
+            Bit 1: primary target direction (0=outbound, 1=inbound)
+            Bit 0: transmitter status (0=Hold, 1=Transmit)
+              
+            Buffer.from("885244202020333441205353532052525220525220523541205151512020512051205120203641202050205020502050205020200d", 'hex')
+        */
+        var myBuff = new Buffer(23); 
+        myBuff[0] = 0x88; //be Speed Data
+        myBuff[1] = 0x50; //01010000   Unit Config
+        myBuff[2] = 0x44; //01000100  Unit Status
+        myBuff[3] = 0x20; // Reserved Space
+        myBuff[4] = 0x20; // Reserved Space
+        myBuff[5] = 0x20; // Reserved Space
+        myBuff[6] = 0x31; //01010000  Number of Speed Blocks Reported Ascii 1 Just Live Speed
+        
+        myBuff[7] =  0x34; //Speed ID  Ascii "4" Live, "5" Peak, "6" Hit
+        myBuff[8] = 0x44; // Default 01000001  Speed Block Status  We change Bits 2 and 1 based on passed in direction
+        if (Speed1DirectionIsIn) {
+            myBuff[8] = (myBuff[8] | 0x02)
+        }
+        if (Speed2DirectionIsIn) {
+            myBuff[8] = (myBuff[8] | 0x04)
+        }
+        var strSpeed1 = Speed1.toFixed(1).toString();
+        if (strSpeed1.length < 5) {
+            for (var i = strSpeed1.length; i < 5; i++) {
+                strSpeed1 = "0" + strSpeed1;
+            } 
+        }
+        myBuff[9] = strSpeed1.charCodeAt(0); //Primary speed Hundreds
+        myBuff[10] = strSpeed1.charCodeAt(1); //Primary speed Tens
+        myBuff[11] = strSpeed1.charCodeAt(2); //Primary speed Ones
+        myBuff[12] = strSpeed1.charCodeAt(4); //Primary speed Tenths
+        var strSpeed2 = Speed2.toFixed(1).toString();
+        if (strSpeed2.length < 5) {
+            for (var i = strSpeed2.length; i < 5; i++) {
+                strSpeed2 = "0" + strSpeed2;
+            }
+        }
+        myBuff[13] = strSpeed2.charCodeAt(0); //Secondary speed Hundreds
+        myBuff[14] = strSpeed2.charCodeAt(1); //Secondary speed Tens
+        myBuff[15] = strSpeed2.charCodeAt(2); //Secondary speed Ones
+        myBuff[16] = strSpeed2.charCodeAt(4); //Secondary speed Tenths
+
+        myBuff[17] = 0x20; //Reserved Space
+        myBuff[18] = 0x20; //Reserved Space
+        myBuff[19] = 0x20; //Reserved Space
+        myBuff[20] = 0x20; //Reserved Space
+        myBuff[21] = 0x20; //Reserved Space
+        myBuff[22] = 0x0D; //Last Byte Carriage Return
+        return myBuff;
+    }
     var getRadarConfigResponsePacket = function (ConfigProperty) {
 
         var valueBuff;
@@ -242,50 +380,22 @@ var RadarEmulator = function (fakePortName, options) {
         return myBuf;
     }
 
-   
-   var recursiveTimerStartFakeRadar = function () {
-        console.log("Fake Radar Timer Execute!");
+    var sendData = function (data) {
+        //if (objOptions.parser) {
+        //    objOptions.parser(self, data);
+        //} else {
+            self.emit('data', data);  
+        //}
         
-        radarSerialPortFakeRadar.write(new Buffer("885244202020333441205353532052525220525220523541205151512020512051205120203641202050205020502050205020200d","hex"), function(err) {
-            if (err != undefined){
-                console.log('Error writing Fake Radar');
-            }
-        });
-
-        setTimeout(function(){
-            radarSerialPortFakeRadar.write(new Buffer("885244202020333441205353522052525220525220523541205151512020512051205120203641202050205020502050205020200d","hex"), function(err) {
-                if (err != undefined){
-                    console.log('Error writing Fake Radar');
-                }
-            });
-
-            setTimeout(function(){
-                radarSerialPortFakeRadar.write(new Buffer("885244202020333441205353512052525220525220523541205151512020512051205120203641202050205020502050205020200d","hex"), function(err) {
-                    if (err != undefined){
-                        console.log('Error writing Fake Radar');
-                    }
-                });
-                
-                 setTimeout(function(){
-                    radarSerialPortFakeRadar.write(new Buffer("885244202020333441205353502052525220525220523541205151512020512051205120203641202050205020502050205020200d","hex"), function(err) {
-                        if (err != undefined){
-                            console.log('Error writing Fake Radar');
-                        }
-                    });
-                    setTimeout(function(){
-                        radarSerialPortFakeRadar.write(new Buffer("885244202020333441202020202020202020202020203541202020202020202020202020203641202020202020202020202020200d","hex"), function(err) {
-                            if (err != undefined){
-                                console.log('Error writing Fake Radar');
-                            }
-                        });
-                    },500);
-                },500);
-
-            },500);
-        },500);
-
-        
-        setTimeout(recursiveTimerStartFakeRadar,60000);
+    }
+    var recursiveTimerStartFakeRadar = function () {
+        //console.log("Radar Emulator Timer Execute!");
+        if (objOptions.radarConfig["TransmiterControl"].value == 1) {
+            sendData(getRadarSpeedPacket(0.0, 0.0, false, false));
+        }
+        if (objOptions.portIsOpen) {
+            setTimeout(recursiveTimerStartFakeRadar, 1000);
+        }
     }
 };
 

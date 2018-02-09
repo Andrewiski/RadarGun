@@ -5,56 +5,56 @@
   "radarConfig": {
     "TargetDirection": {
       "id": 2,
-      "value": null,
+      "value": 1,
       "def": 1,
       "datatype": "int",
       "notes": "0 Outbound, 1 InBound, 2 Both"
     },
     "Range": {
       "id": 4,
-      "value": null,
+      "value": 7,
       "def": 7,
       "datatype": "int",
       "notes": "0(min) - 7(max)"
     },
     "LowSpeedThreshold": {
       "id": 7,
-      "value": null,
+      "value": 30,
       "def": 50,
       "datatype": "int",
       "notes": "0 - 900 MPH"
     },
     "HighSpeedThreshold": {
       "id": 11,
-      "value": null,
+      "value": 150,
       "def": 150,
       "datatype": "int",
       "notes": "0 - 900 MPH"
     },
     "AlarmSpeedThreshold": {
       "id": 12,
-      "value": null,
+      "value": 1500,
       "def": 1500,
       "datatype": "int",
       "notes": "0 - 1500 MPH Aux Pin Function"
     },
     "PeakSpeedEnable": {
       "id": 13,
-      "value": null,
+      "value": 0,
       "def": 1,
       "datatype": "int",
       "notes": "0 Disabled, 1 Enabled"
     },
     "AuxPinConfiguration": {
       "id": 16,
-      "value": null,
+      "value": 0,
       "def": 1,
       "datatype": "int",
       "notes": "0 = Radar Trigger, 1 = Off, 2 = SpeedAlarm, 3 = Doppler without Squeulch, 4 = Doopler with Sqeulch"
     },
     "CosignAngle1": {
       "id": 18,
-      "value": null,
+      "value": 0,
       "def": 0,
       "datatype": "int",
       "notes": "0-45 one degree increments"
@@ -68,28 +68,28 @@
     },
     "Units": {
       "id": 20,
-      "value": null,
+      "value": 0,
       "def": 0,
       "datatype": "int",
       "notes": "0 MPH, 1 km/h, 2 knots, 3 feet/sec, 4 meters/sec"
     },
     "UnitResolution": {
       "id": 21,
-      "value": null,
+      "value": 1,
       "def": 0,
       "datatype": "int",
       "notes": "0 Ones, 1 Tenths"
     },
     "LeadingZeroCharacter": {
       "id": 23,
-      "value": null,
+      "value": 1,
       "def": 1,
       "datatype": "int",
       "notes": "0 Zero, 1 Space, 2 None"
     },
     "SerialPortBaudRate": {
       "id": 29,
-      "value": null,
+      "value": 38400,
       "def": 9,
       "readOnly": true,
       "datatype": "int",
@@ -97,7 +97,7 @@
     },
     "MessageFormat": {
       "id": 30,
-      "value": null,
+      "value": 3,
       "def": 3,
       "readOnly": true,
       "datatype": "int",
@@ -105,7 +105,7 @@
     },
     "MessagePeriod": {
       "id": 31,
-      "value": null,
+      "value": 0,
       "def": 250,
       "datatype": "int",
       "notes": "0 - 10000  10Sec delay"
@@ -120,35 +120,35 @@
     },
     "TransmiterControl": {
       "id": 42,
-      "value": null,
+      "value": 1,
       "def": 1,
       "datatype": "int",
       "notes": "0 = Hold, 1 = Transmit"
     },
     "LiveTargetLock": {
       "id": 43,
-      "value": null,
+      "value": 0,
       "def": 0,
       "datatype": "int",
       "notes": "0 = Release, 1 = Lock"
     },
     "ForkMode": {
       "id": 47,
-      "value": null,
+      "value": 0,
       "def": 0,
       "datatype": "int",
       "notes": "0 Off, 1 On"
     },
     "RadarTriggerMode": {
       "id": 60,
-      "value": null,
+      "value": 0,
       "def": 2,
       "datatype": "int",
       "notes": "Aux Pin Function 0 Continuous, 1 Start - Stop, 2 Lock"
     },
     "ProductType": {
       "id": 79,
-      "value": null,
+      "value": "000",
       "def": "000",
       "readOnly": true,
       "datatype": "string",
@@ -156,7 +156,7 @@
     },
     "SoftwareVersion": {
       "id": 81,
-      "value": null,
+      "value": "0.0.0",
       "def": "0.0.0",
       "readOnly": true,
       "datatype": "string",
@@ -164,14 +164,14 @@
     },
     "AutoClearDelay": {
       "id": 88,
-      "value": null,
+      "value": 2,
       "def": 2,
       "datatype": "int",
       "notes": "0 -10 sec, 11 20 sec, 12 30 sec, 13 Off"
     },
     "MessageTermination": {
       "id": 101,
-      "value": null,
+      "value": 0,
       "def": 0,
       "readOnly": true,
       "datatype": "int",
@@ -179,35 +179,35 @@
     },
     "PeakMessageType": {
       "id": 102,
-      "value": null,
+      "value": 0,
       "def": 0,
       "datatype": "int",
       "notes": "0 Continuous, 1 Single"
     },
     "TargetType": {
       "id": 103,
-      "value": null,
+      "value": 0,
       "def": 0,
       "datatype": "int",
       "notes": "0 Baseball, 1 Carnival, 2 Car, 3 Tennis"
     },
     "FormatASpeed": {
       "id": 104,
-      "value": null,
+      "value": 0,
       "def": 1,
       "datatype": "int",
       "notes": "0 Last/Live, 1 Peak, 2 Hit"
     },
     "HitSpeedEnable": {
       "id": 105,
-      "value": null,
+      "value": 0,
       "def": 1,
       "datatype": "int",
       "notes": "0 Disabled, 1 Enabled"
     },
     "SpeedSensorAddress": {
       "id": 116,
-      "value": null,
+      "value": 2,
       "def": 2,
       "readOnly": true,
       "datatype": "int",

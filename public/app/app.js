@@ -37,8 +37,6 @@
        }])
    .run(['$templateCache', '$http', 'errorHandler',function ($templateCache, $http, errorHandler) {
 
-
-      
       $http.get('app/error-handler.html', { cache: $templateCache });
 
    }]);

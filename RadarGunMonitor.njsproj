@@ -46,6 +46,7 @@
     <Compile Include="modules\radarDatabase.js" />
     <Compile Include="modules\radarStalker2.js" />
     <Compile Include="public\app\app.js" />
+    <Compile Include="public\app\filters.js" />
     <Compile Include="public\app\radarMonitor.js" />
     <Compile Include="public\app\scoreboard\scoreboardController.js" />
     <Compile Include="public\app\scoreboard\scoreboardDirective.js" />

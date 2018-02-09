@@ -264,6 +264,20 @@ var RadarStalker2 = function (options){
     this.getRadarConfig = function(){
         return objOptions.radarConfig;
     }
+    this.radarEmulatorCommand = function (options) {
+        var data = options.data;
+        var socket = options.socket;
+        var socketid
+        if (socket) {
+            socketid = socket.id;
+        } else {
+            socketid = "radar"
+        }
+        debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+        if (objOptions.emulator == true) {
+            radarSerialPort.radarEmulatorCommand(options);
+        }
+    }
     this.radarConfigCommand = function (options) {
         var data = options.data;
         var socket = options.socket;
@@ -450,8 +464,8 @@ var RadarStalker2 = function (options){
         for (var i = 0; i < NumberOfSpeedBlocks; i++) {
             //Next 15 bytes is the speedBlock
 
-            var UnitSpeedBlockStatus = data.readUInt8(8 + Offset);
-            UnitSpeedBlockStatus = { primaryDirection: ((2 == (2 & UnitSpeedBlockStatus)) ? 'in' : 'out'), secondaryDirection: ((4 == (4 & UnitSpeedBlockStatus)) ? 'in' : 'out'), transmiterStatus: ((1 == (1 & UnitSpeedBlockStatus)) ? 'on' : 'off') }
+            var UnitSpeedBlockStatusByte = data.readUInt8(8 + Offset);
+            var UnitSpeedBlockStatus = { primaryDirection: ((2 == (2 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), secondaryDirection: ((4 == (4 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), transmiterStatus: ((1 == (1 & UnitSpeedBlockStatusByte)) ? 'on' : 'off') }
             var Speed = data.toString("ascii", 9 + Offset, 12 + Offset);  //data[9 + Offset] + data[10 + Offset] + data[11 + Offset];
             var Tenths = data.toString("ascii", 12 + Offset, 13 + Offset);
             if (Tenths != ' ') {
@@ -502,7 +516,7 @@ var RadarStalker2 = function (options){
             }
         }
         if (speedData.liveSpeed > objOptions.radarConfig.LowSpeedThreshold.value || speedData.peakSpeed > objOptions.radarConfig.LowSpeedThreshold.value) {
-            debug("Speed Data l:" + speedData.liveSpeed + " " + speedData.liveSpeedDirection + " l2:" + speedData.liveSpeed2 + " " + speedData.liveSpeed2Direction);
+            debug("Speed Data live:" + speedData.liveSpeed + " " + speedData.liveSpeedDirection + " live2:" + speedData.liveSpeed2 + " " + speedData.liveSpeed2Direction);
         } 
         //debug('data received ' + speedData.liveSpeed);
         // If PeakSpeed is Enabled then we can group packets with the exact same PeakSpeed as a baseball can't speed up only slow down.

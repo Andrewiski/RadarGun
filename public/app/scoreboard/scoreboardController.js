@@ -20,6 +20,9 @@
                    outSpeeds:[]
                },
                radarConfig: {},
+               radarEmulator: {
+                   data: { in: 57.4, out: 67.8 }
+               },
                batteryVoltage: -0.01,
                isradarCommandPending: false,
                showConfig: false,
@@ -30,15 +33,24 @@
                    alpha: null,
                    marker:null
                },
-               gpsPosition : null
+               gpsPosition: null,
+               isRadarEmulator: false,
+               isConnected:true
            }
           
-            $rootScope.$on('radarMonitor:Connected', function(event, data) {
+            $rootScope.$on('radarMonitor:reconnect', function(event, data) {
                 // use the data accordingly
-                console.log('radarMonitor:Connected detected');
-                
+                console.log('radarMonitor:reconnect detected');
+                $scope.commonData.isConnected = true;
+                $scope.$apply();
             });
 
+            $rootScope.$on('radarMonitor:reconnecting', function (event, data) {
+                // use the data accordingly
+                console.log('radarMonitor:reconnecting detected');
+                $scope.commonData.isConnected = false;
+                $scope.$apply();
+            });
             $rootScope.$on('radarMonitor:radarConfig', function(event, data) {
                 // use the data accordingly
                 
@@ -48,10 +60,17 @@
                 if ($scope.commonData.radarConfig.TransmiterControl.value == 0) {
                     $scope.showRadarOffModal();
                 }
+                if ($scope.commonData.radarConfig.ProductID.value == 'Radar Emulator') {
+                    $scope.commonData.isRadarEmulator = true;
+                }
                 $scope.$apply();
             });
 
             var radarOffModalInstance = null;
+
+            $scope.radarEmulatorSend = function () {
+                radarMonitor.sendRadarEmulatorCommand('radarEmulatorSpeed', $scope.commonData.radarEmulator.data); 
+            }
 
             $scope.showRadarOffModal = function () {
                 if (radarOffModalInstance == null) {
@@ -134,7 +153,7 @@
              
             $scope.radarCommand = function(cmd, data) {
                 $scope.commonData.isradarCommandPending = true;
-               radarMonitor.sendRadarCommand(cmd,data); 
+                radarMonitor.sendRadarConfigCommand(cmd,data); 
             }
 
             $scope.updateRadarConfig = function(){
