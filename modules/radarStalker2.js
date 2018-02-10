@@ -28,7 +28,9 @@ var RadarStalker2 = function (options){
     });
     
     var emptySpeedData = {
-        id:0,
+        id: 0,
+        firstDirection: null,
+        firstTime:null,
         inMaxSpeed: 0,
         inMinSpeed: 0,
         outMaxSpeed: 0,
@@ -39,7 +41,7 @@ var RadarStalker2 = function (options){
     }
 
     var commonData = {
-        currentRadarSpeedData: {},
+        currentRadarSpeedData: {}
         
     }
 
@@ -271,22 +273,33 @@ var RadarStalker2 = function (options){
         var mybuff = undefined;
 
         var radarConfigProperty = objOptions.radarConfig[data.cmd];
-        if (radarConfigProperty == undefined){
-        }else{
+        if (radarConfigProperty == undefined) {
+            //No Matching
+        } else if (radarConfigProperty.id == -1) {
+            //if its -1 this is not a radar Unit command but software config command
+            radarConfigProperty.value = data.data;
+            try{
+                nconf.save();
+                debug('Settings Saved');
+            } catch (ex) {
+                debug('setting save Error:' + ex);
+            }
+        } else {
             var myConfigVal;
-            switch(radarConfigProperty.datatype){
+            switch (radarConfigProperty.datatype) {
                 case 'int':
                     var numvalue = parseInt(data.data);
-                    if (!isNaN(numvalue) == true){
-                        if (numvalue < 256){
-                            myConfigVal  = new Buffer(1);
-                            myConfigVal.writeUInt8(numvalue,0);
-                        }else{
+                    if (!isNaN(numvalue) == true) {
+                        if (numvalue < 256) {
+                            myConfigVal = new Buffer(1);
+                            myConfigVal.writeUInt8(numvalue, 0);
+                        } else {
                             myConfigVal = new Buffer(2);
-                            myConfigVal.writeUInt16LE(numvalue,0);
+                            myConfigVal.writeUInt16LE(numvalue, 0);
                         }
                     }
                     break;
+
                 case 'hex':
                     debug('Error So far no Config accepts hex as setable value not implemented');
                     break;
@@ -294,15 +307,15 @@ var RadarStalker2 = function (options){
                     debug('Error So far no Config accepts String as setable value not implemented');
                     break;
             }
-            mybuff = getRadarPacket(radarConfigProperty.id,128,myConfigVal);
-            radarSerialPort.write(mybuff, function(err) {
-                if (err == undefined){
-                    radarSerialPort.drain(function(){
+            mybuff = getRadarPacket(radarConfigProperty.id, 128, myConfigVal);
+            radarSerialPort.write(mybuff, function (err) {
+                if (err == undefined) {
+                    radarSerialPort.drain(function () {
                         data.success = true;
                         data.error = '';
                         self.emit('radarCommand', data);
                     });
-                }else{
+                } else {
                     data.success = false;
                     data.error = err;
                     debug('Serial Port Write Error ' + err);
@@ -495,6 +508,7 @@ var RadarStalker2 = function (options){
                     break;
             }
         }
+       
         if (speedData.liveSpeed > objOptions.radarConfig.LowSpeedThreshold.value || speedData.peakSpeed > objOptions.radarConfig.LowSpeedThreshold.value) {
             debug("Speed Data l:" + speedData.liveSpeed + " " + speedData.liveSpeedDirection + " l2:" + speedData.liveSpeed2 + " " + speedData.liveSpeed2Direction);
         } 
@@ -505,8 +519,13 @@ var RadarStalker2 = function (options){
         //}
         
         if (speedData.liveSpeed >= objOptions.radarConfig.LowSpeedThreshold.value) {
+            if (commonData.currentRadarSpeedData.firstDirection == null) {
+                commonData.currentRadarSpeedData.firstDirection = speedData.liveSpeedDirection;
+                commonData.currentRadarSpeedData.firstTime = new Date().getTime();
+            }
             if (speedData.liveSpeedDirection == "in") {
                 //commonData.currentRadarSpeedData.inSpeeds.push(speedData.liveSpeed)
+                
                 if (commonData.currentRadarSpeedData.inMaxSpeed < speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.inMaxSpeed = speedData.liveSpeed;
                 }
@@ -514,6 +533,7 @@ var RadarStalker2 = function (options){
                     commonData.currentRadarSpeedData.inMinSpeed = speedData.liveSpeed;
                 }
             } else if (speedData.liveSpeedDirection == "out") {
+                
                 //commonData.currentRadarSpeedData.outSpeeds.push(speedData.liveSpeed)
                 if (commonData.currentRadarSpeedData.outMaxSpeed < speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.outMaxSpeed = speedData.liveSpeed;
@@ -524,6 +544,10 @@ var RadarStalker2 = function (options){
             }
         }
         if (speedData.liveSpeed2 >= objOptions.radarConfig.LowSpeedThreshold.value) {
+            if (commonData.currentRadarSpeedData.firstDirection == "") {
+                commonData.currentRadarSpeedData.firstDirection = speedData.liveSpeed2Direction;
+                commonData.currentRadarSpeedData.firstTime = new Date().getTime();
+            }
             if (speedData.liveSpeed2Direction == "in") {
                 //commonData.currentRadarSpeedData.inSpeeds.push(speedData.liveSpeed2)
                 if (commonData.currentRadarSpeedData.inMaxSpeed < speedData.liveSpeed2) {
@@ -542,25 +566,56 @@ var RadarStalker2 = function (options){
                 }
             }
         }
+        
+        if (objOptions.radarConfig.LiveGameMode.value == false) {
+            if (speedData.liveSpeed <= objOptions.radarConfig.LowSpeedThreshold.value
+                && speedData.liveSpeed2 <= objOptions.radarConfig.LowSpeedThreshold.value
+                && (
+                    commonData.currentRadarSpeedData.inMinSpeed >= objOptions.radarConfig.LowSpeedThreshold.value
+                    ||
+                    commonData.currentRadarSpeedData.outMinSpeed >= objOptions.radarConfig.LowSpeedThreshold.value
+                    )
+                ) {
 
-        if (speedData.liveSpeed <= objOptions.radarConfig.LowSpeedThreshold.value 
-            && speedData.liveSpeed2 <= objOptions.radarConfig.LowSpeedThreshold.value 
-            && (
-                commonData.currentRadarSpeedData.inMinSpeed >= objOptions.radarConfig.LowSpeedThreshold.value
-                ||
-                commonData.currentRadarSpeedData.outMinSpeed >= objOptions.radarConfig.LowSpeedThreshold.value
-                )            
-            ) {
-            
-            pitchCounter++;
-            //extend(commonData.currentRadarSpeedData, speedData);
-            commonData.currentRadarSpeedData.time = new Date();
-            commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
-            commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
-            commonData.currentRadarSpeedData.pitchCount = pitchCounter;
-            self.emit('radarSpeed', commonData.currentRadarSpeedData);
-            commonData.currentRadarSpeedData = extend({}, emptySpeedData);
-        } 
+                pitchCounter++;
+                //extend(commonData.currentRadarSpeedData, speedData);
+                commonData.currentRadarSpeedData.time = new Date();
+                commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
+                commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
+                commonData.currentRadarSpeedData.pitchCount = pitchCounter;
+                self.emit('radarSpeed', commonData.currentRadarSpeedData);
+                commonData.currentRadarSpeedData = extend({}, emptySpeedData);
+            }
+        } else {
+            //we change the logic in Live Game Mode so that only an in speed is used and add a delay before a new reading as 
+            // when behind the fence a screen fit reads the screen bounce etc
+            // we also tag out speeds with no in speed above hard coded 50 as throw down speed
+            var ms = new Date().getTime();
+            if (speedData.lastTime == null && speedData.liveSpeed <= objOptions.radarConfig.LowSpeedThreshold.value && speedData.liveSpeed2 <= objOptions.radarConfig.LowSpeedThreshold.value) {
+                speedData.lastTime == ms
+            }
+            if ((ms - speedData.lastTime) > 500) {
+                if (speedData.firstSpeedDirection == objOptions.radarConfig.LiveGameDirection.value
+                    && (
+                        commonData.currentRadarSpeedData.inMinSpeed >= objOptions.radarConfig.LowSpeedThreshold.value
+                        ||
+                        commonData.currentRadarSpeedData.outMinSpeed >= objOptions.radarConfig.LowSpeedThreshold.value
+                        )
+                    ) {
+
+                    pitchCounter++;
+                    //extend(commonData.currentRadarSpeedData, speedData);
+                    commonData.currentRadarSpeedData.time = new Date();
+                    commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
+                    commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
+                    commonData.currentRadarSpeedData.pitchCount = pitchCounter;
+                    self.emit('radarSpeed', commonData.currentRadarSpeedData);
+                    commonData.currentRadarSpeedData = extend({}, emptySpeedData);
+                } else {
+                    commonData.currentRadarSpeedData = extend({}, emptySpeedData);
+                }
+            }
+        }
         
         //if ( ((speedData.LiveSpeed > radarConfig.LowSpeedThreshold && speedData.PeakSpeed > radarConfig.LowSpeedThreshold) && (speedData.LiveSpeed != LastValidRadarSpeedData.LiveSpeed && speedData.PeakSpeed != LastValidRadarSpeedData.PeakSpeed && speedData.HitSpeed != LastValidRadarSpeedData.HitSpeed) ) || (LastValidRadarSpeedData.LiveSpeed > 0 && speedData.LiveSpeed == 0 && zeroCounter == zeroCounterLimit)){
         //    LastValidRadarSpeedData = speedData;
