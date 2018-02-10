@@ -87,3 +87,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.suo
+/.vs/RadarGunMonitor/v15
+/obj/Debug/RadarGunMonitor.njsproj.CoreCompileInputs.cache

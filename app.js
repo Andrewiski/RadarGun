@@ -35,22 +35,21 @@ var app = express();
 
 //app.set('views', path.join(__dirname, 'views'));
 //app.set('view engine', 'jade');
-
+  
 //app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/javascript/angular', express.static(path.join(__dirname, 'node_modules', 'angular')));
 app.use('/javascript/angular-route', express.static(path.join(__dirname, 'node_modules', 'angular-route')));
 app.use('/javascript/angular-animate', express.static(path.join(__dirname, 'node_modules', 'angular-animate')));
 app.use('/javascript/angular-ui-bootstrap', express.static(path.join(__dirname, 'node_modules', 'angular-ui-bootstrap', 'dist')));
-app.use('/javascript/angular-ui-router', express.static(path.join(__dirname, 'node_modules', 'angular-ui-router', 'release')));
+app.use('/javascript/angular-ui-router', express.static(path.join(__dirname, 'node_modules', '@uirouter', 'angularjs', 'release')));
 app.use('/javascript/angular-ui-switch', express.static(path.join(__dirname, 'node_modules', 'angular-ui-switch')));
 app.use('/javascript/angular-ui-utils', express.static(path.join(__dirname, 'node_modules', 'angular-ui-utils', 'modules')));
 app.use('/javascript/angular-sanitize', express.static(path.join(__dirname, 'node_modules', 'angular-sanitize')));
 app.use('/javascript/angular-ui-event', express.static(path.join(__dirname, 'node_modules', 'angular-ui-event', 'dist')));
 app.use('/javascript/angular-ui-date', express.static(path.join(__dirname, 'node_modules', 'angular-ui-date', 'dist')));
-app.use('/javascript/angular-ui-select', express.static(path.join(__dirname, 'node_modules', 'angular-ui-select')));
+app.use('/javascript/angular-ui-select', express.static(path.join(__dirname, 'node_modules', 'ui-select', 'dist')));
 app.use('/javascript/socket.io', express.static(path.join(__dirname, 'node_modules', 'socket.io', 'node_modules','socket.io-client')));
-
 app.use('/javascript/fontawesome', express.static(path.join(__dirname, 'node_modules', 'font-awesome')));
 app.use('/javascript/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
 app.use('/javascript/jquery', express.static(path.join(__dirname, 'node_modules', 'jquery', 'dist')));
@@ -99,13 +98,20 @@ var dataDisplay = new DataDisplay({});
 var io = require('socket.io')(server);
 io.on('connection', function(socket){
     debug('socket.io client Connection');
-    socket.on('radarCommand',function(data){
-        debug('radarCommand:' + data.cmd + ', value:' + data.data + ', client id:' +  socket.id );
+    socket.on('radarConfigCommand',function(data){
+        debug('radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client id:' +  socket.id );
         radarStalker2.radarConfigCommand({ data: data, socket: socket });
     });
+    socket.on('radarEmulatorCommand', function (data) {
+        debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
+        radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
+    });
+    
     if (socket.client.request.headers["origin"] != "ArduinoSocketIo") {
+        //send the current Config to the new client Connections
         io.emit('radarConfig', radarStalker2.getRadarConfig());
     }
+    //send the current Battery Voltage
     io.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
     console.log("gpsState", gpsMonitor.getGpsState())
 });
