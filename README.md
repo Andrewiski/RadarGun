@@ -107,44 +107,34 @@ The radar should be setup with direction to both,  hit and peak speeds disabled,
  sudo nano /boot/uEnv.txt
  ```
 
- find and add to the cape_enable=bone_capemgr.enable_partno=
-   BB-UART1,BB-UART2,BB-UART4  so we can use the three uarts.  UART2 (/dev/ttyO2) is on BBG main board where we connect the stalker radar via a rs232 level converter
+ Updates 2/11/2018 Ne UBoot Overlays there is no longer a capes file
+ 
+ UART2 (/dev/ttyO2) is on BBG main board where we connect the stalker radar via a rs232 level converter
 
    UART1 and UART4 are exposed on the seed studio groove v2 cape [https://www.seeedstudio.com/Grove-Base-Cape-for-Beaglebone-v2.0-p-2644.html].
-   I am using a GPS to give me location and Time data at UART1 (/dev/ttyO1)
-   I am currently not using UART4 but added it for future use sure as remote scoreboard control. (More to come on this idea)
+ I am using a GPS to give me location and Time data at UART1 (/dev/ttyO1)
+ I am currently not using UART4 but added it for future use sure as remote scoreboard control. (More to come on this idea)
 
-   We are using /dev/i2c-2 to control our adafruit I2C ledDisplays so we need BB-I2C2 as well
+ We are using /dev/i2c-2 to control our adafruit I2C ledDisplays so we need BB-I2C2 as well
 
-   We are using the ADC to measure batter voltage as well as I need battery voltage monitor for my portable unit etc so need analog pins. Nee BB-ADC
+  We are using the ADC to measure batter voltage as well as I need battery voltage monitor for my portable unit etc so need analog pins. Nee BB-ADC
 
 
  ```
        
-##Example v4.1.x
-#cape_disable=bone_capemgr.disable_partno=
-cape_enable=bone_capemgr.enable_partno=BB-UART1,BB-UART2,BB-UART4,BB-I2C2,BB-ADC
+##Example v4.4
+###Overide capes with eeprom
+uboot_overlay_addr0=/lib/firmware/BB-UART1-00A0.dtbo
+uboot_overlay_addr1=/lib/firmware/BB-UART2-00A0.dtbo
+uboot_overlay_addr2=/lib/firmware/BB-UART4-00A0.dtbo
+uboot_overlay_addr3=/lib/firmware/BB-I2C2-00A0.dtbo
+###
+###Additional custom capes
+uboot_overlay_addr4=/lib/firmware/BB-ADC-00A0.dtbo
 
  ```
 
- after a reboot you should now see the universal cape and Uarts loaded on boot
- ```
- cat /sys/devices/platform/bone_capemgr/slots
- ```
-results should show are UARTS I@C and ADC are loaded
-```
- 0: PF----  -1
- 1: PF----  -1
- 2: PF----  -1
- 3: PF----  -1
- 4: P-O-L-   2 Override Board Name,00A0,Override Manuf,BB-UART1
- 5: P-O-L-   0 Override Board Name,00A0,Override Manuf,BB-UART2
- 6: P-O-L-   1 Override Board Name,00A0,Override Manuf,BB-UART4
- 7: P-O-L-   3 Override Board Name,00A0,Override Manuf,BB-I2C2
- 8: P-O-L-   4 Override Board Name,00A0,Override Manuf,BB-ADC
 
- 
- ```
 
 
  ```
