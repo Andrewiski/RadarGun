@@ -14,35 +14,35 @@
     <link href="/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/javascript/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
     <link href="/javascript/fontawesome/css/font-awesome.min.css" rel="stylesheet" />
-    
+
 
     <script type="text/javascript">
 
-         //Chrome passes the error object (5th param) which we must use since it now truncates the Msg (1st param).
-    window.onerror = function (errorMsg, url, lineNumber, columnNumber, errorObject) {
-        var errMsg;
-        //check the errorObject as IE and FF don't pass it through (yet)
-        if (errorObject && errorObject !== undefined) {
+        //Chrome passes the error object (5th param) which we must use since it now truncates the Msg (1st param).
+        window.onerror = function (errorMsg, url, lineNumber, columnNumber, errorObject) {
+            var errMsg;
+            //check the errorObject as IE and FF don't pass it through (yet)
+            if (errorObject && errorObject !== undefined) {
                 errMsg = errorObject.message;
             }
             else {
                 errMsg = errorMsg;
             }
-        //alert('Error: ' + errMsg);
-        var $errelm = $("#errormsg");
-        if ($errelm.length > 0) {
-            try{
-                $errelm.append('<div>' + url + "<br/>" + lineNumber + "<br/>" + columnNumber + "<br/>" +  + decodeURI(errMsg) + '</div>');
+            //alert('Error: ' + errMsg);
+            var $errelm = $("#errormsg");
+            if ($errelm.length > 0) {
+                try {
+                    $errelm.append('<div>' + url + "<br/>" + lineNumber + "<br/>" + columnNumber + "<br/>" + + decodeURI(errMsg) + '</div>');
+                } catch (err) {
+
+                }
+            }
+            try {
+                console.log(errMsg);
             } catch (err) {
 
             }
         }
-        try {
-            console.log(errMsg);
-        } catch (err) {
-
-        }
-    }
     </script>
     <script src="/javascript/jquery/jquery.min.js"></script>
     <script src="/javascript/angular/angular.js"></script>
@@ -55,6 +55,7 @@
     <script src="/javascript/angular-ui-date/date.js"></script>
     <!--<script src="/javascript/angular-ui-utils/utils.js"></script>-->
     <script src="/javascript/angular-ui-select/select.min.js"></script>
+    <link href="/javascript/angular-ui-select/select.min.css" rel="stylesheet" />
     <link href="/javascript/angular-ui-switch/angular-ui-switch.min.css" rel="stylesheet" />
     <script src="/javascript/angular-ui-switch/angular-ui-switch.min.js"></script>
     <!--Served up by the socket.io service directly-->
@@ -62,6 +63,7 @@
 
     <!-- App Files -->
     <script src="/app/app.js"></script>
+    <script src="/app/filters.js"></script>
     <script src="/app/scoreboard/scoreboardController.js"></script>
     <script src="/app/scoreboard/scoreboardDirective.js"></script>
     <script src="/app/scoreboard/scoreboardViewController.js"></script>
@@ -76,13 +78,13 @@
         }
 
     </script>
- 
+
 </head>
 
 <body>
     <div id="errormsg"></div>
     <form name="radarmonitor" id="radarmonitor" class="sb">
-        <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2017</div>
+        <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2018</div>
         <div data-ng-cloak class="barsandmain">
             <div class="main">
                 <div data-ui-view>                    

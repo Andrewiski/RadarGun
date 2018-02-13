@@ -87,5 +87,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.suo
-/.vs/VSWorkspaceState.json
-/.vs/slnx.sqlite
+/.vs/RadarGunMonitor/v15
+/obj/Debug/RadarGunMonitor.njsproj.CoreCompileInputs.cache
