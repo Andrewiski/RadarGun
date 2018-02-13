@@ -87,3 +87,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.suo
+/.vs/VSWorkspaceState.json
+/.vs/slnx.sqlite
