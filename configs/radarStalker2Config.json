@@ -12,6 +12,35 @@
 
   },
   "radarConfig": {
+    "LiveGameMode": {
+      "id": -1,
+      "value": true,
+      "def": true,
+      "datatype": "bool",
+      "notes": "true LiveGame Mode On, false Live Game Mode Off"
+    },
+    "LiveGameDirection": {
+      "id": -1,
+      "value": "in",
+      "def": "in",
+      "datatype": "string",
+      "notes": "in Radar Behind Catcher, out Live Game Mode Off"
+    },
+    
+    "ThrowDownMode": {
+      "id": -1,
+      "value": true,
+      "def": true,
+      "datatype": "bool",
+      "notes": "true Throw Down Mode On, false Throw Down Mode Off"
+    },
+    "ThrowDownMinSpeed": {
+      "id": -1,
+      "value": true,
+      "def": true,
+      "datatype": "int",
+      "notes": "Min Throw Down Speed, Min Throw Down Speed Off"
+    },
     "TargetDirection": {
       "id": 2,
       "value": null,
@@ -40,7 +69,7 @@
       "datatype": "int",
       "notes": "0 - 900 MPH"
     },
-    "AlarmSpeedThreshold": {
+    "AlarmApeedThreshold": {
       "id": 12,
       "value": null,
       "def": 1500,
