@@ -189,14 +189,22 @@ var RadarEmulator = function (fakePortName, options) {
                     //self.emit('data', getRadarSpeedPacket(inSpeed, 0.0, true, true));
                     inSpeed = inSpeed - 1.3;
                 }
+                sendData(getRadarSpeedPacket(0.0, 0.0, false, false));
+                sendData(getRadarSpeedPacket(45.3, 45.0, true, true));
+                sendData(getRadarSpeedPacket(43.3, 43.0, true, true));
+                sendData(getRadarSpeedPacket(42.3, 44.0, true, true));
                 for (var i = 0; i < 5; i++){
                     //
                     sendData(getRadarSpeedPacket(outSpeed, 0.0, false, false));
                     //self.emit('data', getRadarSpeedPacket(outSpeed, 0.0, false, false));
                     outSpeed = outSpeed - 1.3;
                 }
-                //need to send a zero at the end
-                sendData(getRadarSpeedPacket(0.0, 0.0, false, false));
+
+                for (var i = 0; i < 10; i++) {
+                    //need to send a zero at the end
+                    sendData(getRadarSpeedPacket(0.0, 0.0, false, false));
+                }
+                
                 break;
         }
     };

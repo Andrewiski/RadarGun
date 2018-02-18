@@ -436,7 +436,10 @@ var RadarStalker2 = function (options){
 
     var pitchCounter = 0;
     var zeroCounter = 0;
-    var zeroCounterLimit = 10; //this is used below to send a zero to the client to zero out the scoreboard App after so many 0 values
+    //this is used below to send the speed to the client so we have to reach this value in low speed countes before we decide this is a valid speed
+    //we do this as sometimes the radar gives two pitches as the ball reading are a zero as it passes in front of a player of bounces etc.
+    var zeroCounterLimit = 5; 
+
     var ProcessRadarDataPacket_BESpeed = function (data) {
         var UnitConfig = data.readUInt8(1);
         UnitConfig = { resolution: (8 == (8 & UnitConfig)), peakSpeed: (2 == (2 & UnitConfig)), forkMode: (1 == (1 & UnitConfig)) };
@@ -571,16 +574,22 @@ var RadarStalker2 = function (options){
                 commonData.currentRadarSpeedData.outMinSpeed >= objOptions.radarConfig.LowSpeedThreshold.value
                 )            
             ) {
-            
-            pitchCounter++;
-            //extend(commonData.currentRadarSpeedData, speedData);
-            commonData.currentRadarSpeedData.time = new Date();
-            commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
-            commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
-            commonData.currentRadarSpeedData.pitchCount = pitchCounter;
-            self.emit('radarSpeed', commonData.currentRadarSpeedData);
-            commonData.lastSpeedDataTimestamp = new Date();
-            commonData.currentRadarSpeedData = extend({}, emptySpeedData);
+
+            if (zeroCounter < zeroCounterLimit) {
+                zeroCounter++;
+            } else {
+                zeroCounter = 0;
+                pitchCounter++;
+                //extend(commonData.currentRadarSpeedData, speedData);
+                commonData.currentRadarSpeedData.time = new Date();
+                commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
+                commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
+                commonData.currentRadarSpeedData.pitchCount = pitchCounter;
+                commonData.lastSpeedDataTimestamp = new Date();
+                self.emit('radarSpeed', commonData.currentRadarSpeedData);
+
+                commonData.currentRadarSpeedData = extend({}, emptySpeedData);
+            }
         } 
         
         //if ( ((speedData.LiveSpeed > radarConfig.LowSpeedThreshold && speedData.PeakSpeed > radarConfig.LowSpeedThreshold) && (speedData.LiveSpeed != LastValidRadarSpeedData.LiveSpeed && speedData.PeakSpeed != LastValidRadarSpeedData.PeakSpeed && speedData.HitSpeed != LastValidRadarSpeedData.HitSpeed) ) || (LastValidRadarSpeedData.LiveSpeed > 0 && speedData.LiveSpeed == 0 && zeroCounter == zeroCounterLimit)){
@@ -601,12 +610,16 @@ var RadarStalker2 = function (options){
         lastSpeedTimeOut = new Date(lastSpeedTimeOut.getTime() - (settings.radarSpeedTimeOutMinutes * 60 * 1000));
         if (commonData.lastSpeedDataTimestamp < lastSpeedTimeOut) {
             //send power down radar command
-            self.radarConfigCommand({
-                data: {
-                    cmd: "TransmiterControl",
-                    data: 0
-                }
-            })
+            if (objOptions.radarConfig.TransmiterControl.value != 0) {
+                
+                self.emit('radarTimeout', { lastSpeedDataTimestamp: commonData.lastSpeedDataTimestamp });
+                self.radarConfigCommand({
+                    data: {
+                        cmd: "TransmiterControl",
+                        data: 0
+                    }
+                })
+            }
         } else {
             radarSerialPort.write(getRadarPacket(81, 0, new Buffer([0])), function (err) {
                 if (err == undefined) {

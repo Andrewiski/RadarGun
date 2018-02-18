@@ -121,6 +121,9 @@ radarStalker2.on('radarSpeed', function(data){
     io.emit('radarSpeed', data);
     
 });
+radarStalker2.on('radarTimeout', function (data) {
+    io.emit('radarTimeout', data);
+});
 radarStalker2.on('radarCommand',function(data){
     io.emit('radarCommand', data);
 });

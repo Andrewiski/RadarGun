@@ -45,6 +45,13 @@
                 $scope.$apply();
             });
 
+            $rootScope.$on('radarMonitor:radarTimeout', function (event, data) {
+                // use the data accordingly
+                console.log('radarMonitor:radarTimeout detected');
+                $scope.commonData.lastSpeedDataTimestamp = data.lastSpeedDataTimestamp;
+                $scope.$apply();
+            });
+
             $rootScope.$on('radarMonitor:reconnecting', function (event, data) {
                 // use the data accordingly
                 console.log('radarMonitor:reconnecting detected');
