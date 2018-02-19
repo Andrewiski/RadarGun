@@ -135,7 +135,7 @@ body {
     }
     .sb .speedHistoryTableHead {
         width: 100%;
-        border: red solid 1px;
+        
     }
     .sb .speedHistoryTableBody {
         overflow-y: scroll;
