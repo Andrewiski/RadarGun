@@ -37,7 +37,8 @@ var RadarStalker2 = function (options){
         outMinSpeed: 0,
         inSpeeds:[],
         outSpeeds: [],
-        pitchCount: 0
+        pitchCount: 0,
+        radarRawData:[]
     }
 
     var commonData = {
@@ -47,8 +48,7 @@ var RadarStalker2 = function (options){
 
     extend(commonData.currentRadarSpeedData, emptySpeedData);
     
-    var settings = {};
-    extend(settings, objOptions);
+    
 
     var isBeagleBone = false
     var boneScript;
@@ -93,7 +93,9 @@ var RadarStalker2 = function (options){
             //See RadarDataParser Above to view Code that Parses raw Serial Data into Data Packets
 
             if (data != undefined && data.length > 0){
-            
+                if (objOptions.softwareConfig.logRawRadarPackets) {
+                    commonData.currentRadarSpeedData.radarRawData.push(data.toString('hex'));
+                }
                 switch(data.readUInt8(0)){
                     case 136: // 0x88 BE Speed Stream Packet
                        
@@ -263,6 +265,10 @@ var RadarStalker2 = function (options){
         };
     }
 
+    this.getSoftwareConfig = function () {
+        return objOptions.softwareConfig;
+    }
+
     this.getRadarConfig = function(){
         return objOptions.radarConfig;
     }
@@ -280,6 +286,39 @@ var RadarStalker2 = function (options){
             radarSerialPort.radarEmulatorCommand(options);
         }
     }
+    this.softwareConfigCommand = function (options) {
+        var data = options.data;
+        var socket = options.socket;
+        var socketid
+        if (socket) {
+            socketid = socket.id;
+        } else {
+            socketid = "radar"
+        }
+        debug('softwareConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+        
+        var softwareConfigProperty = objOptions.softwareConfig[data.cmd];
+        if (softwareConfigProperty == undefined) {
+            debug('softwareConfigCommand: Error Config Property Not Found' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+        } else
+        {
+            var myConfigVal;
+            switch (softwareConfigProperty.datatype) {
+                case 'int':
+                    var numvalue = parseInt(data.data);
+                    if (!isNaN(numvalue) == true) {
+                        softwareConfigProperty.value = numvalue;
+                    }
+                    break;
+                case 'string':
+                    //debug('Error So far no Config accepts String as setable value not implemented');
+                    softwareConfigProperty.value = data.data;
+                    break;
+            }
+            self.emit('softwareConfigProperty', data);
+        }
+    };
+
     this.radarConfigCommand = function (options) {
         var data = options.data;
         var socket = options.socket;
@@ -631,7 +670,7 @@ var RadarStalker2 = function (options){
         
 
         var lastSpeedTimeOut = new Date();
-        lastSpeedTimeOut = new Date(lastSpeedTimeOut.getTime() - (settings.radarSpeedTimeOutMinutes * 60 * 1000));
+        lastSpeedTimeOut = new Date(lastSpeedTimeOut.getTime() - (objOptions.softwareConfig.radarSpeedTimeOutMinutes * 60 * 1000));
         if (commonData.lastSpeedDataTimestamp < lastSpeedTimeOut) {
             //send power down radar command
             if (objOptions.radarConfig.TransmiterControl.value != 0) {
@@ -664,7 +703,7 @@ var RadarStalker2 = function (options){
         debug('starting radarStalker2 emulator on Fake Port ' + radarSerialPortName);
         
         radarSerialPort = new RadarEmulator(radarSerialPortName, {
-            baudrate: settings.baudrate,
+            baudrate: objOptions.baudrate,
             parser: radarPacketParser(1024),
             autoOpen: false
         });
@@ -673,7 +712,7 @@ var RadarStalker2 = function (options){
         debug('starting radarStalker2 on serial port ' + radarSerialPortName);
         //version 4 syntax
         radarSerialPort = new SerialPort(radarSerialPortName, {
-            baudrate: settings.baudrate,
+            baudrate: objOptions.baudrate,
             parser: radarPacketParser(1024),
             autoOpen:false}); 
         

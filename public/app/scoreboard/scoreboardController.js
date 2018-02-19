@@ -73,6 +73,14 @@
                 $scope.$apply();
             });
 
+            $rootScope.$on('radarMonitor:softwareConfig', function (event, data) {
+                // use the data accordingly
+
+                console.log('radarMonitor:softwareConfig detected');
+                console.debug(data);
+                $scope.commonData.softwareConfig = data;
+                $scope.$apply();
+            });
             var radarOffModalInstance = null;
 
             $scope.radarEmulatorSend = function () {
@@ -133,6 +141,14 @@
                 $scope.$apply();
             });
 
+            $rootScope.$on('radarMonitor:softwareConfigProperty', function (event, data) {
+                // use the data accordingly
+                console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
+                console.debug(data);
+                $scope.commonData.softwareConfig[data.Property].value = data.data;
+                $scope.$apply();
+            });
+
             $rootScope.$on('radarMonitor:radarSpeed', function(event, data) {
                 // use the data accordingly
                 //console.log('radarMonitor:radarSpeed detected scoreboardController l:' + data.liveSpeed + ' p:' + data.peakSpeed + ' h:' + data.hitSpeed);
@@ -140,8 +156,13 @@
                 $scope.commonData.radarSpeedData = data;
                 var datacopy = angular.copy(data);
                 //if (data.liveSpeed > 0 || data.peakSpeed > 0) {
-                    $scope.commonData.radarSpeedDataHistory.push(datacopy);
+                //$scope.commonData.radarSpeedDataHistory.push(datacopy);
+                //$scope.commonData.radarSpeedDataHistory.splice(0, 0, datacopy);
+                $scope.commonData.radarSpeedDataHistory.unshift(datacopy);
                 //}
+                if ($scope.commonData.radarSpeedDataHistory.length > $scope.commonData.softwareConfig.radarSpeedHistoryCount) {
+                    $scope.commonData.radarSpeedDataHistory.pop();
+                }
                 $scope.$apply();
             });
             

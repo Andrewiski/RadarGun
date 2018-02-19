@@ -1,46 +1,69 @@
 ﻿<div class="speedData">
-    <div class="speedsContainer">
-        <div class="speedBox">
-            <div class="speedLabel">In</div>
-            <div class="speedSecondary">{{commonData.radarSpeedData.inMinSpeed | numpading : 1 : 2}}</div>
-            <div class="speed">{{commonData.radarSpeedData.inMaxSpeed | numpading : 1: 2}}</div>
-        </div>
-        <div class="speedBox">
-            <div class="speedLabel">Out</div>
-            <div class="speedSecondary">{{commonData.radarSpeedData.outMinSpeed | numpading : 1 : 2}}</div>
-            <div class="speed">{{commonData.radarSpeedData.outMaxSpeed | numpading : 1 : 2}}</div>
+    <div class="speedsContainer row">
+        <div class="col-sm-12">
+            <div class="speedBox col-sm-5">
+                <div class="speedLabel">In</div>
+                <div class="speedSecondary">{{commonData.radarSpeedData.inMinSpeed | numpading : 1 : 2}}</div>
+                <div class="speed">{{commonData.radarSpeedData.inMaxSpeed | numpading : 1: 2}}</div>
+            </div>
+            <div class="speedBox col-sm-5">
+                <div class="speedLabel">Out</div>
+                <div class="speedSecondary">{{commonData.radarSpeedData.outMinSpeed | numpading : 1 : 2}}</div>
+                <div class="speed">{{commonData.radarSpeedData.outMaxSpeed | numpading : 1 : 2}}</div>
+            </div>
+            <div class="speedBox col-sm-2 ">
+                <table class="table table-striped speedHistoryTable table-fixed ">
+                    <thead class="speedHistoryTableHead">
+                        <tr><th>Time</th><th>In</th><th>Out</th></tr>
+                    </thead>
+                    <tbody class="speedHistoryTableBody">
+                        <tr ng-repeat="rsdItem in commonData.radarSpeedDataHistory">
+                            <td>{{rsdItem.time | date : 'hh:mm:ss'}}</td>
+                            <td>{{rsdItem.inMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
+                            <td>{{rsdItem.outMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <div>
-        <span ng-show="commonData.isConnected"><i class="fa fa-wifi"></i></span><span ng-hide="commonData.isConnected"><i class="fa fa-ban"></i></span>
-                                                                     <span>{{commonData.batteryVoltage.batteryVoltage | number : 2}}V&nbsp;<i class="fa fa-battery-full"></i></span>
-        <!--<i class="fa fa-battery-quarter"></i>
+    <div class="clear" />
+    <div class="row">
+        <div class="col-sm-12">
+            <span ng-show="commonData.isConnected"><i class="fa fa-wifi"></i></span><span ng-hide="commonData.isConnected"><i class="fa fa-ban"></i></span>
+            <span>{{commonData.batteryVoltage.batteryVoltage | number : 2}}V&nbsp;<i class="fa fa-battery-full"></i></span>
+            <!--<i class="fa fa-battery-quarter"></i>
         <i class="fa fa-battery-half"></i>
         <i class="fa fa-battery-three-quarters" aria-hidden="true"></i>
         <i class="fa fa-battery-empty" aria-hidden="true"></i>-->
-        <span>{{commonData.gpsPosition.lat}} / {{commonData.gpsPosition.lon}} </span>
+            <span>{{commonData.gpsPosition.lat}} / {{commonData.gpsPosition.lon}} </span>
+            <div style="float:right"><button ng-click="showConfig()" class="btn btn-primary">Config</button></div>
+        </div>
     </div>
-    <div style="float:right"><button ng-click="showConfig()" class="btn btn-primary">Config</button></div>
+
     <div class="radarEmulator" ng-show="commonData.isRadarEmulator">
-        
-            In:<input ng-model="commonData.radarEmulator.data.in" type="text" /> Out: <input ng-model="commonData.radarEmulator.data.out" type="text" /> <button class="btn btn-danger" ng-click="radarEmulatorSend()">Go</button>
+
+        In:<input ng-model="commonData.radarEmulator.data.in" type="text" /> Out: <input ng-model="commonData.radarEmulator.data.out" type="text" /> <button class="btn btn-danger" ng-click="radarEmulatorSend()">Go</button>
     </div>
-    <div>
+    <div class="clear" />
+    <div class="row">
         <h3>History</h3>
-        <div>
-            <table>
-                <thead>
+        <div class="col-sm-12">
+            <table class="table table-striped speedHistoryTable table-fixed">
+                <thead class="speedHistoryTableHead">
                     <tr><th>Time</th><th>Pitcher</th><th>Max In</th><th>Min In</th><th>Batter</th><th>Max Out</th><th>Max In</th></tr>
                 </thead>
-                <tr ng-repeat="rsdItem in commonData.radarSpeedDataHistory" class="speedHistory">
-                    <td>{{rsdItem.time | date : 'M/d/yy hh:mm:ss'}}</td>
-                    <td>{{rsdItem.pitcher}}</td>
-                    <td>{{rsdItem.inMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
-                    <td>{{rsdItem.inMinSpeed}}<i class="icon-large icon-down-arrow"></i></td>
-                    <td>{{rsdItem.batter}}</td>
-                    <td>{{rsdItem.outMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
-                    <td>{{rsdItem.outMinSpeed2}}<i class="icon-large icon-down-arrow"></i></td>
-                </tr>
+                <tbody class="speedHistoryTableBody">
+                    <tr ng-repeat="rsdItem in commonData.radarSpeedDataHistory">
+                        <td>{{rsdItem.time | date : 'M/d/yy hh:mm:ss'}}</td>
+                        <td>{{rsdItem.pitcher}}</td>
+                        <td>{{rsdItem.inMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
+                        <td>{{rsdItem.inMinSpeed}}<i class="icon-large icon-down-arrow"></i></td>
+                        <td>{{rsdItem.batter}}</td>
+                        <td>{{rsdItem.outMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
+                        <td>{{rsdItem.outMinSpeed2}}<i class="icon-large icon-down-arrow"></i></td>
+                    </tr>
+                </tbody>
             </table>
         </div>
 
@@ -52,18 +75,23 @@
             <div data-accordion data-close-others="oneAtATime">
                 <div data-accordion-group data-heading="Validation" data-is-open="true">
                     <!--PdfTemplateForm.$dirty: {{ radarmonitor.$dirty }} <br />
-                    PdfTemplateForm.$valid: {{ radarmonitor.$valid }}-->
-                    <a class="btn btn-sm btn-danger" ng-click="Save()" ng-show="PdfTemplateForm.$dirty">Unsaved</a>
+                PdfTemplateForm.$valid: {{ radarmonitor.$valid }}-->
+                    la
+                    <a class="btn btn-sm btn-danger" ng-click="Save()" ng-show="PdfTemplateForm.$dirty">
+                        .$
+                        Unsaved
+                    </a>
+                    .$
                     <a class="btn btn-sm btn-success" ng-show="!PdfTemplateForm.$dirty">Saved</a>
                     <img ng-hide="!isSaving" src="app/img/spinner.gif" ng-style='{"margin-left":"8px"}' width="24" height="24" alt="" />
                 </div>
                 <!--<div data-accordion-group data-heading="Actions" data-is-open="true">
-                    <div id="actions" >
-                        <a href="" ng-click="createTeam()">Create Team</a><br />
-                        <a href="" ng-click="createGame()">Create Game</a><br />
-                        <a href="" ng-click="exportGame()">Export Game</a><br /><br />
-                    </div>
-                </div>-->
+                <div id="actions" >
+                    <a href="" ng-click="createTeam()">Create Team</a><br />
+                    <a href="" ng-click="createGame()">Create Game</a><br />
+                    <a href="" ng-click="exportGame()">Export Game</a><br /><br />
+                </div>
+            </div>-->
                 <div data-accordion-group data-heading="Radar Settings" data-is-open="true">
 
                     <div class="wifidog">

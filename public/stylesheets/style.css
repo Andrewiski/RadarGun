@@ -76,30 +76,72 @@ body {
 
 
 
-.sb .speedHistory{
+
+.sb .speedHistoryTable {
+    height: 320px;
+} 
+.sb .speedHistoryTableBody {
     overflow-y: scroll;
-    min-height:250px;
-    min-width:250px;
+    height: 300px;
     
 }
+
+.table-fixed {
+    width: 100%;
+}
+.table-fixed tbody {
+    height: 200px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.table-fixed thead {
+    width: 100%;
+}
+
+.table-fixed thead, tbody, tr {
+    display: block;
+}
+
+.table-fixed tbody, thead
+{
+    float: left;
+}
+
 
 
     
 
 
  @media only screen and (min-width: 800px), only screen and (min-device-width: 800px) {
-     .sb .speedData{
+    .sb .speedsContainer{
+        height:350px;
+        
+    } 
+    .sb .speedData {
         min-width: 500px;
-     }
+    }
     .sb .speedBox {
         min-height: 150px;
         min-width: 150px;
+        height: 350px;
     }
     .sb .speedHistory {
         min-height:250px;
         min-width:500px;
     }
-
+    .sb .speedHistoryTable {
+        height: 320px;
+    }
+    .sb .speedHistoryTableHead {
+        width: 100%;
+        border: red solid 1px;
+    }
+    .sb .speedHistoryTableBody {
+        overflow-y: scroll;
+        height: 300px;
+        width:100%;
+    }
     .sb .speedBox .speedLabel{
         font-size: 30pt;
     }

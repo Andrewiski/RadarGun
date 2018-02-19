@@ -110,6 +110,7 @@ io.on('connection', function(socket){
     if (socket.client.request.headers["origin"] != "ArduinoSocketIo") {
         //send the current Config to the new client Connections
         io.emit('radarConfig', radarStalker2.getRadarConfig());
+        io.emit('softwareConfig', radarStalker2.getSoftwareConfig());
     }
     //send the current Battery Voltage
     io.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
@@ -128,10 +129,16 @@ radarStalker2.on('radarCommand',function(data){
     io.emit('radarCommand', data);
 });
 
+radarStalker2.on('softwareCommand', function (data) {
+    io.emit('softwareCommand', data);
+});
+
 radarStalker2.on('radarConfigProperty', function (data) {
     io.emit('radarConfigProperty', data);
 });
-
+radarStalker2.on('softwareConfigProperty', function (data) {
+    io.emit('softwareConfigProperty', data);
+});
 
 batteryMonitor.on("batteryVoltage",function(data){
     io.emit("batteryVoltage", data)

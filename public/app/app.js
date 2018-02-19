@@ -51,7 +51,7 @@
     $(document).ready(function () {
         try {
             //Now manually bootstrap angular
-            window.name = "NG_ENABLE_DEBUG_INFO!";
+            //window.name = "NG_ENABLE_DEBUG_INFO!";
             angular.bootstrap(document, ['scoreboardapp']);
             console.log('Angular bootstrap Complete');
         } catch (ex) {

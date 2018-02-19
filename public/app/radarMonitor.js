@@ -48,17 +48,27 @@
            });
 
            Service.socket.on('radarConfig', function(message) {
-                console.log('radarMonitorService received Config Data', message);
+                console.log('radarMonitorService received  Radar Config Data', message);
                 $rootScope.$emit("radarMonitor:radarConfig", message);
             });
            Service.socket.on('radarConfigProperty', function(message) {
-                console.log('radarMonitorService received Config Data Property', message);
+                console.log('radarMonitorService received Radar Config Data Property', message);
                 $rootScope.$emit("radarMonitor:radarConfigProperty", message);
             });
            Service.socket.on('radarCommand', function(message) {
                  console.log('radarMonitorService received radarCommand', message);
                 $rootScope.$emit("radarMonitor:radarCommand", message);
-            });
+           });
+
+           Service.socket.on('softwareConfig', function (message) {
+               console.log('radarMonitorService received software Config Data', message);
+               $rootScope.$emit("radarMonitor:softwareConfig", message);
+           });
+           Service.socket.on('softwareConfigProperty', function (message) {
+               console.log('radarMonitorService received software Config Data Property', message);
+               $rootScope.$emit("radarMonitor:softwareConfigProperty", message);
+           });
+           
 
            Service.socket.on('batteryVoltage',function(message){
                 console.log('radarMonitorService received batteryVoltage Data', message);
