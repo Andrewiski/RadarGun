@@ -47,6 +47,10 @@
                $rootScope.$emit("radarMonitor:radarTimeout", message);
            });
 
+           Service.socket.on('radarSpeedDataHistory', function(message) {
+               console.log('radarMonitorService received  Radar Speed Data History', message);
+               $rootScope.$emit("radarMonitor:radarSpeedDataHistory", message);
+           });
            Service.socket.on('radarConfig', function(message) {
                 console.log('radarMonitorService received  Radar Config Data', message);
                 $rootScope.$emit("radarMonitor:radarConfig", message);

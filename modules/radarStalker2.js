@@ -43,7 +43,8 @@ var RadarStalker2 = function (options){
 
     var commonData = {
         currentRadarSpeedData: {},
-        lastSpeedDataTimestamp: new Date()
+        lastSpeedDataTimestamp: new Date(),
+        radarSpeedDataHistory: []
     }
 
     extend(commonData.currentRadarSpeedData, emptySpeedData);
@@ -263,6 +264,10 @@ var RadarStalker2 = function (options){
 
 
         };
+    }
+
+    this.getradarSpeedDataHistory = function() {
+        return commonData.radarSpeedDataHistory;
     }
 
     this.getSoftwareConfig = function () {
@@ -649,6 +654,10 @@ var RadarStalker2 = function (options){
                 commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
                 commonData.currentRadarSpeedData.pitchCount = pitchCounter;
                 commonData.lastSpeedDataTimestamp = new Date();
+                commonData.radarSpeedDataHistory.unshift(extend({}, commonData.currentRadarSpeedData));
+                if (commonData.radarSpeedDataHistory.length > objOptions.softwareConfig.radarSpeedHistoryCount) {
+                    commonData.radarSpeedDataHistory.pop();
+                }
                 self.emit('radarSpeed', commonData.currentRadarSpeedData);
 
                 commonData.currentRadarSpeedData = extend({}, emptySpeedData);
@@ -684,6 +693,7 @@ var RadarStalker2 = function (options){
                 })
             }
         } else {
+            self.emit('radarTimeout', { lastSpeedDataTimestamp: commonData.lastSpeedDataTimestamp });
             radarSerialPort.write(getRadarPacket(81, 0, new Buffer([0])), function (err) {
                 if (err == undefined) {
                     debug('request Radar Software Version Keep Alive');

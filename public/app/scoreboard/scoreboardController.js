@@ -143,11 +143,20 @@
 
             $rootScope.$on('radarMonitor:softwareConfigProperty', function (event, data) {
                 // use the data accordingly
-                console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
-                console.debug(data);
+                //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
+                console.debug('radarMonitor:softwareConfigProperty detected ', data);
                 $scope.commonData.softwareConfig[data.Property].value = data.data;
                 $scope.$apply();
             });
+
+            $rootScope.$on('radarMonitor:radarSpeedDataHistory', function(event, data) {
+                // use the data accordingly
+                //console.log('radarMonitor:radarSpeedDataHistory detected ');
+                console.debug(data);
+                $scope.commonData.radarSpeedDataHistory = data;
+                $scope.$apply();
+            });
+            
 
             $rootScope.$on('radarMonitor:radarSpeed', function(event, data) {
                 // use the data accordingly
