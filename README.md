@@ -52,7 +52,7 @@ Download Setup the Radar Controller NPM Project
  git clone https://github.com/Andrewiski/RadarGun.git .
  # no sudo for this one
  npm install
- sudo DEBUG=app,dataDisplay,radar,adafruitLedBackck,gpsMonitor,radarEmulator npm start
+ sudo DEBUG=app,dataDisplay,radar,adafruitLedBackpack,gpsMonitor,radarEmulator npm start
 
 ```
 
