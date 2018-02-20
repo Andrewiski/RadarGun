@@ -117,7 +117,7 @@ io.on('connection', function(socket) {
     }
     //send the current Battery Voltage
     io.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
-    console.log("gpsState", gpsMonitor.getGpsState())
+    //console.log("gpsState", gpsMonitor.getGpsState())
 });
 
 radarStalker2.on('radarSpeed', function(data){
