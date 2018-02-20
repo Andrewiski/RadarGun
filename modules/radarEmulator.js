@@ -200,8 +200,8 @@ var RadarEmulator = function (fakePortName, options) {
                     outSpeed = outSpeed - 1.3;
                 }
 
-                for (var i = 0; i < 10; i++) {
-                    //need to send a zero at the end
+                for (var i = 0; i < 25; i++) {
+                    //need to send some zero at the end
                     sendData(getRadarSpeedPacket(0.0, 0.0, false, false));
                 }
                 

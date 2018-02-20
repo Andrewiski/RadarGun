@@ -11,12 +11,12 @@
                 <div class="speedSecondary">{{commonData.radarSpeedData.outMinSpeed | numpading : 1 : 2}}</div>
                 <div class="speed">{{commonData.radarSpeedData.outMaxSpeed | numpading : 1 : 2}}</div>
             </div>
-            <div class="speedBox col-sm-2 ">
-                <table class="table table-striped speedHistoryTable table-fixed ">
-                    <thead class="speedHistoryTableHead">
+            <div class="speedBox col-sm-2 " style="overflow-y:hidden">
+                <table class="table table-striped speedBoxHistoryTable">
+                    <thead>
                         <tr><th>Time</th><th>In</th><th>Out</th></tr>
                     </thead>
-                    <tbody class="speedHistoryTableBody">
+                    <tbody class="speedBoxHistoryTableBody">
                         <tr ng-repeat="rsdItem in commonData.radarSpeedDataHistory">
                             <td>{{rsdItem.time | date : 'hh:mm:ss'}}</td>
                             <td>{{rsdItem.inMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
@@ -50,19 +50,19 @@
     <div class="row">
         <h3>History</h3>
         <div class="col-sm-12">
-            <table class="table table-striped speedHistoryTable table-fixed">
-                <thead class="speedHistoryTableHead">
+            <table class="table table-striped speedHistoryTable">
+                <thead>
                     <tr><th>Time</th><th>Pitcher</th><th>Max In</th><th>Min In</th><th>Batter</th><th>Max Out</th><th>Max In</th></tr>
                 </thead>
-                <tbody class="speedHistoryTableBody">
+                <tbody>
                     <tr ng-repeat="rsdItem in commonData.radarSpeedDataHistory">
                         <td>{{rsdItem.time | date : 'M/d/yy hh:mm:ss'}}</td>
                         <td>{{rsdItem.pitcher}}</td>
-                        <td>{{rsdItem.inMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
-                        <td>{{rsdItem.inMinSpeed}}<i class="icon-large icon-down-arrow"></i></td>
+                        <td>{{rsdItem.inMaxSpeed}}</td>
+                        <td>{{rsdItem.inMinSpeed}}</td>
                         <td>{{rsdItem.batter}}</td>
-                        <td>{{rsdItem.outMaxSpeed}}<i class="icon-large icon-down-arrow"></i></td>
-                        <td>{{rsdItem.outMinSpeed2}}<i class="icon-large icon-down-arrow"></i></td>
+                        <td>{{rsdItem.outMaxSpeed}}</td>
+                        <td>{{rsdItem.outMinSpeed}}</td>
                     </tr>
                 </tbody>
             </table>

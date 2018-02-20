@@ -495,7 +495,7 @@ var RadarStalker2 = function (options){
     var zeroCounter = 0;
     //this is used below to send the speed to the client so we have to reach this value in low speed countes before we decide this is a valid speed
     //we do this as sometimes the radar gives two pitches as the ball reading are a zero as it passes in front of a player of bounces etc.
-    var zeroCounterLimit = 5; 
+    
 
     var ProcessRadarDataPacket_BESpeed = function (data) {
         var UnitConfig = data.readUInt8(1);
@@ -643,7 +643,7 @@ var RadarStalker2 = function (options){
                 )            
             ) {
 
-            if (zeroCounter < zeroCounterLimit) {
+            if (zeroCounter < objOptions.softwareConfig.zeroCounterLimit) {
                 zeroCounter++;
             } else {
                 zeroCounter = 0;

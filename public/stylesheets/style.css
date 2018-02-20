@@ -1,111 +1,110 @@
 
-html,
-body {
-  margin: 2px;
-  padding: 2px;
+    html,
+    body {
+      margin: 2px;
+      padding: 2px;
   
   
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
-  min-height:100%
-}
-#radarmonitor {
-  position: relative;
-  margin: 0 auto;
-  width: 100%;
-  /*@media @wide {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      min-height:100%
+    }
+    #radarmonitor {
+      position: relative;
+      margin: 0 auto;
+      width: 100%;
+      /*@media @wide {
         
-    }*/
-  /*@media @none {
-        display: none;
-    }*/
-  height: 100%;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-#radarmonitor_root {
-  height: 100%;
-}
+        }*/
+      /*@media @none {
+            display: none;
+        }*/
+      height: 100%;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    #radarmonitor_root {
+      height: 100%;
+    }
 
 
-.sb .header {
-  top: 0;
-  background-color:cornflowerblue;
-  color:white;
-}
-
-
-
+    .sb .header {
+      top: 0;
+      background-color:cornflowerblue;
+      color:white;
+    }
 
 
 
 
-.sb .speedBox{
-    display:inline-block;
-    border:solid 3px black;
-    min-height: 100px;
-    min-width: 100px;
+
+
+
+    .sb .speedBox{
+        display:inline-block;
+        border:solid 3px black;
+        min-height: 100px;
+        min-width: 100px;
     
-}
+    }
 
 
 
-.sb .speedBox .speedLabel{
-    color:black;
-    display:inline-block;
-    margin:2px;
-    width:45%;
-    font-size: 15pt;
-}
+    .sb .speedBox .speedLabel{
+        color:black;
+        display:inline-block;
+        margin:2px;
+        width:45%;
+        font-size: 15pt;
+    }
 
-.sb .speedBox .speedSecondary{
-    color:black;
-    display:inline-block;
-    margin:2px;
-    font-size: 15pt;
-}
-.sb .speedBox .speed{
-    color:black;
-    width:90%;
-    text-align:right;
-    vertical-align:top;
-    font-size:36pt;
-}
-
-
+    .sb .speedBox .speedSecondary{
+        color:black;
+        display:inline-block;
+        margin:2px;
+        font-size: 15pt;
+    }
+    .sb .speedBox .speed{
+        color:black;
+        width:90%;
+        text-align:right;
+        vertical-align:top;
+        font-size:36pt;
+    }
 
 
-.sb .speedHistoryTable {
+    .table-fixed {
+        width: 100%;
+    }
+
+    .table-fixed thead {
+        width: 100%;
+        
+    }
+
+    .table-fixed tbody {
+        overflow-y: scroll;
+        width: 100%;
+    }
+    .table-fixed tr {
+        width: 100%;
+    }
+    .table-fixed th {
+        
+    }
+    .table-fixed td {
+       
+    }
+.sb .speedBoxHistoryTable {
     height: 320px;
-} 
-.sb .speedHistoryTableBody {
-    overflow-y: scroll;
+    overflow-y: hidden;
+}
+
+.sb .speedBoxHistoryTableBody {
+    overflow-y: hidden;
     height: 300px;
-    
-}
-
-.table-fixed {
-    width: 100%;
-}
-.table-fixed tbody {
-    height: 200px;
-    overflow-y: auto;
-    width: 100%;
-}
-
-.table-fixed thead {
-    width: 100%;
-}
-
-.table-fixed thead, tbody, tr {
-    display: block;
-}
-
-.table-fixed tbody, thead
-{
-    float: left;
 }
 
 
@@ -130,7 +129,7 @@ body {
         min-height:250px;
         min-width:500px;
     }
-    .sb .speedHistoryTable {
+    /*.sb .speedHistoryTable {
         height: 320px;
     }
     .sb .speedHistoryTableHead {
@@ -141,7 +140,7 @@ body {
         overflow-y: scroll;
         height: 300px;
         width:100%;
-    }
+    }*/
     .sb .speedBox .speedLabel{
         font-size: 30pt;
     }

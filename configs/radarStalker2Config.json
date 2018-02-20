@@ -12,6 +12,7 @@
     "logRawRadarPackets": false,
     "radarSpeedTimeOutMinutes": 30,
     "radarSpeedHistoryCount": 20,
+    "zeroCounterLimit": 15,
     "LiveGameMode": {
       "id": -1,
       "value": true,
