@@ -21,6 +21,7 @@ var RadarStalker2 = require("./modules/radarStalker2.js");
 var BatteryMonitor = require("./modules/batteryMonitor.js");
 var GpsMonitor = require("./modules/gpsMonitor.js");
 var DataDisplay = require("./modules/dataDisplay.js");
+var RadarDatabase = require("./modules/radarDatabase.js");
 nconf.file('./configs/radarGunMonitorConfig.json');
 var configFileSettings = nconf.get();
 var defaultOptions = {
@@ -95,6 +96,13 @@ var radarStalker2 = new RadarStalker2({});
 var batteryMonitor = new BatteryMonitor({});
 var gpsMonitor = new GpsMonitor({});
 var dataDisplay = new DataDisplay({});
+
+var radarDatabase = null;
+
+if (objOptions.useSqlLite) {
+    radarDatabase = new RadarDatabase({});
+}
+
 var io = require('socket.io')(server);
 io.on('connection', function(socket) {
     debug('socket.io client Connection');

@@ -73,9 +73,13 @@
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
     <Content Include="configs\dataDisplayConfig.json" />
+    <Content Include="configs\radarDatabaseConfig.json" />
     <Content Include="configs\radarEmulatorConfig.json" />
     <Content Include="configs\radarGunMonitorConfig.json" />
     <Content Include="configs\radarStalker2Config.json" />
+    <Content Include="data\placeHolder.txt">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="dts\BB-BONE-RADAR-00A0.dts" />
     <Content Include="package.json" />
     <Content Include="public\app\html\partials\footer.html" />
@@ -103,6 +107,7 @@
     <Folder Include="modules\" />
     <Folder Include="configs\" />
     <Folder Include="dts\" />
+    <Folder Include="data\" />
     <Folder Include="wifidog\" />
     <Folder Include="service\" />
     <Folder Include="public\" />

@@ -1,9 +1,35 @@
-﻿//lets setup the database
+﻿//radarDatabase.js
+//This Module will create a sqlite Database file for Logging DB events
+//
+
+var util = require('util');
+var extend = require('extend');
+var EventEmitter = require('events').EventEmitter;
+var debug = require('debug')('radarDatabase');
+var nconf = require('nconf');
 var fs = require("fs");
-var file = "radarMonitor.db";
-var exists = fs.existsSync(file);
 var sqlite3 = require("sqlite3").verbose();
-var db = new sqlite3.Database(file);
+var RadarDatabase = function (options) {
+    var self = this;
+    var defaultOptions = {
+        dbfile:"./data/radarData.db"  
+    }
+    nconf.file('./configs/radarDatabaseConfig.json');
+    var configFileSettings = nconf.get();
+    var objOptions = extend({}, defaultOptions, configFileSettings, options);
+
+
+    // EventEmitters inherit a single event listener, see it in action
+    this.on('newListener', function (listener) {
+        debug('radarDatabase Event Listener: ' + listener);
+    });
+    var exists = fs.existsSync(objOptions.dbfile);
+    var db = new sqlite3.Database(objOptions.dbfile);
+
+    var commonData = {
+        radarSpeedRelatedData: {}
+    }
+
 
 
 var getInitTeamData = function(){
@@ -12,20 +38,20 @@ var getInitTeamData = function(){
             console.log(err);
         }
         var UnknownTeamID = row.TeamID
-        radarSpeedRelatedData.VisitorTeamID = UnknownTeamID;
-        radarSpeedRelatedData.HomeTeamID = UnknownTeamID;
+        commonData.radarSpeedRelatedData.VisitorTeamID = UnknownTeamID;
+        commonData.radarSpeedRelatedData.HomeTeamID = UnknownTeamID;
         db.each('select GameID from Game where name="Unknown Game"', function(err,row){
             if (err != undefined){
                 console.log(err);
             }
-            radarSpeedRelatedData.GameID = row.GameID;
+            commonData.radarSpeedRelatedData.GameID = row.GameID;
             db.each('select PlayerID from Player where FirstName = "Player 1" and LastName = "Player 1" and TeamID=' + UnknownTeamID , function(err,row){
                 if (err != undefined){
                     console.log(err);
                 }
-                radarSpeedRelatedData.HitterPlayerID = row.PlayerID;
-                radarSpeedRelatedData.PitcherPlayerID = row.PlayerID;
-                radarSpeedDataStmt = db.prepare("INSERT INTO RadarData (Time, GameID, PitcherPlayerID, HitterPlayerID, LiveSpeedDirection, LiveSpeed, LiveSpeed2Direction, LiveSpeed2, PeakSpeedDirection,  PeakSpeed, PeakSpeedDirection2, PeakSpeed2, HitSpeedDirection, HitSpeed, HitSpeedDirection2, HitSpeed2) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                commonData.radarSpeedRelatedData.HitterPlayerID = row.PlayerID;
+                commonData.radarSpeedRelatedData.PitcherPlayerID = row.PlayerID;
+                commonData.radarSpeedDataStmt = db.prepare("INSERT INTO RadarData (Time, GameID, PitcherPlayerID, HitterPlayerID, LiveSpeedDirection, LiveSpeed, LiveSpeed2Direction, LiveSpeed2, PeakSpeedDirection,  PeakSpeed, PeakSpeedDirection2, PeakSpeed2, HitSpeedDirection, HitSpeed, HitSpeedDirection2, HitSpeed2) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 DbInited = true;
             });
         });
@@ -59,4 +85,9 @@ var getInitTeamData = function(){
   }else{
 
       getInitTeamData()
-  }
+ }
+}
+// extend the EventEmitter class using our RadarMonitor class
+util.inherits(RadarDatabase, EventEmitter);
+
+module.exports = RadarDatabase;
