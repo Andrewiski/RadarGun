@@ -1,3 +1,6 @@
 {
-  "dbfile": "./data/radarData.db"
+  "deviceId": "",
+  "teamFile": "./data/teams.nosql",
+  "playerFile": "./data/player.nosql",
+  "radarDataFile": "./data/radarData.nosql"
 }

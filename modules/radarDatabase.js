@@ -8,84 +8,156 @@ var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('radarDatabase');
 var nconf = require('nconf');
 var fs = require("fs");
-var sqlite3 = require("sqlite3").verbose();
+var NoSQL = require('nosql');
+const uuidv4 = require('uuid/v4');
 var RadarDatabase = function (options) {
     var self = this;
     var defaultOptions = {
-        dbfile:"./data/radarData.db"  
+        deviceId: "",
+        teamFile: "./data/teams.nosql",
+        playerFile: "./data/player.nosql",
+        radarDataFile: "./data/radarData.nosql"
     }
     nconf.file('./configs/radarDatabaseConfig.json');
     var configFileSettings = nconf.get();
     var objOptions = extend({}, defaultOptions, configFileSettings, options);
 
+    if (objOptions.deviceId == undefined || objOptions.deviceId == '') {
+        objOptions.deviceId = uuidv4();
+        try {
+            configFileSettings.deviceId = objOptions.deviceId;
+            nconf.save();
+            debug('Settings Saved');
+        } catch (ex) {
+            debug('setting save Error:' + ex);
+        }
+    }
 
+    var teamDbExists = fs.existsSync(objOptions.teamFile);
+    var playerDbExists = fs.existsSync(objOptions.playerFile);
+    
+    
     // EventEmitters inherit a single event listener, see it in action
     this.on('newListener', function (listener) {
         debug('radarDatabase Event Listener: ' + listener);
     });
-    var exists = fs.existsSync(objOptions.dbfile);
-    var db = new sqlite3.Database(objOptions.dbfile);
 
-    var commonData = {
-        radarSpeedRelatedData: {}
-    }
+    
+    // db === Database instance <https://docs.totaljs.com/latest/en.html#api~Database>
+    var teamDb = NoSQL.load(objOptions.teamFile);
+    var playerDb = NoSQL.load(objOptions.playerFile);
+    //var radarDataDb = NoSQL.load(objOptions.radarDataFile);
 
 
 
-var getInitTeamData = function(){
-    db.each('select TeamID from Team where name="Unknown Team"', function(err,row){
-        if (err != undefined){
-            console.log(err);
-        }
-        var UnknownTeamID = row.TeamID
-        commonData.radarSpeedRelatedData.VisitorTeamID = UnknownTeamID;
-        commonData.radarSpeedRelatedData.HomeTeamID = UnknownTeamID;
-        db.each('select GameID from Game where name="Unknown Game"', function(err,row){
-            if (err != undefined){
-                console.log(err);
-            }
-            commonData.radarSpeedRelatedData.GameID = row.GameID;
-            db.each('select PlayerID from Player where FirstName = "Player 1" and LastName = "Player 1" and TeamID=' + UnknownTeamID , function(err,row){
-                if (err != undefined){
-                    console.log(err);
-                }
-                commonData.radarSpeedRelatedData.HitterPlayerID = row.PlayerID;
-                commonData.radarSpeedRelatedData.PitcherPlayerID = row.PlayerID;
-                commonData.radarSpeedDataStmt = db.prepare("INSERT INTO RadarData (Time, GameID, PitcherPlayerID, HitterPlayerID, LiveSpeedDirection, LiveSpeed, LiveSpeed2Direction, LiveSpeed2, PeakSpeedDirection,  PeakSpeed, PeakSpeedDirection2, PeakSpeed2, HitSpeedDirection, HitSpeed, HitSpeedDirection2, HitSpeed2) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                DbInited = true;
+    this.team_getAll = function (callback) {
+        teamDb.find().where("status",1).make(function (builder) {
+            builder.callback(function (err, response) {
+                debug('team_getAll ', response);
+                callback(err, response);
             });
         });
-      
-      });
-      
-}
-
- var DbInited = false;
-
-  if(!exists) {
-    db.serialize(function() {
-        db.run("CREATE TABLE Team (TeamID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, Name TEXT NOT NULL)");
-        db.run("CREATE TABLE Game (GameID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, Time TEXT NOT NULL, HomeTeamID INTEGER NOT NULL, VisitorTeamID INTEGER NOT NULL, Name TEXT NOT NULL)");
-        db.run("CREATE TABLE Player (PlayerID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, TeamID INTEGER NOT NULL, FirstName TEXT NOT NULL, LastName TEXT NOT NULL, PlayerNumber INTEGER NOT NULL)");
-        db.run("CREATE TABLE RadarData (RadarDataID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, Time TEXT NOT NULL, GameID INTEGER NOT NULL, PitcherPlayerID INTEGER NOT NULL, HitterPlayerID INTEGER NOT NULL, LiveSpeedDirection TEXT NOT NULL,  LiveSpeed NUMERIC NOT NULL, LiveSpeed2Direction TEXT NOT NULL,  LiveSpeed2 NUMERIC NOT NULL, PeakSpeedDirection TEXT NOT NULL,  PeakSpeed NUMERIC NOT NULL, PeakSpeedDirection2 TEXT NOT NULL,  PeakSpeed2 NUMERIC NOT NULL, HitSpeedDirection TEXT NOT NULL,  HitSpeed NUMERIC NOT NULL, HitSpeedDirection2 TEXT NOT NULL,  HitSpeed2 NUMERIC NOT NULL )");
-        db.run("INSERT INTO Team (Name) values (?)","Unknown Team");
-        db.get('select seq from sqlite_sequence where name="Team"', function(err,row){
-            db.run("INSERT INTO Game (Time, HomeTeamID, VisitorTeamID, Name) values (?,?,?,?)",new Date(2014,1,1,0,0,0,0),row.seq,row.seq,"Unknown Game");
-            var stmt = db.prepare("INSERT INTO Player (TeamID, FirstName, LastName, PlayerNumber) values (?,?,?,?)");
-            for (var i = 1; i < 13; i ++){
-                stmt.run(row.seq, "Player " + i, "Player " + i, i);
-            }
-            stmt.finalize();
-            getInitTeamData()    ;
             
-            
-                            
+    }
+
+    this.team_upsert = function (team, callback) {
+        if (!team.id) {
+            team.id = uuidv4();
+        }
+        teamDb.update(team, team).make(function (builder) {
+            //builder.between('age', 20, 30);
+            builder.callback(function (err, count) {
+                debug('team_upsert ', count);
+                callback(err, count);
+            });
+        });                                            
+    }
+
+    this.team_delete = function (team, callback) {
+        if (team.teamId) {
+            teamDb.modify({ status: 0 }, false).where('id', team.id).make(function (builder) {
+                //builder.between('age', 20, 30);
+                builder.callback(function (err, count) {
+                    debug('team_delete ', count);
+                    callback(err, count);
+                });
+            });
+        } else {
+            debug('team_delete no teamid');
+        }
+        
+        /*
+          nosql.remove().make(function(builder) {
+              // builder.first(); --> removes only one document
+              builder.where('age', '<', 15);
+              builder.callback(function(err, count) {
+                  console.log('removed documents:', count);
+              });
+          });
+        */
+    }
+
+    this.player_upsert = function (player, callback) {
+        if (!player.id) {
+            player.id = uuidv4();
+        }
+        playerDb.update(player, player).make(function (builder) {
+            builder.callback(function (err, count) {
+                debug('player_upsert ', count);
+                callback(err, count);
+            });
+        });  
+    }
+    this.player_getAll = function (callback) {
+        playerDb.find().where("status", 1).make(function (builder) {
+            builder.callback(function (err, response) {
+                debug('player_getAll ', response);
+                callback(err, response);
+            });
         });
-    });
-  }else{
+    }
+    this.player_delete = function (player, callback) {
+        if (player.playerId) {
+            playerDb.modify({ status: 0 }, false).where('id', player.playerId).make(function (builder) {
+                //builder.between('age', 20, 30);
+                builder.callback(function (err, count) {
+                    debug('player_delete ', count);
+                    callback(err, count);
+                });
+            });
+        } else {
+            debug('player_delete no playerid');
+        }
+    }
 
-      getInitTeamData()
- }
+    if (playerDbExists == false) {
+        self.player_upsert({
+            id: "00000000-0000-0000-0000-000000000000",
+            firstName: "Anonymous",
+            lastName: "Player",
+            status: 1
+        },
+        function (err, callback) {
+            debug("Anonymous Player Inserted");
+        });
+    }
+    if (teamDbExists == false) {
+        self.team_upsert({
+            id: "00000000-0000-0000-0000-000000000000",
+            status: 1,
+            name: "Anonymous Team",
+            players: [
+                {
+                    id: "00000000-0000-0000-0000-000000000000",
+                    firstName: "Anonymous",
+                    lastName: "Player"
+                }
+            ]
+        },
+        function (err, callback) {
+            debug("Anonymous Player Inserted");
+        });
+    }
 }
 // extend the EventEmitter class using our RadarMonitor class
 util.inherits(RadarDatabase, EventEmitter);

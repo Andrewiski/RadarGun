@@ -13,7 +13,8 @@
            'ui.bootstrap',
            'ui.bootstrap.modal',
            //'toggle-switch',
-            'ngSanitize'
+           'ngSanitize',
+           'ui.select'
        ])
        .config(['$stateProvider', '$anchorScrollProvider', '$urlRouterProvider', '$locationProvider', 'errorHandlerProvider', function ($stateProvider, $anchorScrollProvider, $urlRouterProvider, $locationProvider, errorHandlerProvider) {
           $anchorScrollProvider.disableAutoScrolling();

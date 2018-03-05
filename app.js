@@ -5,9 +5,6 @@
 
 var express = require('express');
 var extend = require('extend');
-var routes = require('./routes');
-var user = require('./routes/user');
-var team = require('./routes/team');
 var http = require('http');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -31,6 +28,13 @@ var defaultOptions = {
 var objOptions = extend({}, defaultOptions, configFileSettings);
 var app = express();
 // all environments
+
+var radarStalker2 = new RadarStalker2({});
+var batteryMonitor = new BatteryMonitor({});
+var gpsMonitor = new GpsMonitor({});
+var dataDisplay = new DataDisplay({});
+
+var radarDatabase = new RadarDatabase({});;
 
 
 
@@ -81,27 +85,45 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+var routes = express.Router();
+
+
+/* GET home page. */
+routes.get('/', function (req, res) {
+    req.sendfile(path.join(__dirname, 'public/index.htm'));
+});
+
+routes.get('/data/team', function (req, res) {
+    radarDatabase.team_getAll(function (err, response) {
+        if (err) {
+            res.json(500, {err:err})
+        } else {
+            res.json(response);
+        }
+    })
+    
+});
+
+routes.get('/data/player', function (req, res) {
+    radarDatabase.player_getAll(function (err, response) {
+        if (err) {
+            res.json(500, { err: err })
+        } else {
+            res.json(response);
+        }
+    })
+});
+
 app.use('/', routes);
-//app.get('/', routes.index);
-//app.get('/scoreboard', routes.index);
-//app.get('/users', user.list);
-//app.get('/teams', team.list);
+
 
 var server = http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
     debug('Express server listening on port ' + app.get('port'));
 }); 
 
-var radarStalker2 = new RadarStalker2({});
-var batteryMonitor = new BatteryMonitor({});
-var gpsMonitor = new GpsMonitor({});
-var dataDisplay = new DataDisplay({});
 
-var radarDatabase = null;
-
-if (objOptions.useSqlLite) {
-    radarDatabase = new RadarDatabase({});
-}
 
 var io = require('socket.io')(server);
 io.on('connection', function(socket) {

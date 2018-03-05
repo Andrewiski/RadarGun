@@ -5,7 +5,10 @@
     angular.module('scoreboardapp')
        .controller('scoreboardController', ['$rootScope', '$scope', '$uibModal', '$filter', '$log', 'radarMonitor', function ($rootScope, $scope, $uibModal, $filter, $log, radarMonitor) {
            $scope.commonData = {
-               teams:[{ TeamID: 1, Name: 'Marrons' }, { TeamID: 2, Name: 'PrimeTime' }],
+               teamList: [],
+               playerList: [],
+               player: undefined,
+               team:undefined,
                radarSpeedDataHistory:[],
                editRadarConfig: false,
                radarSpeedData: {
@@ -204,6 +207,46 @@
                 }
                 $scope.commonData.isradarCommandPending = false;
             }
+
+
+            $scope.playerShow = function () {
+                
+                $scope.commonData.showPlayer = !$scope.commonData.showPlayer;
+            }
+
+            $scope.playerShowDone = function() {
+                $scope.commonData.showPlayer = false;
+            }
+            $scope.playerEdit = function () {
+                $scope.commonData.showPlayerEdit = true;
+            }
+            $scope.playerEditCancel = function () {
+                $scope.commonData.showPlayerEdit = false;
+            }
+
+            $scope.playerEditSave = function () {
+                $scope.commonData.showPlayerEdit = false;
+            }
+
+            $scope.teamShow = function () {
+
+                $scope.commonData.showTeam = !$scope.commonData.showTeam;
+            }
+
+            $scope.teamShowDone = function() {
+                $scope.commonData.showPlayer = true;
+            }
+            $scope.teamEdit = function () {
+                $scope.commonData.showTeamEdit = true;
+            }
+            $scope.teamEditCancel = function () {
+                $scope.commonData.showTeamEdit = false;
+            }
+
+            $scope.teamEditSave = function () {
+                $scope.commonData.showTeamEdit = false;
+            }
+
             $scope.showConfig = function () {
                 $scope.commonData.showConfig = !$scope.commonData.showConfig;
             }

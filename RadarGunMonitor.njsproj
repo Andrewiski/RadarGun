@@ -82,8 +82,6 @@
     </Content>
     <Content Include="dts\BB-BONE-RADAR-00A0.dts" />
     <Content Include="package.json" />
-    <Content Include="public\app\html\partials\footer.html" />
-    <Content Include="public\app\html\partials\header.html" />
     <Content Include="public\app\error-handler.html" />
     <Content Include="public\app\img\ajax_loader_blue_350.gif" />
     <Content Include="public\app\img\spinner.gif" />
@@ -111,8 +109,6 @@
     <Folder Include="wifidog\" />
     <Folder Include="service\" />
     <Folder Include="public\" />
-    <Folder Include="public\app\html\" />
-    <Folder Include="public\app\html\partials\" />
     <Folder Include="public\app\img\" />
     <Folder Include="public\app\scoreboard\" />
     <Folder Include="public\fonts\" />

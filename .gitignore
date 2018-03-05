@@ -1,5 +1,7 @@
 # DataFile
-data/radarData.db
+data/teams.nosql
+data/player.nosql
+data/radarData.nosq"
 
 # Logs
 typings
