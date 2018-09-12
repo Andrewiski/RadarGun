@@ -12,6 +12,7 @@
     <Environment>DEBUG=app,radar,batteryMonitor,gpsMonitor,dataDisplay,adafruitLedBackpack
 </Environment>
     <LaunchUrl>http://localhost:12336</LaunchUrl>
+    <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
