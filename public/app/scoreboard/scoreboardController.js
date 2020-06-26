@@ -9,7 +9,8 @@
                playerList: [],
                player: undefined,
                team:undefined,
-               radarSpeedDataHistory:[],
+               radarSpeedDataHistory: [],
+               showRadarConfig : true,
                editRadarConfig: false,
                radarSpeedData: {
                    id: 0,
@@ -67,10 +68,10 @@
                 console.log('radarMonitor:radarConfig detected');
                 console.debug(data);
                 $scope.commonData.radarConfig = data;
-                if ($scope.commonData.radarConfig.TransmiterControl.value == 0) {
+                if ($scope.commonData.radarConfig.TransmiterControl.value === 0) {
                     $scope.showRadarOffModal();
                 }
-                if ($scope.commonData.radarConfig.ProductID.value == 'Radar Emulator') {
+                if ($scope.commonData.radarConfig.ProductID.value === 'Radar Emulator') {
                     $scope.commonData.isRadarEmulator = true;
                 }
                 $scope.$apply();
@@ -98,7 +99,7 @@
                         controller: function ($scope) {
                             $scope.turnRadarOn = function () {
                                 $scope.$close({ turnOn: true });
-                            }
+                            };
                         },
                         controllerAs: '$ctrl',
 
@@ -198,9 +199,9 @@
 
             $scope.updateRadarConfig = function(){
                 $scope.commonData.isradarCommandPending = true;
-                for (var key in $scope.radarConfig){
-                    var radarConfigProperty = $scope.radarConfig[key];
-                    if (radarConfigProperty.isDirty == true){
+                for (var key in $scope.commonData.radarConfig){
+                    var radarConfigProperty = $scope.commonData.radarConfig[key];
+                    if (radarConfigProperty.isDirty === true){
                         radarConfigProperty.isDirty = false;
                         $scope.radarCommand(key,radarConfigProperty.value);
                     }
@@ -254,7 +255,7 @@
             $rootScope.$on('radarMonitor:gpsPosition', function (event, data) {
                 $scope.commonData.gpsPosition = data;
                 
-                if (googleMapInited == true && $scope.common.googleMapInited == false) {
+                if (googleMapInited === true && $scope.common.googleMapInited === false) {
                     $scope.commonData.googleMap.alpha = 0.4;
                     $scope.commonData.googleMap.state = { lat: data.lat, lng: data.lon };
 

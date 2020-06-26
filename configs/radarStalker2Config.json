@@ -3,8 +3,8 @@
   "portName": "/dev/ttyO2",
   "packetParserBufferSize": 1024,
   "win32": {
-    "portName": "COM7",
-    "emulator": true
+    "portName": "COM1",
+    "emulator": false
   },
   "baudrate": 115200,
 
