@@ -3,6 +3,9 @@ data/teams.nosql
 data/player.nosql
 data/radarData.nosq"
 
+obj/*
+bin/*
+
 # Logs
 typings
 logs
