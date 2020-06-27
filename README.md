@@ -91,7 +91,7 @@ git pull
 the sample config files expect the Stalker Pro 2 OEM Radar unit to be attached to Uart2. I chose that uart as its polulated to a grove connector on the Beaglebone Green so easy to access.
 I use a simple 4 wire male rs232 signal converter to get the correct 3.3v ttl signals.
 
-The radar should be setup with direction to both,  hit and peak speeds disabled, no message delay, baud rate of 115200, and in be2 format. This application does allow for the limited
+The radar should be setup with direction to both,  hit and peak speeds disabled, no message delay, baud rate of 115200, and in be format. This application does allow for the limited
  config of setting via the web interface but port speed is not one of them. I susgest using the scoreboard app that comes with the OEM unit for inital config.  
  Note that with message delay set to none the data stream can over whelm the scoreboard app so I suggest do a soft off on the transmiter called a hold before attemping to change settings.
 
