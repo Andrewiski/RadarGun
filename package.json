@@ -27,7 +27,7 @@
   "description": "Digital Example BeagleBone based Radar Gun ",
   "main": "app.js",
   "engines": {
-    "node": ">= 12.0.0"
+    "node": ">= 10.0.0"
   },
   "author": {
     "name": "adevries",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@uirouter/angularjs": "^1.0.15",
-    "angular": "^1.6.9",
+    "angular": "^1.8",
     "angular-animate": "^1.6.9",
     "angular-google-maps": "^2.4.1",
     "angular-route": "^1.6.9",
@@ -46,7 +46,6 @@
     "angular-ui-switch": "^0.1.1",
     "angular-ui-utils": "^0.1.1",
     "body-parser": "^1.18.2",
-    "bonescript": ">=0.7.1",
     "bootstrap": "^3.3.7",
     "child_process2": "^2.0.1",
     "cookie-parser": "^1.4.0",
@@ -61,7 +60,7 @@
     "morgan": "^1.9.0",
     "nconf": "0.10.0",
     "nosql": "^6.1.0",
-    "serialport": "^7.1.4",
+    "serialport": "^7.1.5",
     "serve-favicon": "^2.4.5",
     "socket.io": ">=2.2.0",
     "socket.io-client": ">=2.2.0",

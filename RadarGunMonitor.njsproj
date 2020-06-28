@@ -71,6 +71,9 @@
     <Compile Include="wifidog\socket_bk.js" />
     <Compile Include="wifidog\wifi.js" />
     <Compile Include="wifidog\wifidog.js" />
+    <Content Include=".gitattributes" />
+    <Content Include=".gitignore" />
+    <Content Include="configs\Andy Configure Pro II Speed Sensor 232 2.0.1.cfg" />
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
     <Content Include="configs\dataDisplayConfig.json" />

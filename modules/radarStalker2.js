@@ -109,7 +109,7 @@ var RadarStalker2 = function (options){
                     var radarConfigProperty = objOptions.radarConfig[key];
                     if (radarConfigProperty.value === undefined){ 
                         foundone = true;
-                        mybuff = getRadarPacket(radarConfigProperty.id, 0, new Buffer.alloc(1));
+                        mybuff = getRadarPacket(radarConfigProperty.id, 0, new Buffer([0])); // new Buffer.alloc(1));
                         radarSerialPort.write(mybuff, function(err) {
                             if (err === undefined){
                                 configRequestPending = true;

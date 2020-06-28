@@ -31,7 +31,7 @@ class RadarPacketParser extends Transform {
             //We Are going to blow are max buffer size as something has gone wrong so discard saved buffer and start over
             console.log('RadarPacketParser over our bufferSize discarding partial packet buffer');
             this.position = 0;
-            
+            cb();
             return;
         } else {
             //Take what ever was pending in our buffer and append the incomming data so we can use it for processing
@@ -140,7 +140,8 @@ class RadarPacketParser extends Transform {
     }
 
     _flush(cb) {
-        this.push(this.buffer.slice(0, this.position));
+        //this.push(this.buffer.slice(0, this.position));
+        this.position = 0;
         this.buffer = Buffer.alloc(this.length);
         cb();
     }
