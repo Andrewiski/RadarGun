@@ -1,5 +1,5 @@
 const { Transform } = require('stream');
-
+var debug = require('debug')('radarPacketParser');
 /**
  * Emit data every number of bytes
  * @extends Transform
