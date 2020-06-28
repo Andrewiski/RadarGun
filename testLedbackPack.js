@@ -14,7 +14,7 @@ try {
     //    console.log('dogtag = ' + x.dogtag);
     //    console.log('os = ', x.os);
     //});
-    AdafruitLedBackpack = require('./../modules/AdafruitLedBackpack.js');
+    AdafruitLedBackpack = require('./modules/AdafruitLedBackpack.js');
     adafruitLedBackpack = new AdafruitLedBackpack();
     debug('attempting adafruitLedBackpack init');
     adafruitLedBackpack.Initialize({ I2CAddress: 0x70, I2CDevice: '/dev/i2c-2' }, function (err) {
