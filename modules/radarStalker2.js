@@ -107,7 +107,7 @@ var RadarStalker2 = function (options){
                 var foundone = false;
                 for(var key in objOptions.radarConfig){
                     var radarConfigProperty = objOptions.radarConfig[key];
-                    if (radarConfigProperty.value === undefined){ 
+                    if (radarConfigProperty.value === undefined || radarConfigProperty.value === null ){ 
                         foundone = true;
                         mybuff = getRadarPacket(radarConfigProperty.id, 0, new Buffer([0])); // new Buffer.alloc(1));
                         radarSerialPort.write(mybuff, function(err) {
@@ -417,7 +417,7 @@ var RadarStalker2 = function (options){
 
     var serialPacketCount = 0;
     var radarConfigGetComplete = false;
-    
+    var configRequestPending = false;
 
     var ProcessRadarDataPacket_Config = function (data) {
         if (data.readUInt8(1) == 1) { // make sure this packet is for us We are always ID 1
@@ -463,8 +463,10 @@ var RadarStalker2 = function (options){
                 if (ConfigProperty.value !== value) {
                     ConfigProperty.value = value;
                     updateRadarConfigProperty = true;
+                    debug("radarConfigProperty received ", ConfigPropertyName, value)
                 }
                 if (updateRadarConfigProperty == true) {
+                    //raise the event to app.js so it can emit it via socket.io to the browser
                     var cdp = { Property: ConfigPropertyName, data: value };
                     self.emit('radarConfigProperty', cdp);
                 }
@@ -694,8 +696,6 @@ var RadarStalker2 = function (options){
         
         setTimeout(recursiveTimerStart,60000);
     };
-
-   
 
     var radarSerialPort = null;
     if (objOptions.emulator == true) {
