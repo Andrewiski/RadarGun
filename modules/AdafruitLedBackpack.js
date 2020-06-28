@@ -30,7 +30,7 @@ var adafruitLedBackpack = function () {
     var HT16K33_BLINK_HALFHZ = 3;
     var HT16K33_CMD_BRIGHTNESS = 0xE0;
     var HT16K33_CMD_SYSTEM = 0x20;
-    var buffer = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var buffer = Buffer.alloc(16); // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     var digits = [
         0x3F, //0
         0x06, //1
@@ -100,7 +100,8 @@ var adafruitLedBackpack = function () {
                                                 } else {
                                                     debug('Brightness set to high ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
 
-                                                    i2cdevice.writeI2cBlock(objOptions.I2CAddress, 0x00, 10, Buffer.alloc(10, [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), function (err) {
+                                                    //i2cdevice.writeI2cBlock(objOptions.I2CAddress, 0x00, 10, Buffer.alloc(10, [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), function (err) {
+                                                    i2cdevice.writeI2cBlock(objOptions.I2CAddress, 0x00, 16, Buffer.alloc(16), function (err) {
                                                         if (err) {
                                                             debug('Error in init clear ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                                                         } else {
@@ -146,20 +147,24 @@ var adafruitLedBackpack = function () {
 
     function setBufferRow(row, value) {
         debug('setBufferRow ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, row, value);
-        buffer[row * 2] = value & 0xFF;
-        buffer[row * 2 + 1] = 0x00; //(value >> 8);
+        //buffer[row * 2] = value & 0xFF;
+        //buffer[row * 2 + 1] = 0x00; //(value >> 8);
+
+        buffer.writeUInt8(value & 0xFF, row * 2);
+        buffer.writeUInt8(0x00, row * 2 + 1);
         
     }
     function getBufferRow(row) {
         
-        return buffer[row * 2];
-
+        //return buffer[row * 2];
+        return buffer.readUInt8(row * 2);
     }
 
     self.clear = function (Callback, callbackData) {
         debug('clear ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
         for (var i = 0; i < 16; i++) {
-            buffer[i] = 0;
+            //buffer[i] = 0;
+            buffer.writeUInt8(0x00, i);
         }
         self.writeDisplay(Callback);
     }
@@ -210,8 +215,9 @@ var adafruitLedBackpack = function () {
     //sends the LSB first. The device wants the MSB first. 
     function WriteData(Register, ByteArray, Callback, callbackData) {
         if (i2cdevice && isInited) {
-            debug('WriteData ', Register)
-            i2cdevice.writeI2cBlock(objOptions.I2CAddress, Register, ByteArray.length, Buffer.alloc(ByteArray.length, ByteArray), function (err) {
+            debug('WriteData ', Register);
+            
+            i2cdevice.writeI2cBlock(objOptions.I2CAddress, Register, ByteArray.length, ByteArray, function (err) {
                 if (Callback) {
                     Callback(err, callbackData);
                 }
