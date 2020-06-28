@@ -15,10 +15,10 @@ var adafruitLedBackpack = function () {
     var self = this;
     var defaultOptions = {
         I2CAddress: "0x70", //the i2c address of the LedBackpack
-        I2CDevice: '/dev/i2c-2'
+        I2CDevice: '1'
     }
     if (process.platform != 'win32') {
-        i2c = require('i2c');
+        i2c = require('i2c-bus');
     }
     var objOptions = {};
     var isInited = false;
@@ -65,8 +65,7 @@ var adafruitLedBackpack = function () {
         }
         console.log('I2CAddress set to ' + objOptions.I2CAddress);
         if (process.platform != 'win32') {
-            i2cdevice = new i2c(objOptions.I2CAddress, { I2CDevice: objOptions.I2CDevice, debug: false });
-            i2cdevice.open(objOptions.I2CDevice,
+            i2cdevice = i2c.open(objOptions.I2CDevice,
                 function (err, port) {
 
                     if (err) {
@@ -78,7 +77,7 @@ var adafruitLedBackpack = function () {
                     } else {
                         // Turn on the LED Ocillator
                         //i2cdevice.setAddress(objOptions.I2CAddress);
-                        i2cdevice.writeBytes(HT16K33_CMD_SYSTEM | HT16K33_BLINK_DISPLAYON, [0x00],
+                        i2cdevice.writeByte(objOptions.I2CAddress, HT16K33_CMD_SYSTEM | HT16K33_BLINK_DISPLAYON, [0x00],
                             function (err) {
                                 if (err) {
                                     debug('Error in init DisplayOn %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
@@ -87,7 +86,7 @@ var adafruitLedBackpack = function () {
                                     }
                                 } else {
                                     debug('ocillator enabled ' + objOptions.I2CDevice + '/' + +objOptions.I2CAddress);
-                                    i2cdevice.writeBytes(HT16K33_BLINK_CMD | 0x01, [0x00], function (err) {
+                                    i2cdevice.writeByte(objOptions.I2CAddress, HT16K33_BLINK_CMD | 0x01, [0x00], function (err) {
                                         if (err) {
                                             debug('Error in init setBlinkRate %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                                             if (Callback) {
@@ -95,12 +94,12 @@ var adafruitLedBackpack = function () {
                                             }
                                         } else {
                                             debug('display enabled ' + objOptions.I2CDevice + '/' + +objOptions.I2CAddress);
-                                            i2cdevice.writeBytes(HT16K33_CMD_BRIGHTNESS | 15, [0x00], function (err) {
+                                            i2cdevice.writeByte(objOptions.I2CAddress, HT16K33_CMD_BRIGHTNESS | 15, [0x00], function (err) {
                                                 if (err) {
                                                     debug('Error in init setBrightness %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                                                 } else {
                                                     debug('Brightness set to high ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
-                                                    i2cdevice.writeBytes([0x00], [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], function (err) {
+                                                    i2cdevice.writeByte(objOptions.I2CAddress, [0x00], [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], function (err) {
                                                         if (err) {
                                                             debug('Error in init clear ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                                                         } else {
@@ -187,7 +186,7 @@ var adafruitLedBackpack = function () {
 
     function ReadData(Register, Bytes, Callback, callbackData) {
         if (i2cdevice && isInited) {
-            i2cdevice.readBytes(Register, Bytes, function (err, data) {
+            i2cdevice.readByte(objOptions.I2CAddress, Register, Bytes, function (err, data) {
                 var ParsedData;
                 if (Bytes == 1) {
                     ParsedData = data.readUInt8(0);
@@ -211,7 +210,7 @@ var adafruitLedBackpack = function () {
     function WriteData(Register, ByteArray, Callback, callbackData) {
         if (i2cdevice && isInited) {
             debug('WriteData ', Register)
-            i2cdevice.writeBytes(Register, ByteArray, function (err) {
+            i2cdevice.writeByte(objOptions.I2CAddress, Register, ByteArray, function (err) {
                 if (Callback) {
                     Callback(err, callbackData);
                 }
