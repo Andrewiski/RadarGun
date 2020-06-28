@@ -15,7 +15,7 @@ var mcp9808 = function () {
     var self = this;
     var defaultOptions = {
         I2CAddress: "0x18", //the address of the wire
-        I2CDevice: '/dev/i2c-2'
+        I2CDevice: 2
     }
     
     var isInited = false;
