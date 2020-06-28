@@ -99,7 +99,8 @@ var adafruitLedBackpack = function () {
                                                     debug('Error in init setBrightness %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                                                 } else {
                                                     debug('Brightness set to high ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress);
-                                                    i2cdevice.writeI2cBlock(objOptions.I2CAddress, 0x00, 10, [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], function (err) {
+
+                                                    i2cdevice.writeI2cBlock(objOptions.I2CAddress, 0x00, 10, Buffer.alloc(10, [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), function (err) {
                                                         if (err) {
                                                             debug('Error in init clear ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                                                         } else {
@@ -210,7 +211,7 @@ var adafruitLedBackpack = function () {
     function WriteData(Register, ByteArray, Callback, callbackData) {
         if (i2cdevice && isInited) {
             debug('WriteData ', Register)
-            i2cdevice.writeI2cBlock(objOptions.I2CAddress, Register, ByteArray.length, ByteArray, function (err) {
+            i2cdevice.writeI2cBlock(objOptions.I2CAddress, Register, ByteArray.length, Buffer.alloc(ByteArray.length, ByteArray), function (err) {
                 if (Callback) {
                     Callback(err, callbackData);
                 }

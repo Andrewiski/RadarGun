@@ -17,7 +17,7 @@ try {
     AdafruitLedBackpack = require('./modules/AdafruitLedBackpack.js');
     adafruitLedBackpack = new AdafruitLedBackpack();
     debug('attempting adafruitLedBackpack init');
-    adafruitLedBackpack.Initialize({ I2CAddress: 0x70, I2CDevice: 1 }, function (err) {
+    adafruitLedBackpack.Initialize({ I2CAddress: 0x70, I2CDevice: 2 }, function (err) {
         adafruitLedBackpack.writeNumber(1234, true, function (err) {
             debug('i2c adafruitLedBackpack2 writeNumber ', err);
         })
