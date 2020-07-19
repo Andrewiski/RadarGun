@@ -38,23 +38,56 @@
     <i class="fa fa-battery-empty" aria-hidden="true"></i>-->
             <span> | {{commonData.gpsPosition.lat}} / {{commonData.gpsPosition.lon}} </span>
             <span> | {{commonData.lastSpeedDataTimestamp}}</span>
+            
+                
+        </div>
+    </div>
+    <div ng-hide="commonData.isGameAdmin">
+        <div style="float:right"><button ng-click="commonData.isGameAdmin = true" class="btn btn-primary">Login</button></div>
+    </div>
+    <div ng-show="commonData.isGameAdmin">
+        <div class="row">
             <div class="form-group">
-                <label class="col-sm-3 control-label">Player</label>
+
                 <div class="col-sm-6">
-                    <ui-select ng-model="commonData.player" theme="bootstrap">
+                    <label class="col-sm-3 control-label">Batter</label>
+                    <ui-select ng-model="commonData.batter" theme="bootstrap">
                         <ui-select-match placeholder="Select or search a person in the list...">{{$select.selected.name}}</ui-select-match>
                         <ui-select-choices repeat="item in commonData.playerList | filter: $select.search">
                             <div ng-bind-html="item.name | highlight: $select.search"></div>
                             <small ng-bind-html="item.email | highlight: $select.search"></small>
                         </ui-select-choices>
                     </ui-select>
-                    <button class="btn btn-primary" ng-click="playerEdit()">Edit</button>
+
+                </div>
+
+                <div class="col-sm-6">
+                    <label class="col-sm-3 control-label">Pitcher</label>
+                    <ui-select ng-model="commonData.pitcher" theme="bootstrap">
+                        <ui-select-match placeholder="Select or search a person in the list...">{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices repeat="item in commonData.playerList | filter: $select.search">
+                            <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            <small ng-bind-html="item.email | highlight: $select.search"></small>
+                        </ui-select-choices>
+                    </ui-select>
+
                 </div>
             </div>
-            <div style="float:right"><button ng-click="showConfig()" class="btn btn-primary">Config</button></div>
-        </div>
-    </div>
 
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div><button class="btn btn-primary" ng-click="gameEdit()">Edit Game</button></div>
+            </div>
+            <div class="col-sm-6">
+                <div style="float:right">
+                <button ng-click="showConfig()" class="btn btn-primary">Config</button>
+                <button ng-click="commonData.isGameAdmin = false" class="btn btn-primary">Logout</button>
+                
+            </div>
+        </div>
+
+    </div>
     <div class="radarEmulator" ng-show="commonData.isRadarEmulator">
 
         In:<input ng-model="commonData.radarEmulator.data.in" type="text" /> Out: <input ng-model="commonData.radarEmulator.data.out" type="text" /> <button class="btn btn-danger" ng-click="radarEmulatorSend()">Go</button>
@@ -175,6 +208,7 @@
                 </div>
                 <div id="googleMap"></div>
             </div>
+            <div></div>
         </div>
         </div>
     </div>

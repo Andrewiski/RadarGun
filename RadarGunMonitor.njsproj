@@ -110,6 +110,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="data\games\" />
     <Folder Include="modules\" />
     <Folder Include="configs\" />
     <Folder Include="dts\" />

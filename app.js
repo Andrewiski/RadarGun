@@ -136,6 +136,17 @@ io.on('connection', function(socket) {
         debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
         radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
     });
+
+    socket.on("pitcher", function (data) {
+        debug('pitcher:'  + ', value:' + data.data + ', client id:' + socket.id);
+        radarStalker2.pitcher({ data: data, socket: socket });
+    })
+
+    socket.on("batter", function (data) {
+        debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
+        radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
+    })
+
     socket.on('ping', function(data) {
         debug('ping: client id:' + socket.id);
     });

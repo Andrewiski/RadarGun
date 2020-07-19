@@ -7,7 +7,8 @@
            $scope.commonData = {
                teamList: [],
                playerList: [],
-               player: undefined,
+               pitcher: undefined,
+               batter: undefined,
                team:undefined,
                radarSpeedDataHistory: [],
                showRadarConfig : true,
@@ -152,6 +153,22 @@
                 $scope.commonData.softwareConfig[data.Property].value = data.data;
                 $scope.$apply();
             });
+
+           $rootScope.$on('radarMonitor:batter', function (event, data) {
+               // use the data accordingly
+               //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
+               console.debug('radarMonitor:batter detected ', data);
+               $scope.commonData.batter = data.data;
+               $scope.$apply();
+           });
+
+           $rootScope.$on('radarMonitor:pitcher', function (event, data) {
+               // use the data accordingly
+               //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
+               console.debug('radarMonitor:pitcher detected ', data);
+               $scope.commonData.pitcher = data.data;
+               $scope.$apply();
+           });
 
             $rootScope.$on('radarMonitor:radarSpeedDataHistory', function(event, data) {
                 // use the data accordingly
