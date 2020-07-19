@@ -7,8 +7,10 @@
            $scope.commonData = {
                teamList: [],
                playerList: [],
-               pitcher: undefined,
-               batter: undefined,
+               pitcher: {firstName:"", lastName:"", jerseyNumber:-1},
+               batter: { firstName: "", lastName: "", jerseyNumber: -1 },
+               batterEdit: false,
+               pitcherEdit:false,
                team:undefined,
                radarSpeedDataHistory: [],
                showRadarConfig : true,
@@ -225,6 +227,39 @@
                 }
                 $scope.commonData.isradarCommandPending = false;
             }
+
+
+           
+
+           $scope.pitcherAdd = function () {
+
+               $scope.commonData.pitcherEdit = true;
+           }
+           $scope.pitcherEdit = function () {
+               $scope.commonData.pitcherEdit = true;
+           }
+           $scope.pitcherEditCancel = function () {
+               $scope.commonData.pitcherEdit = false;
+           }
+
+           $scope.pitcherEditSave = function () {
+               $scope.commonData.pitcherEdit = false;
+           }
+
+           $scope.batterAdd = function () {
+
+               $scope.commonData.batterEdit = true;
+           }
+           $scope.batterEdit = function () {
+               $scope.commonData.batterEdit = true;
+           }
+           $scope.batterEditCancel = function () {
+               $scope.commonData.batterEdit = false;
+           }
+
+           $scope.batterEditSave = function () {
+               $scope.commonData.batterEdit = false;
+           }
 
 
             $scope.playerShow = function () {
