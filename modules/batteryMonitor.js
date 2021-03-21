@@ -36,10 +36,7 @@ var BatteryMonitor = function (options) {
         isEmulationEnabled: false
     }
     
-    var b = undefined;
-    if (process.platform !== 'win32') {
-        b = require('bonescript');
-    }
+    
 
     var readBatteryVoltage = function () {
 
@@ -90,7 +87,20 @@ var BatteryMonitor = function (options) {
         readBatteryVoltage();
         setTimeout(recursiveTimerStart, objOptions.timerInterval);
     };
-    recursiveTimerStart();
+
+    var b = undefined;
+    if (process.platform !== 'win32') {
+        //b = require('bonescript');
+        var BeagleBone = require('beaglebone-io');
+        var b = new BeagleBone();
+
+        b.on('ready', function () {
+            this.pinMode(objOptions.analogPin, this.MODES.ANALOG);
+            this.analogRead(objOptions.analogPin, processBatteryVoltage);
+        });
+    } else {
+        recursiveTimerStart(); //Only need this in windows to fake it ne Beaglebone-io does this for us
+    }
 }
 // extend the EventEmitter class using our RadarMonitor class
 util.inherits(BatteryMonitor, EventEmitter);

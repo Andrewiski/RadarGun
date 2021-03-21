@@ -3,8 +3,8 @@
   "portName": "/dev/ttyO2",
   "packetParserBufferSize": 1024,
   "win32": {
-    "portName": "COM1",
-    "emulator": true
+    "portName": "COM3",
+    "emulator": false
   },
   "baudrate": 115200,
 
@@ -61,14 +61,14 @@
     },
     "LowSpeedThreshold": {
       "id": 7,
-      "value": null,
+      "value": 50,
       "def": 50,
       "datatype": "int",
       "notes": "0 - 900 MPH"
     },
     "HighSpeedThreshold": {
       "id": 11,
-      "value": null,
+      "value": 100,
       "def": 150,
       "datatype": "int",
       "notes": "0 - 900 MPH"

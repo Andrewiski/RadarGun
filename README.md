@@ -2,6 +2,9 @@
 # Stalker Pro II Radar OEM Sensor Web Based Monitor #
 
 ### Intro ###
+
+Last Update 6/28/2020
+
 This application is under active development by Andrew DeVries for Digital Example, LLC all rights reserved.
 
 The Radar Gun Monitor is a BeagleBone application using a Stalker Pro II OEM Speed Sensor as its primary speed sensor. Speed data is recorded and logged on local flash memory as well as presented to multiple clients over tcp web client.
@@ -20,15 +23,12 @@ The GPS is used to set the time so the logs are timestamped.  MongoDB is the pla
 
 Tested setup is as follows.
 
-bone-debian-9.2-iot-armhf-2017-10-10-4gb  image from beagleboard.org
+bone-eMMC-flasher-debian-10.3-iot-armhf-2020-04-06-4gb.img.xz  image from beagleboard.org
 
 Connect the BeagleBone to the internet as we need to install some software. Node 6.0 is now included in latest release so does not need to be installed.
 
-Also note as of 2/06/2016 we are using released bonescript ^0.6.2 to check what version you have installed run.
+Also note as of 6/28/2020 we are using beaglebone-io 4.1.0 and i2c-bus and remvoed i2c and bonescript as comiple issues in debian 10 and node 10.
 
-```
-node -pe "require('bonescript').getPlatform().bonescript"
-```
 
 ```
  sudo apt-get update
@@ -91,7 +91,7 @@ git pull
 the sample config files expect the Stalker Pro 2 OEM Radar unit to be attached to Uart2. I chose that uart as its polulated to a grove connector on the Beaglebone Green so easy to access.
 I use a simple 4 wire male rs232 signal converter to get the correct 3.3v ttl signals.
 
-The radar should be setup with direction to both,  hit and peak speeds disabled, no message delay, baud rate of 115200, and in be2 format. This application does allow for the limited
+The radar should be setup with direction to both,  hit and peak speeds disabled, no message delay, baud rate of 115200, and in be format. This application does allow for the limited
  config of setting via the web interface but port speed is not one of them. I susgest using the scoreboard app that comes with the OEM unit for inital config.  
  Note that with message delay set to none the data stream can over whelm the scoreboard app so I suggest do a soft off on the transmiter called a hold before attemping to change settings.
 

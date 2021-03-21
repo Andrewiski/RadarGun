@@ -9,6 +9,7 @@ var debug = require('debug')('gpsMonitor');
 var nconf = require('nconf');
 var exec = require('child_process').exec;
 var SerialPort = require("serialport");
+const Readline = require('@serialport/parser-readline')
 
 var GpsMonitor = function (options) {
     var self = this;
@@ -45,8 +46,8 @@ var GpsMonitor = function (options) {
             gpsSerialPortName = objOptions.win32.portName;
             if (gpsSerialPortName) {
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
-                    baudrate: objOptions.win32.baudrate,
-                    parser: SerialPort.parsers.readline('\r\n'),
+                    baudRate: objOptions.win32.baudrate,
+                    //parser: SerialPort.parsers.readline('\r\n'),
                     autoOpen: false
                 }); // this is the openImmediately flag [default is true]
                 isEnabled = true;
@@ -64,14 +65,15 @@ var GpsMonitor = function (options) {
                 //    debug('bonescript serial device activated');
                 //});
                 gpsSerialPort = new SerialPort(gpsSerialPortName, {
-                    baudrate: objOptions.baudrate,
-                    parser: SerialPort.parsers.readline('\r\n'),
+                    baudRate: objOptions.baudrate,
+                    //parser: SerialPort.parsers.readline('\r\n'),
                     autoOpen:false
                 }); // this is the openImmediately flag [default is true]
                 isEnabled = true;
             }
 
         }
+        
     } catch (ex) {
         debug('error  ' + gpsSerialPortName, ex);
     }
@@ -116,7 +118,10 @@ var GpsMonitor = function (options) {
     // Call the update routine directly with a NMEA sentence, which would
     // come from the serial port or stream-reader normally
     if (gpsSerialPort) {
-        gpsSerialPort.on('data', handleGpsSerialData);
+        const readlineParser = new Readline('\r\n');
+        gpsSerialPort.pipe(readlineParser);
+        readlineParser.on('data', handleGpsSerialData);
+        //gpsSerialPort.on('data', handleGpsSerialData);
         gpsSerialPort.open(function (err) {
             if (err) {
                 debug('open Error' + err);

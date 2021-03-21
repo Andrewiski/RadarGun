@@ -14,10 +14,10 @@ try {
     //    console.log('dogtag = ' + x.dogtag);
     //    console.log('os = ', x.os);
     //});
-    AdafruitLedBackpack = require('./../modules/AdafruitLedBackpack.js');
+    AdafruitLedBackpack = require('./modules/AdafruitLedBackpack.js');
     adafruitLedBackpack = new AdafruitLedBackpack();
     debug('attempting adafruitLedBackpack init');
-    adafruitLedBackpack.Initialize({ I2CAddress: 0x70, I2CDevice: '/dev/i2c-2' }, function (err) {
+    adafruitLedBackpack.Initialize({ I2CAddress: 0x70, I2CDevice: 2 }, function (err) {
         adafruitLedBackpack.writeNumber(1234, true, function (err) {
             debug('i2c adafruitLedBackpack2 writeNumber ', err);
         })
@@ -26,7 +26,7 @@ try {
     
     adafruitLedBackpack2 = new AdafruitLedBackpack();
     debug('attempting adafruitLedBackpack2 init');
-    adafruitLedBackpack2.Initialize({ I2CAddress: 0x71, I2CDevice: '/dev/i2c-2' }, function (err) {
+    adafruitLedBackpack2.Initialize({ I2CAddress: 0x71, I2CDevice: 2 }, function (err) {
         debug('i2c adafruitLedBackpack2 Inited ', err);
         adafruitLedBackpack2.writeNumber(70.32, false, function (err) {
             debug('i2c adafruitLedBackpack2 writeNumber ', err);
@@ -34,7 +34,7 @@ try {
     });
     adafruitLedBackpack3 = new AdafruitLedBackpack();
     debug('attempting adafruitLedBackpack3 init');
-    adafruitLedBackpack3.Initialize({ I2CAddress: 0x72, I2CDevice: '/dev/i2c-2' }, function (err) {
+    adafruitLedBackpack3.Initialize({ I2CAddress: 0x72, I2CDevice: 2 }, function (err) {
         debug('i2c adafruitLedBackpack3 Inited ', err);
         adafruitLedBackpack3.writeNumber('beef', false, function (err) {
             debug('i2c adafruitLedBackpack3 writeNumber ', err);
@@ -42,7 +42,7 @@ try {
     });
     adafruitLedBackpack4 = new AdafruitLedBackpack();
     debug('attempting adafruitLedBackpack3 init');
-    adafruitLedBackpack4.Initialize({ I2CAddress: 0x77, I2CDevice: '/dev/i2c-2' }, function (err) {
+    adafruitLedBackpack4.Initialize({ I2CAddress: 0x77, I2CDevice: 2 }, function (err) {
         debug('i2c adafruitLedBackpack4 Inited ', err);
         adafruitLedBackpack4.writeNumber(43.54, false, function (err) {
             debug('i2c adafruitLedBackpack4 writeNumber ', err);

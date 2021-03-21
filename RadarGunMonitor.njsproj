@@ -9,8 +9,7 @@
     <SccProvider>SAK</SccProvider>
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
-    <Environment>DEBUG=app,radar,batteryMonitor,gpsMonitor,dataDisplay,adafruitLedBackpack,socket.io*
-</Environment>
+    <Environment>DEBUG=app,radar,batteryMonitor,gpsMonitor,dataDisplay,adafruitLedBackpack,radarPacketParser</Environment>
     <LaunchUrl>http://localhost:12336</LaunchUrl>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
@@ -30,7 +29,7 @@
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
     <ProjectView>ShowAllFiles</ProjectView>
     <NodejsPort>12336</NodejsPort>
-    <StartWebBrowser>True</StartWebBrowser>
+    <StartWebBrowser>False</StartWebBrowser>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -72,6 +71,9 @@
     <Compile Include="wifidog\socket_bk.js" />
     <Compile Include="wifidog\wifi.js" />
     <Compile Include="wifidog\wifidog.js" />
+    <Content Include=".gitattributes" />
+    <Content Include=".gitignore" />
+    <Content Include="configs\Andy Configure Pro II Speed Sensor 232 2.0.1.cfg" />
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
     <Content Include="configs\dataDisplayConfig.json" />
@@ -83,6 +85,7 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="dts\BB-BONE-RADAR-00A0.dts" />
+    <Content Include="modules\radarPacketParser.js" />
     <Content Include="package.json" />
     <Content Include="public\app\error-handler.html" />
     <Content Include="public\app\img\ajax_loader_blue_350.gif" />
@@ -102,11 +105,15 @@
     <Content Include="public\index.html" />
     <Content Include="service\radarMonitor" />
     <Content Include="StartRadarApp.sh" />
+    <Content Include="testBatteryVoltage.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="TestNanoVideo.js">
       <SubType>Code</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="data\games\" />
     <Folder Include="modules\" />
     <Folder Include="configs\" />
     <Folder Include="dts\" />

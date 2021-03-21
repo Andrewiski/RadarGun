@@ -38,23 +38,119 @@
     <i class="fa fa-battery-empty" aria-hidden="true"></i>-->
             <span> | {{commonData.gpsPosition.lat}} / {{commonData.gpsPosition.lon}} </span>
             <span> | {{commonData.lastSpeedDataTimestamp}}</span>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Player</label>
-                <div class="col-sm-6">
-                    <ui-select ng-model="commonData.player" theme="bootstrap">
-                        <ui-select-match placeholder="Select or search a person in the list...">{{$select.selected.name}}</ui-select-match>
-                        <ui-select-choices repeat="item in commonData.playerList | filter: $select.search">
-                            <div ng-bind-html="item.name | highlight: $select.search"></div>
-                            <small ng-bind-html="item.email | highlight: $select.search"></small>
-                        </ui-select-choices>
-                    </ui-select>
-                    <button class="btn btn-primary" ng-click="playerEdit()">Edit</button>
-                </div>
-            </div>
-            <div style="float:right"><button ng-click="showConfig()" class="btn btn-primary">Config</button></div>
+            
+                
         </div>
     </div>
+    <div ng-hide="commonData.isGameAdmin">
+        <div style="float:right"><button ng-click="commonData.isGameAdmin = true" class="btn btn-primary">Login</button></div>
+    </div>
+    <div ng-show="commonData.isGameAdmin">
+        <div class="row">
+            <div class="col-sm-6">
+                <div>
+                    <label class="col-sm-3 control-label">Batter</label>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div>
+                    <label class="col-sm-3 control-label">Pitcher</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div>
 
+                <div class="col-sm-6">
+                    
+                   
+                    <div ng-hide="commonData.batterEdit">
+                        <ui-select ng-model="commonData.batter" theme="bootstrap">
+                            <ui-select-match placeholder="Select or search a person in the list...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="item in commonData.battersList | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                <small ng-bind-html="item.email | highlight: $select.search"></small>
+                            </ui-select-choices>
+
+                        </ui-select>
+                        <div class="btn-group" role="group" aria-label="Buttons">
+                            <button type="button" class="btn btn-primary" ng-click="batterEdit()">Edit</button>
+                            <button type="button" class="btn btn-primary" ng-click="batterAdd()">Add</button>
+                        </div>
+                    </div>
+                    <div ng-show="commonData.batterEdit">
+                        <div>
+                            <div class="form-group">
+                                <label>First Name</label>
+                                <input class="form-control" ng-model="commonData.batter.firstName" />
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name</label>
+                                <input class="form-control" ng-model="commonData.batter.lastName" />
+                            </div>
+                        </div>
+                        <div class="btn-group" role="group" aria-label="Buttons">
+                            <button type="button" class="btn btn-secondary" ng-click="batterEditCancel()">Cancel</button>
+                            <button type="button" class="btn btn-primary" ng-click="batterEditSave()">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div>
+                        <label class="col-sm-3 control-label">Pitcher</label>
+                    </div>
+                    <div class="clear"></div>
+                    <div ng-hide="commonData.pitcherEdit">
+                        
+                        <ui-select ng-model="commonData.pitcher" theme="bootstrap">
+                            <ui-select-match placeholder="Select or search a person in the list...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="item in commonData.ppitchersList | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                <small ng-bind-html="item.email | highlight: $select.search"></small>
+                            </ui-select-choices>
+                        </ui-select>
+                        <div class="btn-group" role="group" aria-label="Buttons">
+                            <button type="button" class="btn btn-primary" ng-click="pitcherEdit()">Edit</button>
+                            <button type="button" class="btn btn-primary" ng-click="picherAdd()">Add</button>
+                        </div>
+                        
+                    </div>
+                    <div ng-show="commonData.pitcherEdit">
+                        <div >
+                            <div class="form-group">
+                                <label>First Name</label>
+                                <input class="form-control" ng-model="commonData.pitcher.firstName" />
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name</label>
+                                <input class="form-control" ng-model="commonData.pitcher.lastName" />
+                            </div>
+                        </div>
+                        <div class="btn-group" role="group" aria-label="Buttons">
+                            <button type="button" class="btn btn-danger" ng-click="pitcherEditCancel()">Cancel</button>
+                            <button type="button" class="btn btn-primary" ng-click="pitcherEditSave()">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                
+            </div>
+            <div class="col-sm-6">
+                <div style="float:right">
+                    <button class="btn btn-primary" ng-click="gameEdit()">Edit Game</button>
+                    <button ng-click="showConfig()" class="btn btn-secondary">Config</button>
+                    <button ng-click="commonData.isGameAdmin = false" class="btn btn-danger">Logout</button>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
     <div class="radarEmulator" ng-show="commonData.isRadarEmulator">
 
         In:<input ng-model="commonData.radarEmulator.data.in" type="text" /> Out: <input ng-model="commonData.radarEmulator.data.out" type="text" /> <button class="btn btn-danger" ng-click="radarEmulatorSend()">Go</button>
@@ -129,18 +225,20 @@
                     <input type="button" class='btn' size="15" style="background-color: transparent; border: 0;" onclick="check()" value="OK" />
                 </form>
             </div>
+
+            <div class="editGameTemplate">
+
+            </div>
+
             <div class="radarConfig" ng-show="commonData.showRadarConfig">
-
-
-
                 <div>
                     <div ng-hide="commonData.radarConfig.TransmiterControl.value == 1"><a class="btn btn-sm btn-danger" ng-click="radarCommand('TransmiterControl',1)">Off</a>(Click to Turn On)</div>
                     <div ng-show="commonData.radarConfig.TransmiterControl.value == 1"><a class="btn btn-sm btn-success" ng-click="radarCommand('TransmiterControl',0)">On</a> (Click to Turn Off)</div>
                     <!--<div data-toggle-switch data-model="radarPower"></div>-->
                     <img ng-hide="!commonData.isradarCommandPending" src="app/img/spinner.gif" ng-style='{"margin-left":"8px"}' width="24" height="24" alt="" />
                 </div>
-                
-                <div ng-hide="editRadarConfig == true">
+
+                <div ng-hide="commonData.editRadarConfig == true">
                     <div>Radar Model: {{commonData.radarConfig.ProductID.value}}</div>
                     <div>Low Speed Threshold:{{commonData.radarConfig.LowSpeedThreshold.value}}</div>
                     <div>High Speed Threshold:{{commonData.radarConfig.HighSpeedThreshold.value}}</div>
@@ -152,9 +250,9 @@
                     <div>Auto Clear Delay:{{commonData.radarConfig.AutoClearDelay.value}}</div>
                     <div>Hit Speed Enable:{{commonData.radarConfig.HitSpeedEnable.value}}</div>
                     <div>Target Direction:{{commonData.radarConfig.TargetDirection.value}}</div>
-                    <div style="float:right"><a href="" ng-click="editRadarConfig = true">edit</a></div>
+                    <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="commonData.editRadarConfig = true">edit</a></div>
                 </div>
-                <div ng-show="editRadarConfig == true">
+                <div ng-show="commonData.editRadarConfig == true">
 
 
                     <div>{{commonData.radarConfig.ProductID.value}}</div>
@@ -167,7 +265,7 @@
                     <div>Auto Clear Delay:<input style="width:45px" type="number" ng-model="commonData.radarConfig.AutoClearDelay.value" ng-change="commonData.radarConfig.AutoClearDelay.isDirty = true" /></div>
                     <div>Hit Speed Enable:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HitSpeedEnable.value" ng-change="commonData.radarConfig.HitSpeedEnable.isDirty = true" /></div>
                     <div>Target Direction:<input style="width:45px" type="number" ng-model="commonData.radarConfig.TargetDirection.value" ng-change="commonData.radarConfig.TargetDirection.isDirty = true" />0 Outbound, 1 InBound, 2 Both</div>
-                    <div style="float:right"><a href="" ng-click="updateRadarConfig(); editRadarConfig = false;">save</a></div>
+                    <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="updateRadarConfig(); commonData.editRadarConfig = false;">Save</a></div>
                 </div>
                 <div>
                     <div>Battery Voltage: {{commonData.batteryVoltage.batteryVoltage}}</div>

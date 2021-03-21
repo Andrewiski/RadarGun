@@ -1,6 +1,6 @@
 {
   "name": "RadarGunMonitor",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": false,
   "license": "Apache-2.0",
   "keywords": [
@@ -27,7 +27,7 @@
   "description": "Digital Example BeagleBone based Radar Gun ",
   "main": "app.js",
   "engines": {
-    "node": ">= 4.0.0"
+    "node": ">= 10.0.0"
   },
   "author": {
     "name": "adevries",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@uirouter/angularjs": "^1.0.25",
-    "angular": "^1.7.9",
+    "angular": "^1.8",
     "angular-animate": "^1.7.9",
     "angular-google-maps": "^2.4.1",
     "angular-route": "^1.7.9",
@@ -45,7 +45,7 @@
     "angular-ui-event": "^1.0.0",
     "angular-ui-switch": "^0.1.1",
     "angular-ui-utils": "^0.1.1",
-    "body-parser": "^1.19.0",
+    
     "bootstrap": "^3.3.7",
     "cookie-parser": "^1.4.0",
     "debug": "^4.1.1",
@@ -53,8 +53,9 @@
     "extend": "^3.0.0",
     "font-awesome": "^4.6.3",
     "gps": "^0.5.3",
-    "jquery": "^3.4.1",
-    "mathjs": "^5.10.3",
+    "i2c-bus": "5.2.0",
+    "jquery": "^3.3.1",
+    "mathjs": "^5.8.0",
     "morgan": "^1.9.0",
     "nconf": "0.10.0",
     "nosql": "^6.1.0",

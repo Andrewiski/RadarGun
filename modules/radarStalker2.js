@@ -11,6 +11,7 @@ var nconf = require('nconf');
 // version 4 syntax 
 var SerialPort = require("serialport");
 var RadarEmulator = require("./radarEmulator.js");
+var RadarPacketParser = require("./radarPacketParser.js");
 var RadarStalker2 = function (options){
     var self = this;
     var defaultOptions = {
@@ -51,9 +52,7 @@ var RadarStalker2 = function (options){
     
     
 
-    var isBeagleBone = false
-    var boneScript;
-
+    
     
     
     //use Global so we can access our instance of Serial Port from RadarCommandFiles
@@ -63,25 +62,14 @@ var RadarStalker2 = function (options){
     
 
     if (process.platform === 'win32') {
-        
-        
+
         radarSerialPortName = objOptions.win32.portName;
-        objOptions.emulator = objOptions.win32.emulator;
-        //radarSerialPortNameFakeRadar = "COM8";
-        //radarSerialPortName = "COM1"; 
-        //radarSerialPortNameFakeRadar = "COM16";  
-        //radarSerialPortName = "COM4"; 
-        //radarSerialPortNameFakeRadar = "COM8";  
+        objOptions.emulator = objOptions.win32.emulator; 
 
     } else {
         //
         radarSerialPortName = objOptions.portName;
     }
-
-    
-
-    
-
 
 
     var radarSpeedRelatedData = { GameID: 0, VisitorTeamID: 0, HomeTeamID: 0, PitcherPlayerID: 0, HitterPlayerID: 0 };
@@ -91,7 +79,7 @@ var RadarStalker2 = function (options){
 
       
 
-            //See RadarDataParser Above to view Code that Parses raw Serial Data into Data Packets
+            //See RadarDataParser below to view Code that Parses raw Serial Data into Data Packets
 
             if (data != undefined && data.length > 0){
                 if (objOptions.softwareConfig.logRawRadarPackets) {
@@ -115,15 +103,15 @@ var RadarStalker2 = function (options){
             } //end of If (data != undefined)
             // if radarConfigGetComplete = false then we need to run through the radarConfigProperties and ask Radar for settings.
 
-            if (radarConfigGetComplete == false && configRequestPending == false){
+            if (radarConfigGetComplete === false && configRequestPending === false){
                 var foundone = false;
                 for(var key in objOptions.radarConfig){
                     var radarConfigProperty = objOptions.radarConfig[key];
-                    if (radarConfigProperty.value == undefined){ 
+                    if (radarConfigProperty.value === undefined || radarConfigProperty.value === null ){ 
                         foundone = true;
-                        mybuff = getRadarPacket(radarConfigProperty.id,0,new Buffer([0]));
+                        mybuff = getRadarPacket(radarConfigProperty.id, 0, new Buffer([0])); // new Buffer.alloc(1));
                         radarSerialPort.write(mybuff, function(err) {
-                            if (err == undefined){
+                            if (err === undefined){
                                 configRequestPending = true;
                                 debug('request Radar Config ' + key);
                             }else{
@@ -135,136 +123,136 @@ var RadarStalker2 = function (options){
                         break;
                     }
                 }
-                if (foundone == false){
+                if (foundone === false){
                     radarConfigGetComplete = true;
                 }
             }
         };
 
-    var radarPacketParser = function (bufferSize) {
-        // Delimiter buffer saved in closure
-        var radarDataBuffer = new Buffer(bufferSize);
-        radarDataBuffer.fill(0);  //init buffer to Zeros
-        var radarDataBufferLength = 0;
+    //var radarPacketParser = function (bufferSize) {
+    //    // Delimiter buffer saved in closure
+    //    var radarDataBuffer = new Buffer(bufferSize);
+    //    radarDataBuffer.fill(0);  //init buffer to Zeros
+    //    var radarDataBufferLength = 0;
 
-        return function (emitter, buffer) {
-            // Collect data
-            if (buffer != undefined && buffer.length > 0) {
+    //    return function (emitter, buffer) {
+    //        // Collect data
+    //        if (buffer != undefined && buffer.length > 0) {
 
-                var packets = [];
+    //            var packets = [];
 
-                if ((radarDataBufferLength + buffer.length) > bufferSize) {
-                    //We Are going to blow are max buffer size as something has gone wrong so discard saved buffer and start over
-                    debug('We are over our radarDataBufferSize discarding partial packet buffer');
-                    radarDataBufferLength = 0;
-                    return;
-                } else {
-                    //Take what ever was pending in our buffer and append the incomming data so we can use it for processing
-                    buffer.copy(radarDataBuffer, radarDataBufferLength, 0, buffer.length);
-                    radarDataBufferLength = radarDataBufferLength + buffer.length;
-                }
+    //            if ((radarDataBufferLength + buffer.length) > bufferSize) {
+    //                //We Are going to blow are max buffer size as something has gone wrong so discard saved buffer and start over
+    //                debug('We are over our radarDataBufferSize discarding partial packet buffer');
+    //                radarDataBufferLength = 0;
+    //                return;
+    //            } else {
+    //                //Take what ever was pending in our buffer and append the incomming data so we can use it for processing
+    //                buffer.copy(radarDataBuffer, radarDataBufferLength, 0, buffer.length);
+    //                radarDataBufferLength = radarDataBufferLength + buffer.length;
+    //            }
 
-                //data should have the any pending and current data in it lets process what ever full packets we have and if any left over bytes
-                // we will copy to start of radarDataBuffer and set the radarDataBufferLength
-                var needmoredata = false;
-                var i = 0;
-                for (i = 0; i < radarDataBufferLength; i++) {
+    //            //data should have the any pending and current data in it lets process what ever full packets we have and if any left over bytes
+    //            // we will copy to start of radarDataBuffer and set the radarDataBufferLength
+    //            var needmoredata = false;
+    //            var i = 0;
+    //            for (i = 0; i < radarDataBufferLength; i++) {
 
-                    //The radar unit doesn't have a consistant output data format while using the streaming format as it doesn't have a checksum at the end
-                    // all it has is Termination Char which can be changed via a setting we are expecting default sitting of Carrage Return 0x0D (13)
-                    // Polling mode has Checksum but no Peak and Hit speed. So BE streaming mode which is what we need to use as for the application
-                    // we need peak and hit speed 
-                    // So the only thing we can do is look for our two Start ID's 0x88 (136) streaming data and 0xEF (239) Configuration Data  
-
-
-                    switch (radarDataBuffer.readUInt8(i)) {
-                        case 136: // 0x88 BE Speed Stream Packet
-                            if (radarDataBufferLength > i + 6) {
-                                var speedPacketLength = 0;
-                                switch (radarDataBuffer.readUInt8(i + 6)) {
-                                    //this is the Number of Speed Blocks but its in Ascii and each is 15 bytes long + 7 in Header + Delimeter 0x0D = 8
-                                    case 49: //1
-                                        speedPacketLength = 23; // (7 + 15 + 1)
-                                        break;
-                                    case 50: //2
-                                        speedPacketLength = 38; // (7 + (15 * 2) + 1)
-                                        break;
-                                    case 51: //3
-                                        speedPacketLength = 53; // (7 + (15 * 2) + 1)
-                                        break;
-                                    default:
-                                        debug("Invalid Byte detected in Speed Stream Packet " + radarDataBuffer.readUInt8(i) + " at position " + (i + 6));
-                                        break;
-                                }
-                                if (speedPacketLength > 0) {
-                                    if (radarDataBufferLength >= i + speedPacketLength) {
-                                        var speedPacket = new Buffer(speedPacketLength);
-                                        radarDataBuffer.copy(speedPacket, 0, i, i + speedPacketLength);
-                                        i = i + speedPacketLength - 1;
-                                        packets.push(speedPacket);
-                                    } else {
-                                        needmoredata = true;
-                                    }
-                                } else {
-                                    needmoredata = true;
-                                }
-                            } else {
-                                needmoredata = true;
-                            }
-                            break;
-                        case 239: // 0xEF  Configuration Data
-                            var configPacketLength = 0;
-                            // Config Packets have Packet length as 2 byte Word LSB first at index 4
-                            if (radarDataBufferLength > i + 6) {
-                                configPacketLength = radarDataBuffer.readUInt16LE(i + 4) + 8; //9 = 6 header + 2 checksum 
-                                //Proboly should check for a max packet length here in case we get a bad length 
-
-                                if (configPacketLength > 128) {
-                                    debug('Invalid Config Data Packet Length ' + configPacketLength);
-                                    break;
-                                }
-
-                                if (radarDataBufferLength >= i + configPacketLength) {
-                                    var configPacket = new Buffer(configPacketLength);
-                                    radarDataBuffer.copy(configPacket, 0, i, i + configPacketLength);
-                                    i = i + configPacketLength - 1;
-                                    //Todo Check Checksum to make sure its a valid packet
-                                    packets.push(configPacket);
-                                } else {
-                                    needmoredata = true;
-                                }
-                            } else {
-                                needmoredata = true;
-                            }
-                            break;
-                        default:
-                            debug("Invalid Byte detected " + radarDataBuffer.readUInt8(i) + " at position " + i);
-                            break;
-                    }
-                    if (needmoredata == true) {
-                        break;
-                    }
-                }  //end of for loop
-                packets.forEach(function (part, i, array) {
-                    emitter.emit('data', part);
-                });
-                if (needmoredata == true) {
-                    //i should be where we left off with partial packet so we need to copy from i to length to start of radarDataBuffer
-                    if (i != 0) {
-                        //No need to do any copying here as we are already starting at the begining  
-                        radarDataBuffer.copy(radarDataBuffer, 0, i, radarDataBufferLength);
-                        radarDataBufferLength = radarDataBufferLength - i
-                    }
-                } else {
-                    radarDataBufferLength = 0
-                }
-            } //end of If (data != undefined)
+    //                //The radar unit doesn't have a consistant output data format while using the streaming format as it doesn't have a checksum at the end
+    //                // all it has is Termination Char which can be changed via a setting we are expecting default sitting of Carrage Return 0x0D (13)
+    //                // Polling mode has Checksum but no Peak and Hit speed. So BE streaming mode which is what we need to use as for the application
+    //                // we need peak and hit speed 
+    //                // So the only thing we can do is look for our two Start ID's 0x88 (136) streaming data and 0xEF (239) Configuration Data  
 
 
+    //                switch (radarDataBuffer.readUInt8(i)) {
+    //                    case 136: // 0x88 BE Speed Stream Packet
+    //                        if (radarDataBufferLength > i + 6) {
+    //                            var speedPacketLength = 0;
+    //                            switch (radarDataBuffer.readUInt8(i + 6)) {
+    //                                //this is the Number of Speed Blocks but its in Ascii and each is 15 bytes long + 7 in Header + Delimeter 0x0D = 8
+    //                                case 49: //1
+    //                                    speedPacketLength = 23; // (7 + 15 + 1)
+    //                                    break;
+    //                                case 50: //2
+    //                                    speedPacketLength = 38; // (7 + (15 * 2) + 1)
+    //                                    break;
+    //                                case 51: //3
+    //                                    speedPacketLength = 53; // (7 + (15 * 2) + 1)
+    //                                    break;
+    //                                default:
+    //                                    debug("Invalid Byte detected in Speed Stream Packet " + radarDataBuffer.readUInt8(i) + " at position " + (i + 6));
+    //                                    break;
+    //                            }
+    //                            if (speedPacketLength > 0) {
+    //                                if (radarDataBufferLength >= i + speedPacketLength) {
+    //                                    var speedPacket = new Buffer(speedPacketLength);
+    //                                    radarDataBuffer.copy(speedPacket, 0, i, i + speedPacketLength);
+    //                                    i = i + speedPacketLength - 1;
+    //                                    packets.push(speedPacket);
+    //                                } else {
+    //                                    needmoredata = true;
+    //                                }
+    //                            } else {
+    //                                needmoredata = true;
+    //                            }
+    //                        } else {
+    //                            needmoredata = true;
+    //                        }
+    //                        break;
+    //                    case 239: // 0xEF  Configuration Data
+    //                        var configPacketLength = 0;
+    //                        // Config Packets have Packet length as 2 byte Word LSB first at index 4
+    //                        if (radarDataBufferLength > i + 6) {
+    //                            configPacketLength = radarDataBuffer.readUInt16LE(i + 4) + 8; //9 = 6 header + 2 checksum 
+    //                            //Proboly should check for a max packet length here in case we get a bad length 
+
+    //                            if (configPacketLength > 128) {
+    //                                debug('Invalid Config Data Packet Length ' + configPacketLength);
+    //                                break;
+    //                            }
+
+    //                            if (radarDataBufferLength >= i + configPacketLength) {
+    //                                var configPacket = new Buffer(configPacketLength);
+    //                                radarDataBuffer.copy(configPacket, 0, i, i + configPacketLength);
+    //                                i = i + configPacketLength - 1;
+    //                                //Todo Check Checksum to make sure its a valid packet
+    //                                packets.push(configPacket);
+    //                            } else {
+    //                                needmoredata = true;
+    //                            }
+    //                        } else {
+    //                            needmoredata = true;
+    //                        }
+    //                        break;
+    //                    default:
+    //                        debug("Invalid Byte detected " + radarDataBuffer.readUInt8(i) + " at position " + i);
+    //                        break;
+    //                }
+    //                if (needmoredata == true) {
+    //                    break;
+    //                }
+    //            }  //end of for loop
+    //            packets.forEach(function (part, i, array) {
+    //                emitter.emit('data', part);
+    //            });
+    //            if (needmoredata == true) {
+    //                //i should be where we left off with partial packet so we need to copy from i to length to start of radarDataBuffer
+    //                if (i != 0) {
+    //                    //No need to do any copying here as we are already starting at the begining  
+    //                    radarDataBuffer.copy(radarDataBuffer, 0, i, radarDataBufferLength);
+    //                    radarDataBufferLength = radarDataBufferLength - i
+    //                }
+    //            } else {
+    //                radarDataBufferLength = 0
+    //            }
+    //        } //end of If (data != undefined)
 
 
-        };
-    }
+
+
+    //    };
+    //}
 
     this.getradarSpeedDataHistory = function() {
         return commonData.radarSpeedDataHistory;
@@ -294,11 +282,11 @@ var RadarStalker2 = function (options){
     this.softwareConfigCommand = function (options) {
         var data = options.data;
         var socket = options.socket;
-        var socketid
+        var socketid = null;
         if (socket) {
             socketid = socket.id;
         } else {
-            socketid = "radar"
+            socketid = "radar";
         }
         debug('softwareConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
         
@@ -327,16 +315,16 @@ var RadarStalker2 = function (options){
     this.radarConfigCommand = function (options) {
         var data = options.data;
         var socket = options.socket;
-        var socketid
+        var socketid = null;
         if (socket) {
             socketid = socket.id;
         } else {
-            socketid = "radar"
+            socketid = "radar";
         }
         debug('radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
 
         //if this is a radarpower command reset the lastspeedtimestamp
-        if (data.cmd == "TransmiterControl" && data.data == 1) {
+        if (data.cmd === "TransmiterControl" && data.data === 1) {
             commonData.lastSpeedDataTimestamp = new Date();
         }
 
@@ -344,9 +332,9 @@ var RadarStalker2 = function (options){
         var mybuff = undefined;
 
         var radarConfigProperty = objOptions.radarConfig[data.cmd];
-        if (radarConfigProperty == undefined) {
+        if (radarConfigProperty === undefined) {
             //No Matching
-        } else if (radarConfigProperty.id == -1) {
+        } else if (radarConfigProperty.id === -1) {
             //if its -1 this is not a radar Unit command but software config command
             radarConfigProperty.value = data.data;
             try{
@@ -362,10 +350,10 @@ var RadarStalker2 = function (options){
                     var numvalue = parseInt(data.data);
                     if (!isNaN(numvalue) == true) {
                         if (numvalue < 256) {
-                            myConfigVal = new Buffer(1);
+                            myConfigVal = new Buffer.alloc(1);
                             myConfigVal.writeUInt8(numvalue, 0);
                         } else {
-                            myConfigVal = new Buffer(2);
+                            myConfigVal = new Buffer.alloc(2);
                             myConfigVal.writeUInt16LE(numvalue, 0);
                         }
                     }
@@ -398,7 +386,7 @@ var RadarStalker2 = function (options){
     };
 
     var getRadarPacket = function (settingid, getsetchange, valueBuff) {
-        var myBuf = new Buffer(10 + valueBuff.length);
+        var myBuf = new Buffer.alloc(10 + valueBuff.length);
         myBuf[0] = 239;     // Start ID = 239
         myBuf[1] = 2;       // Destination Address = 2
         myBuf[2] = 1;       // Source Address = 1
@@ -406,8 +394,8 @@ var RadarStalker2 = function (options){
         //myBuf[4] = 0        // Packet Length LSB = 3
         //myBuf[5] = 0        // Packet Length MSB = 0
         myBuf.writeUInt16LE(valueBuff.length + 2, 4);
-        myBuf[6] = settingid + getsetchange      // Command 20 + 128 = 148
-        myBuf[7] = 0        // Antenna Number = 0
+        myBuf[6] = settingid + getsetchange;      // Command 20 + 128 = 148
+        myBuf[7] = 0;        // Antenna Number = 0
         valueBuff.copy(myBuf, 8);  // Config Value = 1
         myBuf[8 + valueBuff.length] = 0;
         myBuf[9 + valueBuff.length] = 0;
@@ -429,12 +417,11 @@ var RadarStalker2 = function (options){
 
     var serialPacketCount = 0;
     var radarConfigGetComplete = false;
-    
+    var configRequestPending = false;
 
     var ProcessRadarDataPacket_Config = function (data) {
         if (data.readUInt8(1) == 1) { // make sure this packet is for us We are always ID 1
-            //We assume only Radar Attached below but proboly Should Build an Array incase we get a RS 485 Version
-            // We would need to store the Config Values per Address we are talking to
+            //We assume only RS232 Radar is Attached as that is the only one that support BE protocol
             var PayloadSource = data.readUInt8(2);
             var PayloadLength = data.readUInt16LE(4);
             var updateRadarConfig = false;
@@ -476,9 +463,11 @@ var RadarStalker2 = function (options){
                 if (ConfigProperty.value !== value) {
                     ConfigProperty.value = value;
                     updateRadarConfigProperty = true;
+                    debug("radarConfigProperty received ", ConfigPropertyName, value)
                 }
                 if (updateRadarConfigProperty == true) {
-                    var cdp = { Property: ConfigPropertyName, data: value }
+                    //raise the event to app.js so it can emit it via socket.io to the browser
+                    var cdp = { Property: ConfigPropertyName, data: value };
                     self.emit('radarConfigProperty', cdp);
                 }
                 configRequestPending = false;
@@ -523,7 +512,9 @@ var RadarStalker2 = function (options){
         var Offset = 0;
         for (var i = 0; i < NumberOfSpeedBlocks; i++) {
             //Next 15 bytes is the speedBlock
-
+            if (data.length <= 8 + Offset) {
+                console.log('Invalid Length');
+            }
             var UnitSpeedBlockStatusByte = data.readUInt8(8 + Offset);
             var UnitSpeedBlockStatus = { primaryDirection: ((2 == (2 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), secondaryDirection: ((4 == (4 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), transmiterStatus: ((1 == (1 & UnitSpeedBlockStatusByte)) ? 'on' : 'off') }
             var Speed = data.toString("ascii", 9 + Offset, 12 + Offset);  //data[9 + Offset] + data[10 + Offset] + data[11 + Offset];
@@ -694,7 +685,7 @@ var RadarStalker2 = function (options){
             }
         } else {
             self.emit('radarTimeout', { lastSpeedDataTimestamp: commonData.lastSpeedDataTimestamp });
-            radarSerialPort.write(getRadarPacket(81, 0, new Buffer([0])), function (err) {
+            radarSerialPort.write(getRadarPacket(81, 0, new Buffer.alloc(1)), function (err) {
                 if (err == undefined) {
                     debug('request Radar Software Version Keep Alive');
                 } else {
@@ -706,15 +697,12 @@ var RadarStalker2 = function (options){
         setTimeout(recursiveTimerStart,60000);
     };
 
-   
-
     var radarSerialPort = null;
     if (objOptions.emulator == true) {
         debug('starting radarStalker2 emulator on Fake Port ' + radarSerialPortName);
         
         radarSerialPort = new RadarEmulator(radarSerialPortName, {
-            baudRate: objOptions.baudrate,
-            parser: radarPacketParser(1024),
+            baudrate: objOptions.baudrate,
             autoOpen: false
         });
         
@@ -723,11 +711,11 @@ var RadarStalker2 = function (options){
         //version 4 syntax
         radarSerialPort = new SerialPort(radarSerialPortName, {
             baudRate: objOptions.baudrate,
-            parser: radarPacketParser(1024),
             autoOpen:false}); 
         
     }
-    radarSerialPort.on('data', radarSerialPortDataHandler);
+    const radarPacketParser = radarSerialPort.pipe(new RadarPacketParser({ bufferSize: 512 }));
+    radarPacketParser.on('data', radarSerialPortDataHandler);
     //set things in motion by opening the serial port and starting the keepalive timer
     radarSerialPort.open(function (err) {
         if (err) {

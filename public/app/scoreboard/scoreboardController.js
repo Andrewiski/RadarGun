@@ -7,9 +7,13 @@
            $scope.commonData = {
                teamList: [],
                playerList: [],
-               player: undefined,
+               pitcher: {firstName:"", lastName:"", jerseyNumber:-1},
+               batter: { firstName: "", lastName: "", jerseyNumber: -1 },
+               batterEdit: false,
+               pitcherEdit:false,
                team:undefined,
-               radarSpeedDataHistory:[],
+               radarSpeedDataHistory: [],
+               showRadarConfig : true,
                editRadarConfig: false,
                radarSpeedData: {
                    id: 0,
@@ -67,10 +71,10 @@
                 console.log('radarMonitor:radarConfig detected');
                 console.debug(data);
                 $scope.commonData.radarConfig = data;
-                if ($scope.commonData.radarConfig.TransmiterControl.value == 0) {
+                if ($scope.commonData.radarConfig.TransmiterControl.value === 0) {
                     $scope.showRadarOffModal();
                 }
-                if ($scope.commonData.radarConfig.ProductID.value == 'Radar Emulator') {
+                if ($scope.commonData.radarConfig.ProductID.value === 'Radar Emulator') {
                     $scope.commonData.isRadarEmulator = true;
                 }
                 $scope.$apply();
@@ -98,7 +102,7 @@
                         controller: function ($scope) {
                             $scope.turnRadarOn = function () {
                                 $scope.$close({ turnOn: true });
-                            }
+                            };
                         },
                         controllerAs: '$ctrl',
 
@@ -152,6 +156,22 @@
                 $scope.$apply();
             });
 
+           $rootScope.$on('radarMonitor:batter', function (event, data) {
+               // use the data accordingly
+               //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
+               console.debug('radarMonitor:batter detected ', data);
+               $scope.commonData.batter = data.data;
+               $scope.$apply();
+           });
+
+           $rootScope.$on('radarMonitor:pitcher', function (event, data) {
+               // use the data accordingly
+               //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
+               console.debug('radarMonitor:pitcher detected ', data);
+               $scope.commonData.pitcher = data.data;
+               $scope.$apply();
+           });
+
             $rootScope.$on('radarMonitor:radarSpeedDataHistory', function(event, data) {
                 // use the data accordingly
                 //console.log('radarMonitor:radarSpeedDataHistory detected ');
@@ -198,15 +218,48 @@
 
             $scope.updateRadarConfig = function(){
                 $scope.commonData.isradarCommandPending = true;
-                for (var key in $scope.radarConfig){
-                    var radarConfigProperty = $scope.radarConfig[key];
-                    if (radarConfigProperty.isDirty == true){
+                for (var key in $scope.commonData.radarConfig){
+                    var radarConfigProperty = $scope.commonData.radarConfig[key];
+                    if (radarConfigProperty.isDirty === true){
                         radarConfigProperty.isDirty = false;
                         $scope.radarCommand(key,radarConfigProperty.value);
                     }
                 }
                 $scope.commonData.isradarCommandPending = false;
             }
+
+
+           
+
+           $scope.pitcherAdd = function () {
+
+               $scope.commonData.pitcherEdit = true;
+           }
+           $scope.pitcherEdit = function () {
+               $scope.commonData.pitcherEdit = true;
+           }
+           $scope.pitcherEditCancel = function () {
+               $scope.commonData.pitcherEdit = false;
+           }
+
+           $scope.pitcherEditSave = function () {
+               $scope.commonData.pitcherEdit = false;
+           }
+
+           $scope.batterAdd = function () {
+
+               $scope.commonData.batterEdit = true;
+           }
+           $scope.batterEdit = function () {
+               $scope.commonData.batterEdit = true;
+           }
+           $scope.batterEditCancel = function () {
+               $scope.commonData.batterEdit = false;
+           }
+
+           $scope.batterEditSave = function () {
+               $scope.commonData.batterEdit = false;
+           }
 
 
             $scope.playerShow = function () {
@@ -254,7 +307,7 @@
             $rootScope.$on('radarMonitor:gpsPosition', function (event, data) {
                 $scope.commonData.gpsPosition = data;
                 
-                if (googleMapInited == true && $scope.common.googleMapInited == false) {
+                if (googleMapInited === true && $scope.common.googleMapInited === false) {
                     $scope.commonData.googleMap.alpha = 0.4;
                     $scope.commonData.googleMap.state = { lat: data.lat, lng: data.lon };
 
