@@ -713,7 +713,7 @@ var RadarStalker2 = function (options){
         debug('starting radarStalker2 emulator on Fake Port ' + radarSerialPortName);
         
         radarSerialPort = new RadarEmulator(radarSerialPortName, {
-            baudrate: objOptions.baudrate,
+            baudRate: objOptions.baudrate,
             parser: radarPacketParser(1024),
             autoOpen: false
         });
@@ -722,7 +722,7 @@ var RadarStalker2 = function (options){
         debug('starting radarStalker2 on serial port ' + radarSerialPortName);
         //version 4 syntax
         radarSerialPort = new SerialPort(radarSerialPortName, {
-            baudrate: objOptions.baudrate,
+            baudRate: objOptions.baudrate,
             parser: radarPacketParser(1024),
             autoOpen:false}); 
         

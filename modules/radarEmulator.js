@@ -174,7 +174,7 @@ var RadarEmulator = function (fakePortName, options) {
         if (socket) {
             socketid = socket.id;
         } else {
-            socketid = "radar"
+            socketid = "radar";
         }
         debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
         switch (data.cmd) {
