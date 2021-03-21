@@ -4,4 +4,5 @@ D:\Users\adevries\sources\GitHub\RadarGun\obj\Debug\RadarGunMonitor.njsproj.Core
 D:\Users\adevries\sources\GitHub\RadarGun\bin\Microsoft.NodejsTools.WebRole.dll
 D:\github\RadarGun\obj\Debug\RadarGunMonitor.njsproj.CoreCompileInputs.cache
 C:\VS2010\RadarGun\obj\Debug\RadarGunMonitor.njsprojAssemblyReference.cache
-
+C:\VS2010\RadarGun\obj\Debug\RadarGunMonitor.njsproj.CoreCompileInputs.cache
+C:\VS2010\RadarGun\bin\Microsoft.NodejsTools.WebRole.dll
