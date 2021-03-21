@@ -3,6 +3,11 @@ data/teams.nosql
 data/player.nosql
 data/radarData.nosq"
 
+RadarGunMonitor.njsproj.FileListAbsolute.txt 
+RadarGunMonitor.njsprojAssemblyReference.cache
+
+package-lock.json
+
 obj
 bin
 
