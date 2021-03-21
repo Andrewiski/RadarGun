@@ -37,7 +37,6 @@
     "@uirouter/angularjs": "^1.0.25",
     "angular": "^1.8",
     "angular-animate": "^1.7.9",
-    "angular-google-maps": "^2.4.1",
     "angular-route": "^1.7.9",
     "angular-sanitize": "^1.7.9",
     "angular-ui-bootstrap": "^2.5.6",
