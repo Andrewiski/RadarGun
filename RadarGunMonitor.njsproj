@@ -20,7 +20,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>83aac9f6-1094-40fc-8ce9-2ca0fe8ccbac</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>app.js</StartupFile>
+    <StartupFile>TestNanoVideo2.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -111,6 +111,7 @@
     <Content Include="TestNanoVideo.js">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="TestNanoVideo2.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="data\games\" />
