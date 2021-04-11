@@ -20,7 +20,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>83aac9f6-1094-40fc-8ce9-2ca0fe8ccbac</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>TestNanoVideo2.js</StartupFile>
+    <StartupFile>app.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -74,6 +74,7 @@
     <Content Include=".gitattributes" />
     <Content Include=".gitignore" />
     <Content Include="configs\Andy Configure Pro II Speed Sensor 232 2.0.1.cfg" />
+    <Content Include="configs\ffmpegConfig.json" />
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
     <Content Include="configs\dataDisplayConfig.json" />
@@ -85,11 +86,62 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="dts\BB-BONE-RADAR-00A0.dts" />
+    <Content Include="ffmpeg\doc\bootstrap.min.css" />
+    <Content Include="ffmpeg\doc\default.css" />
+    <Content Include="ffmpeg\doc\developer.html" />
+    <Content Include="ffmpeg\doc\faq.html" />
+    <Content Include="ffmpeg\doc\fate.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-all.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-bitstream-filters.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-codecs.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-devices.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-filters.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-formats.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-protocols.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-resampler.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-scaler.html" />
+    <Content Include="ffmpeg\doc\ffmpeg-utils.html" />
+    <Content Include="ffmpeg\doc\ffmpeg.html" />
+    <Content Include="ffmpeg\doc\ffplay-all.html" />
+    <Content Include="ffmpeg\doc\ffplay.html" />
+    <Content Include="ffmpeg\doc\ffprobe-all.html" />
+    <Content Include="ffmpeg\doc\ffprobe.html" />
+    <Content Include="ffmpeg\doc\general.html" />
+    <Content Include="ffmpeg\doc\git-howto.html" />
+    <Content Include="ffmpeg\doc\libavcodec.html" />
+    <Content Include="ffmpeg\doc\libavdevice.html" />
+    <Content Include="ffmpeg\doc\libavfilter.html" />
+    <Content Include="ffmpeg\doc\libavformat.html" />
+    <Content Include="ffmpeg\doc\libavutil.html" />
+    <Content Include="ffmpeg\doc\libswresample.html" />
+    <Content Include="ffmpeg\doc\libswscale.html" />
+    <Content Include="ffmpeg\doc\mailing-list-faq.html" />
+    <Content Include="ffmpeg\doc\nut.html" />
+    <Content Include="ffmpeg\doc\platform.html" />
+    <Content Include="ffmpeg\doc\style.min.css" />
+    <None Include="ffmpeg\presets\ffprobe.xsd" />
+    <Content Include="ffmpeg\ffmpeg.exe" />
+    <Content Include="ffmpeg\ffplay.exe" />
+    <Content Include="ffmpeg\ffprobe.exe" />
+    <Content Include="ffmpeg\LICENSE.txt" />
+    <Content Include="ffmpeg\presets\libvpx-1080p.ffpreset" />
+    <Content Include="ffmpeg\presets\libvpx-1080p50_60.ffpreset" />
+    <Content Include="ffmpeg\presets\libvpx-360p.ffpreset" />
+    <Content Include="ffmpeg\presets\libvpx-720p.ffpreset" />
+    <Content Include="ffmpeg\presets\libvpx-720p50_60.ffpreset" />
+    <Content Include="ffmpeg\README.txt" />
+    <Content Include="modules\ffmpegOverlay.js" />
     <Content Include="modules\radarPacketParser.js" />
+    <Content Include="overlay.txt">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="package.json" />
     <Content Include="public\app\error-handler.html" />
     <Content Include="public\app\img\ajax_loader_blue_350.gif" />
     <Content Include="public\app\img\spinner.gif" />
+    <Content Include="public\app\mw-confirm-click.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="public\app\scoreboard\configView.html" />
     <Content Include="public\app\scoreboard\radarOffModal.html" />
     <Content Include="public\app\scoreboard\scoreboard.tpl.html" />
@@ -108,6 +160,9 @@
     <Content Include="testBatteryVoltage.js">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="TestFfmpeg.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="TestNanoVideo.js">
       <SubType>Code</SubType>
     </Content>
@@ -115,10 +170,14 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="data\games\" />
+    <Folder Include="data\games\00000000-0000-0000-0000-000000000001\" />
+    <Folder Include="ffmpeg\doc\" />
+    <Folder Include="ffmpeg\presets\" />
     <Folder Include="modules\" />
     <Folder Include="configs\" />
     <Folder Include="dts\" />
     <Folder Include="data\" />
+    <Folder Include="ffmpeg\" />
     <Folder Include="wifidog\" />
     <Folder Include="service\" />
     <Folder Include="public\" />

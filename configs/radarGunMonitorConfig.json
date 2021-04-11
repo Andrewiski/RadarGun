@@ -2,4 +2,5 @@
   "webserverPort": 12336,
   "win32WebserverPort": 12336,
   "useNoSql": true
+
 }

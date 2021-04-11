@@ -84,7 +84,15 @@
            Service.sendRadarEmulatorCommand = function (cmd, data) {
                Service.socket.emit('radarEmulatorCommand', { cmd: cmd, data: data });
            };
-           
+
+           Service.sendServerCommand = function (cmd, data) {
+               Service.socket.emit(cmd, data );
+           };
+
+           Service.socket.on('gameChanged', function (message) {
+               console.log('radarMonitorService received gameChanged', message);
+               $rootScope.$emit("gameChanged", message);
+           });
             return Service;
         }]);
 })();

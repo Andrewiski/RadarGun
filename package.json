@@ -49,6 +49,7 @@
     "debug": "^4.3.1",
     "express": "^4.17.1",
     "extend": "^3.0.0",
+    "fluent-ffmpeg": "^2.1.2",
     "font-awesome": "^4.6.3",
     "gps": "^0.5.3",
     "gstreamer-superficial": "^1.6.0",

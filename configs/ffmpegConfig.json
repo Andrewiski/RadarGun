@@ -1,0 +1,8 @@
+{
+  "rtspUrl": "rtsp://10.100.32.95:7447/0MxYqhH8uDMLeQ4j",
+  "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/7w0t-zhy3-0wzw-9kw8-b1md",
+  "videoRoute": "/videotest",
+  "logLevel": "debug",
+  "audioCodec": "copy",
+  "videoCodec": "libx264"
+}

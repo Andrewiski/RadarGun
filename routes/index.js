@@ -7,12 +7,6 @@ router.get('/', function (req, res) {
     req.sendfile(path.join(__dirname, 'public/index.htm'));
 });
 
-router.get('/data/team', function (req, res) {
-    res.json
-});
 
-router.get('/data/player', function (req, res) {
-    req.sendfile(path.join(__dirname, 'public/index.htm'));
-});
 
 module.exports = router;

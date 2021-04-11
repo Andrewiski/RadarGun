@@ -14,15 +14,14 @@ var RadarDatabase = function (options) {
     var self = this;
     var defaultOptions = {
         deviceId: "",
-        teamFile: "./data/teams.nosql",
-        playerFile: "./data/player.nosql",
-        radarDataFile: "./data/radarData.nosql"
+        teamsFile: "./data/teams.nosql",
+        gamesFile: "./data/games.nosql"
     }
     nconf.file('./configs/radarDatabaseConfig.json');
     var configFileSettings = nconf.get();
     var objOptions = extend({}, defaultOptions, configFileSettings, options);
 
-    if (objOptions.deviceId == undefined || objOptions.deviceId == '') {
+    if (objOptions.deviceId === undefined || objOptions.deviceId === '') {
         objOptions.deviceId = uuidv4();
         try {
             configFileSettings.deviceId = objOptions.deviceId;
@@ -33,8 +32,8 @@ var RadarDatabase = function (options) {
         }
     }
 
-    var teamDbExists = fs.existsSync(objOptions.teamFile);
-    var playerDbExists = fs.existsSync(objOptions.playerFile);
+    var teamsDbExists = fs.existsSync(objOptions.teamsFile);
+    var gamesDbExists = fs.existsSync(objOptions.gamesFile);
     
     
     // EventEmitters inherit a single event listener, see it in action
@@ -44,14 +43,14 @@ var RadarDatabase = function (options) {
 
     
     // db === Database instance <https://docs.totaljs.com/latest/en.html#api~Database>
-    var teamDb = NoSQL.load(objOptions.teamFile);
-    var playerDb = NoSQL.load(objOptions.playerFile);
+    var teamsDb = NoSQL.load(objOptions.teamsFile);
+    var gamesDb = NoSQL.load(objOptions.gamesFile);
     //var radarDataDb = NoSQL.load(objOptions.radarDataFile);
 
 
 
     this.team_getAll = function (callback) {
-        teamDb.find().where("status",1).make(function (builder) {
+        teamsDb.find().where("status",1).make(function (builder) {
             builder.callback(function (err, response) {
                 debug('team_getAll ', response);
                 callback(err, response);
@@ -64,18 +63,18 @@ var RadarDatabase = function (options) {
         if (!team.id) {
             team.id = uuidv4();
         }
-        teamDb.update(team, team).make(function (builder) {
-            //builder.between('age', 20, 30);
-            builder.callback(function (err, count) {
+        teamsDb.update(team, team).make(function (filter) {
+            filter.where('id', team.id);
+            filter.callback(function (err, count, doc) {
                 debug('team_upsert ', count);
-                callback(err, count);
+                callback(err, count, doc);
             });
         });                                            
     }
 
     this.team_delete = function (team, callback) {
         if (team.teamId) {
-            teamDb.modify({ status: 0 }, false).where('id', team.id).make(function (builder) {
+            teamsDb.modify({ status: 0 }, false).where('id', team.id).make(function (builder) {
                 //builder.between('age', 20, 30);
                 builder.callback(function (err, count) {
                     debug('team_delete ', count);
@@ -97,65 +96,186 @@ var RadarDatabase = function (options) {
         */
     }
 
-    this.player_upsert = function (player, callback) {
-        if (!player.id) {
-            player.id = uuidv4();
-        }
-        playerDb.update(player, player).make(function (builder) {
-            builder.callback(function (err, count) {
-                debug('player_upsert ', count);
-                callback(err, count);
-            });
-        });  
-    }
-    this.player_getAll = function (callback) {
-        playerDb.find().where("status", 1).make(function (builder) {
+
+    this.game_getAll = function (callback) {
+        gamesDb.find().where("status", 1).make(function (builder) {
             builder.callback(function (err, response) {
-                debug('player_getAll ', response);
+                debug('game_getAll ', response);
                 callback(err, response);
             });
         });
+
     }
-    this.player_delete = function (player, callback) {
-        if (player.playerId) {
-            playerDb.modify({ status: 0 }, false).where('id', player.playerId).make(function (builder) {
+
+    this.game_upsert = function (game, callback) {
+        if (!game.id) {
+            game.id = uuidv4();
+        }
+        gamesDb.update(game, game).make(function (builder) {
+            //builder.between('age', 20, 30);
+            builder.callback(function (err, count) {
+                debug('game_upsert ', count);
+                callback(err, count);
+            });
+        });
+    }
+
+    this.game_delete = function (game, callback) {
+        if (game.id) {
+            teamsDb.modify({ status: 0 }, false).where('id', game.id).make(function (builder) {
                 //builder.between('age', 20, 30);
                 builder.callback(function (err, count) {
-                    debug('player_delete ', count);
+                    debug('game_delete ', count);
                     callback(err, count);
                 });
             });
         } else {
-            debug('player_delete no playerid');
+            debug('game_delete no gameid');
         }
+
+        /*
+          nosql.remove().make(function(builder) {
+              // builder.first(); --> removes only one document
+              builder.where('age', '<', 15);
+              builder.callback(function(err, count) {
+                  console.log('removed documents:', count);
+              });
+          });
+        */
     }
 
-    if (playerDbExists == false) {
-        self.player_upsert({
-            id: "00000000-0000-0000-0000-000000000000",
-            firstName: "Anonymous",
-            lastName: "Player",
-            status: 1
-        },
+   
+
+    if (gamesDbExists === false) {
+        self.game_upsert(
+            { "id": "00000000-0000-0000-0000-000000000001", "name": "New Game", "date": "", "home": "", "guest": "", "status": 1 }    
+        ,
         function (err, callback) {
-            debug("Anonymous Player Inserted");
+            debug("Anonymous Game Inserted");
         });
     }
-    if (teamDbExists == false) {
+    if (teamsDbExists === false) {
         self.team_upsert({
-            id: "00000000-0000-0000-0000-000000000000",
-            status: 1,
-            name: "Anonymous Team",
-            players: [
+            "id": "00000000-0000-0000-0000-000000000001",
+            "status": 1,
+            "name": "Vicksburg Bulldogs Varsity",
+            "roster": [
                 {
-                    id: "00000000-0000-0000-0000-000000000000",
-                    firstName: "Anonymous",
-                    lastName: "Player"
+                    "firstName": "Cole",
+                    "lastName": "Gebben",
+                    "jerseyNumber": "1",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Jacob",
+                    "lastName": "Conklin",
+                    "jerseyNumber": "2",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Zach",
+                    "lastName": "Myers",
+                    "jerseyNumber": "4",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Tyler",
+                    "lastName": "DeVries",
+                    "jerseyNumber": "5",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Ben",
+                    "lastName": "Hackman",
+                    "jerseyNumber": "6",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Jimmy",
+                    "lastName": "Cutshaw",
+                    "jerseyNumber": "7",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Logan",
+                    "lastName": "Cohrs",
+                    "jerseyNumber": "8",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Brenden",
+                    "lastName": "Monroe",
+                    "jerseyNumber": "9",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Brenden",
+                    "lastName": "Owen",
+                    "jerseyNumber": "10",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Carter",
+                    "lastName": "Brown",
+                    "jerseyNumber": "11",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Parker",
+                    "lastName": "Wilson",
+                    "jerseyNumber": "12",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Dylan",
+                    "lastName": "Zemitans",
+                    "jerseyNumber": "13",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Drew",
+                    "lastName": "Habel",
+                    "jerseyNumber": "14",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Trevor",
+                    "lastName": "Young",
+                    "jerseyNumber": "15",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Evan",
+                    "lastName": "Anderson",
+                    "jerseyNumber": "18",
+                    "fielding": 99,
+                    "batting": 99
+                },
+                {
+                    "firstName": "Colin",
+                    "lastName": "Klinger",
+                    "jerseyNumber": "22",
+                    "fielding": 99,
+                    "batting": 99
                 }
             ]
         },
         function (err, callback) {
-            debug("Anonymous Player Inserted");
+            debug("Anonymous Game Inserted");
         });
     }
 }
