@@ -42,232 +42,267 @@
 
         </div>
     </div>
-
-    <div ng-hide="commonData.isGameAdmin">
-        <div class="clear" />
-        <div class="row form-inline">
-            <div class="col-sm-1">
-                <div class="form-group">
-                    <label class="control-label">Inning</label>
-                    <span class="form-control" ng-bind="commonData.game.inning">1</span>&nbsp;<i class="fa fa-sort-up" style="font-size:larger" ng-show="commonData.game.inningPosition==='top'"></i><i class="fa fa-sort-down" style="font-size:larger" ng-show="commonData.game.inningPosition==='bottom'"></i>
-                </div>
-            </div>
-
-            <div class="col-sm-1">
-                <label class="control-label">Home</label>
-                <span class="form-control" ng-bind="commonData.game.score.home">0</span>
-            </div>
-            <div class="col-sm-1">
-                <label class="control-label">Guest</label>
-                <span class="form-control" ng-bind="commonData.game.score.guest">0</span>
-            </div>
-            <div class="col-sm-1">
-                <div>
-                    <label class="control-label">Outs</label>
-                    <span class="form-control" ng-bind="commonData.game.outs">0</span>
-                </div>
-            </div>
-            <div class="col-sm-1">
-                <div>
-                    <label class="control-label">Balls</label>
-                    <span class="form-control" ng-bind="commonData.game.balls">0</span>
-                </div>
-            </div>
-            <div class="col-sm-1">
-                <div>
-                    <label class="control-label">Strikes</label>
-                    <span class="form-control" ng-bind="commonData.game.strikes">0</span>
-                </div>
-            </div>
-
-        </div>
-    </div>
+    
+    <div ng-hide="commonData.game === null">
 
         <div ng-hide="commonData.isGameAdmin">
-            <div style="float:right"><button ng-click="commonData.isGameAdmin = true" class="btn btn-primary">Login</button></div>
-        </div>
-        <div ng-show="commonData.isGameAdmin">
-            <div class="row">
+            <div class="clear" />
+            <div class="row form-inline">
                 <div class="col-sm-1">
-                    <label class="control-label">Inning</label>
-                    <select class="form-control" ng-model="commonData.game.inning" convert-to-number ng-change="inningChange()" style="width:auto;">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                        <option>6</option>
-                        <option>7</option>
-                        <option>8</option>
-                        <option>9</option>
-                        <option>10</option>
-                        <option>11</option>
-                        <option>12</option>
-                        <option>13</option>
-                        <option>14</option>
-                        <option>15</option>
-                        <option>16</option>
-                        <option>17</option>
-                        <option>18</option>
-                        <option>19</option>
-                        <option>20</option>
-                    </select>
-                </div>
-                <div class="col-sm-1">
-                    <label class="control-label">Top/Bottom</label>
-                    <select class="form-control" ng-model="commonData.game.inningPosition" ng-change="inningPositionChange()" style="width:auto;">
-                        <option value="top">Top</option>
-                        <option value="bottom">Bottom</option>
-                    </select>
-
-                </div>
-
-                <div class="col-sm-1">
-                    <label class="control-label">Home</label>
-                    <select class="form-control" ng-model="commonData.game.score.home" ng-change="homeScoreChange()" convert-to-number style="width:auto;">
-                        <option>0</option>
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                        <option>6</option>
-                        <option>7</option>
-                        <option>8</option>
-                        <option>9</option>
-                        <option>10</option>
-                        <option>11</option>
-                        <option>12</option>
-                        <option>13</option>
-                        <option>14</option>
-                        <option>15</option>
-                        <option>16</option>
-                        <option>17</option>
-                        <option>18</option>
-                        <option>19</option>
-                        <option>20</option>
-                        <option>21</option>
-                        <option>22</option>
-                        <option>23</option>
-                        <option>24</option>
-                        <option>25</option>
-                        <option>26</option>
-                        <option>27</option>
-                        <option>28</option>
-                        <option>29</option>
-                        <option>30</option>
-                    </select>
-                </div>
-                <div class="col-sm-1">
-                    <label class="control-label">Guest</label>
-                    <select class="form-control" ng-model="commonData.game.score.guest" ng-change="guestScoreChange()" convert-to-number style="width:auto;">
-                        <option>0</option>
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                        <option>6</option>
-                        <option>7</option>
-                        <option>8</option>
-                        <option>9</option>
-                        <option>10</option>
-                        <option>11</option>
-                        <option>12</option>
-                        <option>13</option>
-                        <option>14</option>
-                        <option>15</option>
-                        <option>16</option>
-                        <option>17</option>
-                        <option>18</option>
-                        <option>19</option>
-                        <option>20</option>
-                        <option>21</option>
-                        <option>22</option>
-                        <option>23</option>
-                        <option>24</option>
-                        <option>25</option>
-                        <option>26</option>
-                        <option>27</option>
-                        <option>28</option>
-                        <option>29</option>
-                        <option>30</option>
-                    </select>
-                </div>
-                <div class="col-sm-1">
-                    <div>
-                        <label class="control-label">Outs</label>
-                        <select class="form-control" ng-model="commonData.game.outs" convert-to-number ng-change="outsChange()" style="width:auto;">
-                            <option>0</option>
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                        </select>
+                    <div class="form-group">
+                        <label class="control-label">Inning</label>
+                        <span class="form-control" ng-bind="commonData.game.inning">1</span>&nbsp;<i class="fa fa-sort-up" style="font-size:larger" ng-show="commonData.game.inningPosition==='top'"></i><i class="fa fa-sort-down" style="font-size:larger" ng-show="commonData.game.inningPosition==='bottom'"></i>
                     </div>
                 </div>
 
                 <div class="col-sm-1">
+                    <label class="control-label">Home</label>
+                    <span class="form-control" ng-bind="commonData.game.score.home">0</span>
+                </div>
+                <div class="col-sm-1">
+                    <label class="control-label">Guest</label>
+                    <span class="form-control" ng-bind="commonData.game.score.guest">0</span>
+                </div>
+                <div class="col-sm-1">
+                    <div>
+                        <label class="control-label">Outs</label>
+                        <span class="form-control" ng-bind="commonData.game.outs">0</span>
+                    </div>
+                </div>
+                <div class="col-sm-1">
                     <div>
                         <label class="control-label">Balls</label>
-                        <select class="form-control" ng-model="commonData.game.balls" convert-to-number ng-change="ballsChange()" style="width:auto;">
-                            <option>0</option>
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                        </select>
+                        <span class="form-control" ng-bind="commonData.game.balls">0</span>
                     </div>
                 </div>
                 <div class="col-sm-1">
                     <div>
                         <label class="control-label">Strikes</label>
-                        <select class="form-control" ng-model="commonData.game.strikes" convert-to-number ng-change="strikesChange()" style="width:auto;">
+                        <span class="form-control" ng-bind="commonData.game.strikes">0</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row form-inline">
+                <div class="col-sm-6">
+                    <label class="control-label">Pitcher</label>
+                    <span class="form-control" ng-bind="'#' + commonData.game.pitcher.player.jerseyNumber + ' ' + commonData.game.pitcher.player.firstName + ' ' + commonData.game.pitcher.player.lastName"></span>
+                </div>
+                <div class="col-sm-6">
+                    <label class="control-label">Batter</label>
+                    <span class="form-control" ng-bind="'#' + commonData.game.batter.player.jerseyNumber + ' ' + commonData.game.batter.player.firstName + ' ' + commonData.game.batter.player.lastName"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div ng-hide="commonData.isGameAdmin">
+            <div style="float:right"><button ng-click="commonData.isGameAdmin = true" class="btn btn-primary">Login</button></div>
+        </div>
+        <div ng-show="commonData.isGameAdmin">
+            <div ng-show="commonData.isRadarEmulator" class="row">
+                <div class=" col-lg-12 radarEmulator">
+
+                    In:<input ng-model="commonData.radarEmulator.data.in" type="text" /> Out: <input ng-model="commonData.radarEmulator.data.out" type="text" /> <button class="btn btn-danger" ng-click="radarEmulatorSend()">Go</button>
+                </div>
+            </div>
+            <div ng-show="commonData.isGameSelect">
+                <ui-select ng-model="commonData.selectedGame" ng-change="gameSelected()" theme="bootstrap">
+                    <ui-select-match placeholder="Select or search a game in the list..."> {{$select.selected.startDate}} {{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="item in commonData.games | filter: $select.search">
+                        <span ng-bind-html="item.name | highlight: $select.search"></span>
+                        <div>
+                            <small>
+                                <span ng-bind-html="item.home.team.name | highlight: $select.search"></span>
+                                <span ng-bind-html="item.guest.team.name | highlight: $select.search"></span>
+                            </small>
+                        </div>
+                    </ui-select-choices>
+                </ui-select>
+
+            </div>
+            <div ng-show="commonData.isGameScore">
+                <div class="row">
+                    <div class="col-sm-1">
+                        <label class="control-label">Inning</label>
+                        <select class="form-control" ng-model="commonData.game.inning" convert-to-number ng-change="inningChange()" style="width:auto;">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                            <option>13</option>
+                            <option>14</option>
+                            <option>15</option>
+                            <option>16</option>
+                            <option>17</option>
+                            <option>18</option>
+                            <option>19</option>
+                            <option>20</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-1">
+                        <label class="control-label">Top/Bottom</label>
+                        <select class="form-control" ng-model="commonData.game.inningPosition" ng-change="inningPositionChange()" style="width:auto;">
+                            <option value="top">Top</option>
+                            <option value="bottom">Bottom</option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-sm-1">
+                        <label class="control-label">Home</label>
+                        <select class="form-control" ng-model="commonData.game.score.home" ng-change="homeScoreChange()" convert-to-number style="width:auto;">
                             <option>0</option>
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                            <option>13</option>
+                            <option>14</option>
+                            <option>15</option>
+                            <option>16</option>
+                            <option>17</option>
+                            <option>18</option>
+                            <option>19</option>
+                            <option>20</option>
+                            <option>21</option>
+                            <option>22</option>
+                            <option>23</option>
+                            <option>24</option>
+                            <option>25</option>
+                            <option>26</option>
+                            <option>27</option>
+                            <option>28</option>
+                            <option>29</option>
+                            <option>30</option>
                         </select>
                     </div>
-                </div>
-
-            </div>
-            <div class="row">
-                <div class="col-sm-6">
-                    <div>
-                        <label class="col-sm-3 control-label">Batter</label>
+                    <div class="col-sm-1">
+                        <label class="control-label">Guest</label>
+                        <select class="form-control" ng-model="commonData.game.score.guest" ng-change="guestScoreChange()" convert-to-number style="width:auto;">
+                            <option>0</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                            <option>13</option>
+                            <option>14</option>
+                            <option>15</option>
+                            <option>16</option>
+                            <option>17</option>
+                            <option>18</option>
+                            <option>19</option>
+                            <option>20</option>
+                            <option>21</option>
+                            <option>22</option>
+                            <option>23</option>
+                            <option>24</option>
+                            <option>25</option>
+                            <option>26</option>
+                            <option>27</option>
+                            <option>28</option>
+                            <option>29</option>
+                            <option>30</option>
+                        </select>
                     </div>
-                </div>
-                <div class="col-sm-6">
-                    <div>
-                        <label class="col-sm-3 control-label">Pitcher</label>
+                    <div class="col-sm-1">
+                        <div>
+                            <label class="control-label">Outs</label>
+                            <select class="form-control" ng-model="commonData.game.outs" convert-to-number ng-change="outsChange()" style="width:auto;">
+                                <option>0</option>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div>
 
+                    <div class="col-sm-1">
+                        <div>
+                            <label class="control-label">Balls</label>
+                            <select class="form-control" ng-model="commonData.game.balls" convert-to-number ng-change="ballsChange()" style="width:auto;">
+                                <option>0</option>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                        <div>
+                            <label class="control-label">Strikes</label>
+                            <select class="form-control" ng-model="commonData.game.strikes" convert-to-number ng-change="strikesChange()" style="width:auto;">
+                                <option>0</option>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
                     <div class="col-sm-6">
                         <div>
-                            <ui-select ng-model="commonData.pitcher" theme="bootstrap">
-                                <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
-                                <ui-select-choices repeat="item in commonData.pitchers | filter: $select.search">
-                                    #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
-                                    <span ng-bind-html="item.firstName | highlight: $select.search"></span>
-                                    <span ng-bind-html="item.lastName | highlight: $select.search"></span>
-                                </ui-select-choices>
-                            </ui-select>
+                            <label class="col-sm-3 control-label">Pitcher</label>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div>
-                            <ui-select ng-model="commonData.batter" theme="bootstrap">
-                                <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
-                                <ui-select-choices repeat="item in commonData.batters | filter: $select.search">
-                                    #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
-                                    <span ng-bind-html="item.firstName | highlight: $select.search"></span>
-                                    <span ng-bind-html="item.lastName | highlight: $select.search"></span>
-                                </ui-select-choices>
-                            </ui-select>
+                            <label class="col-sm-3 control-label">Batter</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+
+                        <div class="col-sm-6">
+                            <div>
+                                <ui-select ng-model="commonData.game.pitcher" ng-change="pitcherChange()" theme="bootstrap">
+                                    <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.player.jerseyNumber}} {{$select.selected.player.firstName}} {{$select.selected.player.lastName}}</ui-select-match>
+                                    <ui-select-choices repeat="item in commonData.pitchers | filter: $select.search">
+                                        #<span ng-bind-html="item.player.jerseyNumber | highlight: $select.search"></span>
+                                        <span ng-bind-html="item.player.firstName | highlight: $select.search"></span>
+                                        <span ng-bind-html="item.player.lastName | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div>
+                                <ui-select ng-model="commonData.game.batter" ng-change="batterChange()" theme="bootstrap">
+                                    <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.player.jerseyNumber}} {{$select.selected.player.firstName}} {{$select.selected.player.lastName}}</ui-select-match>
+                                    <ui-select-choices repeat="item in commonData.batters | filter: $select.search">
+                                        #<span ng-bind-html="item.player.jerseyNumber | highlight: $select.search"></span>
+                                        <span ng-bind-html="item.player.firstName | highlight: $select.search"></span>
+                                        <span ng-bind-html="item.player.lastName | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -279,18 +314,23 @@
                 <div class="col-sm-6">
                     <div style="float:right">
 
-                        <button class="btn btn-primary" mw-confirm-click="gameNew()" mw-confirm-click-message="Are you SURE you want to create a new Game?">New Game</button>
-                        <button class="btn btn-primary" ng-click="gameEdit()">Edit Game</button>
+                        <button class="btn btn-primary" ng-click="streamStart()">Start Stream</button>
+                        <button class="btn btn-primary" ng-click="streamStop()">Stop Stream</button>
+                        <!--<button class="btn btn-primary" mw-confirm-click="commonData.isSelectGame = true" mw-confirm-click-message="Are you SURE you want to create a new Game?">New Game</button>-->
+                        <button class="btn btn-primary" ng-click="gameScore()">Score Game</button>
+                        <button class="btn btn-primary" ng-click="gameSelect()">Select Game</button>
+                        <button class="btn btn-primary" ng-click="gameSave()">Save Game</button>
+                        <button class="btn btn-primary" ng-show="commonData.selectedGame !== null && commonData.isGameEdit == false" ng-click="gameEdit()">Edit Game</button>
                         <button ng-click="showConfig()" class="btn btn-secondary">Config</button>
                         <button ng-click="commonData.isGameAdmin = false" class="btn btn-danger">Logout</button>
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <br />
+            </div>
+            <div ng-show="commonData.isGameSelected">
 
-            <div ng-show="commonData.gameEdit">
-                <div class="row">
-
-                </div>
 
                 <div class="row">
                     <div>
@@ -298,15 +338,20 @@
 
                             <div>
                                 <label class="control-label">Home Team</label>
-                            </div>
-                            <div ng-hide="commonData.homeTeamEdit">
-                                <label class="control-label" ng-bind="commonData.game.home.team.name || 'Home Team Name'">Home Team Name</label>
-                                <div class="btn-group" role="group" aria-label="Buttons">
-                                    <button type="button" class="btn btn-primary" ng-click="homeTeamEdit()">Edit</button>
+                                <div style="float:right">
+                                    <div class="btn-group" role="group" aria-label="Buttons">
+                                        <button type="button" class="btn btn-primary" ng-hide="commonData.isHomeTeamEdit == true || commonData.isSelectHomeTeam == true " ng-click="homeTeamEdit()">Edit</button>
+                                        <button type="button" class="btn btn-primary" ng-show="commonData.isGameEdit && commonData.isSelectHomeTeam == false " ng-click="homeTeamSelect()">Select</button>
+                                        <button type="button" class="btn btn-primary" ng-show="commonData.isHomeTeamEdit  && commonData.isSelectHomeTeam == false" ng-click="homeTeamSave()">Save</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div ng-show="commonData.homeTeamEdit">
-                                <ui-select ng-model="commonData.selectedHomeTeam" theme="bootstrap">
+                            <div ng-hide="commonData.isSelectHomeTeam">
+                                <label class="control-label" ng-bind="commonData.selectedGame.home.team.name || 'Home Team Name'">Home Team Name</label>
+
+                            </div>
+                            <div ng-show="commonData.isSelectHomeTeam">
+                                <ui-select ng-model="commonData.selectedHomeTeam" ng-change="homeTeamSelected()" theme="bootstrap">
                                     <ui-select-match placeholder="Select or search a team in the list...">{{$select.selected.name}}</ui-select-match>
                                     <ui-select-choices repeat="item in commonData.teams | filter: $select.search">
                                         <div ng-bind-html="item.name | highlight: $select.search"></div>
@@ -314,103 +359,145 @@
 
                                 </ui-select>
                                 <i class="fa fa-refresh" ng-click="refreshTeams()"></i>
+
+                            </div>
+                            <div ng-show="commonData.isHomeTeamEdit">
+
+                                <div>
+                                    <div class="form-group">
+                                        <label class="control-label">Team Name</label>
+                                        <input class="form-control" ng-model="commonData.selectedGame.home.team.name" placeholder="Team Name" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">Short Name</label>
+                                        <input class="form-control" ng-model="commonData.selectedGame.home.team.shortName" placeholder="Team Short Name" />
+                                    </div>
+                                </div>
+                                <table class="table table-bordered">
+                                    <thead>
+
+                                        <tr>
+                                            <td><label class="control-label">Jersey Number</label></td>
+                                            <td><label class="control-label">First Name</label></td>
+                                            <td><label class="control-label">Last Name</label></td>
+                                            <td>&nbsp;</td>
+                                            <!--<td><label class="control-label">Fielding</label></td>
+                                    <td><label class="control-label">Batting</label></td>-->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(index, player) in commonData.selectedGame.home.team.roster">
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <input class="form-control" ng-model="player.jerseyNumber" placeholder="Jersey Number" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <input class="form-control" ng-model="player.firstName" placeholder="First Name" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <input class="form-control" ng-model="player.lastName" placeholder="Last Name" />
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <div class="form-group btn-group" role="group" aria-label="Buttons">
+                                                    <button type="button" class="btn btn-danger" ng-click="homeTeamDeletePlayer(index, player)"><i class="fa fa-minus-circle"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                                 <div class="btn-group" role="group" aria-label="Buttons">
-                                    <button type="button" class="btn btn-primary" ng-click="homeTeamLoad()">Load</button>
-                                    <button type="button" class="btn btn-primary" ng-click="homeTeamSave()">Save</button>
+                                    <button type="button" class="btn btn-primary" ng-click="homeTeamAddPlayer()">Add</button>
                                 </div>
                             </div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <td><label class="control-label">Jersey Number</label></td>
-                                        <td><label class="control-label">First Name</label></td>
-                                        <td><label class="control-label">Last Name</label></td>
-                                        <td><label class="control-label">Fielding</label></td>
-                                        <td><label class="control-label">Batting</label></td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="(index, player) in commonData.game.home.team.roster">
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <input class="form-control" ng-model="player.jerseyNumber" placeholder="Jersey Number" />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <input class="form-control" ng-model="player.firstName" placeholder="First Name" />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <input class="form-control" ng-model="player.lastName" placeholder="Last Name" />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <select class="form-control" ng-model="player.fielding" placeholder="Fielding">
-                                                    <option value="99">Bench</option>
-                                                    <option value="1">1 (P)</option>
-                                                    <option value="2">2 (C)</option>
-                                                    <option value="3">3 (1st)</option>
-                                                    <option value="4">4 (2nd)</option>
-                                                    <option value="5">5 (SS)</option>
-                                                    <option value="6">6 (3rd)</option>
-                                                    <option value="7">7 (LF)</option>
-                                                    <option value="8">8 (CF)</option>
-                                                    <option value="9">9 (RF)</option>
-                                                    <option value="9">10 (EH)</option>
-                                                    <option value="9">11 (DH)</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <select class="form-control" ng-model="player.batting" placeholder="Batting">
-                                                    <option value="99">Bench</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7">7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
-                                                    <option value="11">11</option>
-                                                    <option value="12">12</option>
-                                                    <option value="13">13</option>
-                                                    <option value="14">14</option>
-                                                    <option value="15">15</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group" aria-label="Buttons">
-                                                <button type="button" class="btn btn-danger" ng-click="homeTeamDeletePlayer(index, player)"><i class="fa fa-minus-circle"></i></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="btn-group" role="group" aria-label="Buttons">
-                                <button type="button" class="btn btn-primary" ng-click="homeTeamAddPlayer()">Add</button>
+
+                            <div ng-hide="commonData.isHomeTeamEdit">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <td><label class="control-label">Order</label></td>
+                                            <td><label class="control-label">Player</label></td>
+                                            <td><label class="control-label">Fielding</label></td>
+                                            <td>&nbsp;</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(index, player) in commonData.selectedGame.home.lineup">
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <lable class="form-control" ng-bind="index + 1" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <ui-select ng-model="commonData.selectedGame.home.lineup[index].player" theme="bootstrap">
+                                                        <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
+                                                        <ui-select-choices repeat="item in commonData.selectedGame.home.team.roster | filter: $select.search">
+                                                            #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
+                                                            <span ng-bind-html="item.firstName | highlight: $select.search"></span>
+                                                            <span ng-bind-html="item.lastName | highlight: $select.search"></span>
+                                                        </ui-select-choices>
+                                                    </ui-select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <!--<lable class="form-control" ng-bind="player.fielding" />-->
+                                                    <select class="form-control" ng-model="player.fielding" placeholder="Fielding">
+                                                        <option value="99">Bench</option>
+                                                        <option value="1">1 (P)</option>
+                                                        <option value="2">2 (C)</option>
+                                                        <option value="3">3 (1st)</option>
+                                                        <option value="4">4 (2nd)</option>
+                                                        <option value="5">5 (SS)</option>
+                                                        <option value="6">6 (3rd)</option>
+                                                        <option value="7">7 (LF)</option>
+                                                        <option value="8">8 (CF)</option>
+                                                        <option value="9">9 (RF)</option>
+                                                        <option value="11">11 (DH)</option>
+                                                        <option value="12">12 (EH)</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <div class="form-group btn-group" role="group" aria-label="Buttons">
+                                                    <button type="button" class="btn btn-primary" ng-click="homeTeamLineupSub()"><i class="fa fa-minus-circle"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="btn-group" role="group" aria-label="Buttons">
+                                    <button type="button" class="btn btn-primary" ng-click="homeTeamLinupAdd()">Add</button>
+                                </div>
                             </div>
+
                         </div>
                         <div class="col-sm-6">
 
                             <div>
-                                <label class="control-label">Guest</label>
-                            </div>
-                            <div ng-hide="commonData.guestTeamEdit">
-                                <label class="control-label" ng-bind="commonData.game.guest.team.name">Guest Team Name</label>
-                                <div class="btn-group" role="group" aria-label="Buttons">
-                                    <button type="button" class="btn btn-primary" ng-click="guestTeamEdit()">Edit</button>
+                                <label class="control-label">Guest Team</label>
+                                <div style="float:right">
+                                    <div class="btn-group" role="group" aria-label="Buttons">
+                                        <button type="button" class="btn btn-primary" ng-hide="commonData.isGuestTeamEdit == true || commonData.isSelectGuestTeam == true " ng-click="guestTeamEdit()">Edit</button>
+                                        <button type="button" class="btn btn-primary" ng-show="commonData.isGameEdit && commonData.isSelectGuestTeam == false " ng-click="guestTeamSelect()">Select</button>
+                                        <button type="button" class="btn btn-primary" ng-show="commonData.isGuestTeamEdit  && commonData.isSelectGuestTeam == false" ng-click="guestTeamSave()">Save</button>
+                                        <button type="button" class="btn btn-danger" ng-show="commonData.isGuestTeamEdit  && commonData.isSelectGuestTeam == false" ng-click="guestTeamCancel()">Cancel</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div ng-show="commonData.guestTeamEdit">
-                                <ui-select ng-model="commonData.selectedGuestTeam" theme="bootstrap">
+                            <div ng-hide="commonData.isSelectGuestTeam">
+                                <label class="control-label" ng-bind="commonData.selectedGame.guest.team.name">Guest Team Name</label>
+
+                            </div>
+                            <div ng-show="commonData.isSelectGuestTeam">
+                                <ui-select ng-model="commonData.selectedGuestTeam" ng-change="guestTeamSelected()" theme="bootstrap">
                                     <ui-select-match placeholder="Select or search a team in the list...">{{$select.selected.name}}</ui-select-match>
                                     <ui-select-choices repeat="item in commonData.teams | filter: $select.search">
                                         <div ng-bind-html="item.name | highlight: $select.search"></div>
@@ -418,97 +505,133 @@
 
                                 </ui-select>
                                 <i class="fa fa-refresh" ng-click="refreshTeams()"></i>
+                            </div>
+
+                            <div ng-show="commonData.isGuestTeamEdit">
+                                <div>
+                                    <div class="form-group">
+                                        <label class="control-label">Team Name</label>
+                                        <input class="form-control" ng-model="commonData.selectedGame.guest.team.name" placeholder="Team Name" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">Short Name</label>
+                                        <input class="form-control" ng-model="commonData.selectedGame.guest.team.shortName" placeholder="Team Short Name" />
+                                    </div>
+                                </div>
+
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <td><label class="control-label">Jersey Number</label></td>
+                                            <td><label class="control-label">First Name</label></td>
+                                            <td><label class="control-label">Last Name</label></td>
+                                            <td>&nbsp;</td>
+                                            <!--<td><label class="control-label">Fielding</label></td>
+                                    <td><label class="control-label">Batting</label></td>-->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(index, player) in commonData.selectedGame.guest.team.roster">
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <input class="form-control" ng-model="player.jerseyNumber" placeholder="Jersey Number" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <input class="form-control" ng-model="player.firstName" placeholder="First Name" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <input class="form-control" ng-model="player.lastName" placeholder="Last Name" />
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <div class="form-group btn-group" role="group" aria-label="Buttons">
+                                                    <button type="button" class="btn btn-primary" ng-click="guestTeamDeletePlayer()"><i class="fa fa-minus-circle"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                                 <div class="btn-group" role="group" aria-label="Buttons">
-                                    <button type="button" class="btn btn-primary" ng-click="guestTeamLoad()">Load</button>
-                                    <button type="button" class="btn btn-primary" ng-click="guestTeamNew()">New</button>
+                                    <button type="button" class="btn btn-primary" ng-click="guestTeamAddPlayer()">Add</button>
                                 </div>
                             </div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <td><label class="control-label">Jersey Number</label></td>
-                                        <td><label class="control-label">First Name</label></td>
-                                        <td><label class="control-label">Last Name</label></td>
-                                        <td><label class="control-label">Fielding</label></td>
-                                        <td><label class="control-label">Batting</label></td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="(index, player) in commonData.game.guest.team.roster">
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <input class="form-control" ng-model="player.jerseyNumber" placeholder="Jersey Number" />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <input class="form-control" ng-model="player.firstName" placeholder="First Name" />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <input class="form-control" ng-model="player.lastName" placeholder="Last Name" />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <select class="form-control" ng-model="player.fielding" placeholder="Fielding">
-                                                    <option value="99">Bench</option>
-                                                    <option value="1">1 (P)</option>
-                                                    <option value="2">2 (C)</option>
-                                                    <option value="3">3 (1st)</option>
-                                                    <option value="4">4 (2nd)</option>
-                                                    <option value="5">5 (SS)</option>
-                                                    <option value="6">6 (3rd)</option>
-                                                    <option value="7">7 (LF)</option>
-                                                    <option value="8">8 (CF)</option>
-                                                    <option value="9">9 (RF)</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group form-control-sm">
-                                                <select class="form-control" ng-model="player.batting" placeholder="Batting">
-                                                    <option value="99">Bench</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                    <option value="6">6</option>
-                                                    <option value="7">7</option>
-                                                    <option value="8">8</option>
-                                                    <option value="9">9</option>
-                                                    <option value="10">10</option>
-                                                    <option value="11">11</option>
-                                                    <option value="12">12</option>
-                                                    <option value="13">13</option>
-                                                    <option value="14">14</option>
-                                                    <option value="15">15</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group" aria-label="Buttons">
-                                                <button type="button" class="btn btn-primary" ng-click="guestTeamDeletePlayer()"><i class="fa fa-minus-circle"></i></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="btn-group" role="group" aria-label="Buttons">
-                                <button type="button" class="btn btn-primary" ng-click="guestTeamAddPlayer()">Add</button>
+
+
+
+                            <div ng-hide="commonData.isGuestTeamEdit">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <td><label class="control-label">Order</label></td>
+                                            <td><label class="control-label">Player</label></td>
+                                            <td><label class="control-label">Fielding</label></td>
+                                            <td>&nbsp;</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(index, player) in commonData.selectedGame.guest.lineup">
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <lable class="form-control" ng-bind="index + 1" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <ui-select ng-model="commonData.selectedGame.guest.lineup[index].player" theme="bootstrap">
+                                                        <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
+                                                        <ui-select-choices repeat="item in commonData.selectedGame.guest.team.roster | filter: $select.search">
+                                                            #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
+                                                            <span ng-bind-html="item.firstName | highlight: $select.search"></span>
+                                                            <span ng-bind-html="item.lastName | highlight: $select.search"></span>
+                                                        </ui-select-choices>
+                                                    </ui-select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group form-control-sm">
+                                                    <!--<lable class="form-control" ng-bind="player.fielding" />-->
+                                                    <select class="form-control" ng-model="player.fielding" placeholder="Fielding">
+                                                        <option value="99">Bench</option>
+                                                        <option value="1">1 (P)</option>
+                                                        <option value="2">2 (C)</option>
+                                                        <option value="3">3 (1st)</option>
+                                                        <option value="4">4 (2nd)</option>
+                                                        <option value="5">5 (SS)</option>
+                                                        <option value="6">6 (3rd)</option>
+                                                        <option value="7">7 (LF)</option>
+                                                        <option value="8">8 (CF)</option>
+                                                        <option value="9">9 (RF)</option>
+                                                        <option value="11">11 (DH)</option>
+                                                        <option value="12">12 (EH)</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <div class="form-group btn-group" role="group" aria-label="Buttons">
+                                                    <button type="button" class="btn btn-primary" ng-click="guestTeamLineupSub()"><i class="fa fa-minus-circle"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="btn-group" role="group" aria-label="Buttons">
+                                    <button type="button" class="btn btn-primary" ng-click="guestTeamLinupAdd()">Add</button>
+                                </div>
                             </div>
+
                         </div>
 
 
                     </div>
                 </div>
             </div>
-            <div class="radarEmulator" ng-show="commonData.isRadarEmulator">
 
-                In:<input ng-model="commonData.radarEmulator.data.in" type="text" /> Out: <input ng-model="commonData.radarEmulator.data.out" type="text" /> <button class="btn btn-danger" ng-click="radarEmulatorSend()">Go</button>
-            </div>
 
             <div class="config" ng-show="commonData.showConfig">
                 <div>
@@ -614,10 +737,10 @@
                     <tbody>
                         <tr ng-repeat="rsdItem in commonData.radarSpeedDataHistory">
                             <td>{{rsdItem.time | date : 'M/d/yy hh:mm:ss'}}</td>
-                            <td>{{rsdItem.pitcher}}</td>
+                            <td>#{{rsdItem.pitcher.player.jerseyNumber }} {{rsdItem.pitcher.player.firstName}} {{rsdItem.pitcher.player.lastName}}</td>
                             <td>{{rsdItem.inMaxSpeed}}</td>
                             <td>{{rsdItem.inMinSpeed}}</td>
-                            <td>{{rsdItem.batter}}</td>
+                            <td>#{{rsdItem.batter.player.jerseyNumber }} {{rsdItem.batter.player.firstName}} {{rsdItem.batter.player.lastName}}</td>
                             <td>{{rsdItem.outMaxSpeed}}</td>
                             <td>{{rsdItem.outMinSpeed}}</td>
                         </tr>

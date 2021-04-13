@@ -5,18 +5,21 @@
     angular.module('scoreboardapp')
        .controller('scoreboardController', ['$rootScope', '$scope', '$uibModal', '$filter', '$log', '$http', 'radarMonitor', function ($rootScope, $scope, $uibModal, $filter, $log, $http, radarMonitor) {
            $scope.commonData = {
-               emptyPlayer: { "firstName": "", "lastName": "", "jerseyNumber": "", "fielding": "99", "batting": "99" },
+               emptyPlayer: { "firstName": "", "lastName": "", "jerseyNumber": "" },
                teams: [],
-               pitcher: null,
-               batter: null,
                pitchers: null,
                batters: null,
                isGameAdmin: false,
-               gameEdit: false,
-               homeTeamEdit: false,
-               guestTeamEdit: false,
-               game: {},
-               
+               isGameSelect: false,
+               isGameSelected: false,
+               isGameEdit: false,
+               isSelectHomeTeam: false,
+               isSelectGuestTeam: false,
+               isHomeTeamEdit: false,
+               isGuestTeamEdit: false,
+               isGameScore: false,
+               selectedGame: null,
+               game: null,
                radarSpeedDataHistory: [],
                showRadarConfig : true,
                editRadarConfig: false,
@@ -52,9 +55,16 @@
 
 
            var refreshTeams = function () {
-               $http.get('/data/team').
+               $http.get('/data/teams').
                    then(function (response) {
                        $scope.commonData.teams = response.data;
+                   });
+           }
+
+           var refreshGames = function () {
+               $http.get('/data/games').
+                   then(function (response) {
+                       $scope.commonData.games = response.data;
                    });
            }
 
@@ -67,11 +77,82 @@
 
            var initData = function () {
                refreshTeams();
+               refreshGames();
                getCurrentGame();
-              
+               
            }
 
            initData();
+
+
+           $scope.gameSelect = function () {
+               $scope.commonData.isGameSelect = true;
+           }
+
+           $scope.gameScore = function () {
+               if ($scope.commonData.selectedGame.id === '00000000-0000-0000-0000-000000000000') {
+                   $scope.commonData.selectedGame.id = null;
+               }
+               $http.put('/data/scoreGame', $scope.commonData.selectedGame).
+                   then(function (response) {
+                       $scope.commonData.isGameEdit = false;
+                       $scope.commonData.isGameSelected = true;
+                       $scope.commonData.isGameScore = true;
+                   });
+
+               
+           }
+
+           $scope.gameSave = function () {
+
+               if ($scope.commonData.selectedGame.id === '00000000-0000-0000-0000-000000000000') {
+                   $scope.commonData.selectedGame.id = null;
+               }
+               $http.put('/data/game', $scope.commonData.selectedGame).
+                   then(function (response) {
+                       $scope.commonData.isGameEdit = false;
+                       //$scope.commonData.isGameSelect = false;
+                       $scope.commonData.isGameSelected = true;
+                   });
+               
+           }
+
+           $scope.gameSelected = function () {
+               if ($scope.commonData.selectedGame && $scope.commonData.selectedGame.id === "00000000-0000-0000-0000-000000000000") {
+                   //this is a new game
+                   $scope.commonData.selectedGame = JSON.parse(JSON.stringify($scope.commonData.selectedGame));
+                   $scope.commonData.selectedGame.id = radarMonitor.uuid();
+                   $scope.commonData.selectedGame.name = "";
+                   $scope.commonData.selectedGame.startDate = moment();
+                   $scope.commonData.isGameEdit = true;
+                   $scope.commonData.isSelectHomeTeam = true;
+                   $scope.commonData.isSelectGuestTeam = true;
+               }
+               
+               $scope.commonData.isGameSelected = true;
+               $scope.commonData.isGameSelect = false;
+
+           }
+
+           $scope.streamStart = function () {
+               //Tell server the inningChanged
+               radarMonitor.sendServerCommand("stream", { cmd: "start"});
+           }
+
+           $scope.streamStop= function () {
+               //Tell server the inningChanged
+               radarMonitor.sendServerCommand("stream", { cmd: "stop" });
+           }
+
+           $scope.batterChange = function () {
+               //Tell server the inningChanged
+               radarMonitor.sendServerCommand("gameChange", { cmd: "batterChange", data: { batter: $scope.commonData.game.batter } });
+           }
+
+           $scope.pitcherChange = function () {
+               //Tell server the inningChanged
+               radarMonitor.sendServerCommand("gameChange", { cmd: "pitcherChange", data: { pitcher: $scope.commonData.game.pitcher } });
+           }
 
            $scope.inningChange = function () {
                //Tell server the inningChanged
@@ -103,6 +184,118 @@
                radarMonitor.sendServerCommand("gameChange", { cmd: "strikesChange", data: { strikes: $scope.commonData.game.strikes } });
            }
 
+           $scope.refreshTeams = function () {
+               refreshTeams();
+           }
+
+           $scope.homeTeamDeletePlayer = function (index, player) {
+               $scope.commonData.selectedGame.home.team.roster.splice(index, 1);
+               //$scope.$apply();
+           }
+
+           $scope.homeTeamAddPlayer = function () {
+
+               $scope.commonData.selectedGame.home.team.roster.push(angular.copy($scope.commonData.emptyPlayer))
+           }
+
+           $scope.homeTeamSave = function () {
+               if ($scope.commonData.selectedGame.home.team.id === '00000000-0000-0000-0000-000000000000') {
+                   $scope.commonData.selectedGame.home.team.id = null;
+               }
+               $http.put('/data/team', $scope.commonData.selectedGame.home.team).
+                   then(function (response) {
+                       //$scope.commonData.teams = response.data;
+                       $scope.commonData.isHomeTeamEdit = false;
+                   });
+
+           }
+
+           $scope.guestTeamSave = function () {
+               if ($scope.commonData.selectedGame.guest.team.id === '00000000-0000-0000-0000-000000000000') {
+                   $scope.commonData.selectedGame.guest.team.id = null;
+               }
+               $http.put('/data/team', $scope.commonData.selectedGame.guest.team).
+                   then(function (response) {
+                       $scope.commonData.isGuestTeamEdit = false;
+                   });
+
+           }
+
+
+           $scope.gameEdit = function () {
+               $scope.commonData.isGameEdit = true;
+
+           }
+
+           $scope.guestTeamDeletePlayer = function (index, player) {
+               $scope.commonData.selectedGame.guest.team.roster.splice(index, 1);
+
+           }
+
+           $scope.guestTeamAddPlayer = function () {
+               $scope.commonData.selectedGame.guest.team.roster.push(angular.copy($scope.commonData.emptyPlayer))
+           }
+
+           $scope.guestTeamEdit = function () {
+               $scope.commonData.isGuestTeamEdit = true;
+           }
+
+           $scope.homeTeamEdit = function () {
+               $scope.commonData.isHomeTeamEdit = true;
+           }
+
+           $scope.homeTeamSelected = function () {
+               if ($scope.commonData.selectedHomeTeam && $scope.commonData.selectedHomeTeam.id === '00000000-0000-0000-0000-000000000000') {
+                   //this is a new Team
+                   $scope.commonData.selectedGame.home.team = JSON.parse(JSON.stringify($scope.commonData.selectedHomeTeam));
+                   $scope.commonData.selectedGame.home.team.id = radarMonitor.uuid();
+                   $scope.commonData.selectedGame.home.team.name = "";
+                   $scope.commonData.isHomeTeamEdit = true;
+               } else {
+                   $scope.commonData.selectedGame.home.team = $scope.commonData.selectedHomeTeam;
+               }
+
+               $scope.commonData.isSelectHomeTeam = false;
+           }
+
+           $scope.homeTeamSelect = function () {
+               $scope.commonData.isSelectHomeTeam = true;
+
+           }
+
+           $scope.guestTeamSelected = function () {
+
+               if ($scope.commonData.selectedGuestTeam && $scope.commonData.selectedGuestTeam.id === '00000000-0000-0000-0000-000000000000') {
+                   //this is a new Team
+                   $scope.commonData.selectedGame.guest.team = JSON.parse(JSON.stringify($scope.commonData.selectedGuestTeam));
+                   $scope.commonData.selectedGame.guest.team.id = radarMonitor.uuid();
+                   $scope.commonData.selectedGame.guest.team.name = "";
+                   $scope.commonData.isGuestTeamEdit = true;
+               } else {
+                   $scope.commonData.selectedGame.guest.team = $scope.commonData.selectedGuestTeam;
+               }
+
+               $scope.commonData.isSelectGuestTeam = false;
+           }
+
+           $scope.guestTeamSelect = function () {
+               $scope.commonData.isSelectGuestTeam = true;
+           }
+
+
+           $scope.guestTeamLinupAdd = function () {
+               $scope.commonData.selectedGame.guest.lineup.push({ player: null, position: "99" })
+           }
+
+           $scope.homeTeamLinupAdd = function () {
+               $scope.commonData.selectedGame.home.lineup.push({ player: null, position: "99" })
+           }
+
+
+           $scope.showConfig = function () {
+               $scope.commonData.showConfig = !$scope.commonData.showConfig;
+           }
+
            $rootScope.$on('gameChanged', function (event, message) {
                // use the data accordingly
                console.log('gameChanged', message);
@@ -113,15 +306,15 @@
                    case "inningPositionChanged":
                        $scope.commonData.game.inningPosition = message.data.inningPosition;
                        if ($scope.commonData.game.inningPosition === "top") {
-                           $scope.commonData.batters = $scope.commonData.game.guest.team.roster;
-                           $scope.commonData.pitchers = $scope.commonData.game.home.team.roster;
-                           $scope.commonData.pitcher = null;
-                           $scope.commonData.batter = null;
+                           $scope.commonData.batters = $scope.commonData.game.guest.lineup;
+                           $scope.commonData.pitchers = $scope.commonData.game.home.lineup;
+                           $scope.commonData.game.pitcher = null;
+                           $scope.commonData.game.batter = null;
                        } else {
-                           $scope.commonData.batters = $scope.commonData.game.home.team.roster;
-                           $scope.commonData.pitchers = $scope.commonData.game.guest.team.roster;
-                           $scope.commonData.pitcher = null;
-                           $scope.commonData.batter = null;
+                           $scope.commonData.batters = $scope.commonData.game.home.lineup;
+                           $scope.commonData.pitchers = $scope.commonData.game.guest.lineup;
+                           $scope.commonData.game.pitcher = null;
+                           $scope.commonData.game.batter = null;
                        }
                        break;
                    case "homeScoreChanged":
@@ -134,10 +327,50 @@
                        $scope.commonData.game.outs = message.data.outs;
                        break;
                    case "ballsChanged":
-                       $scope.commonData.game.balls = message.data.balls;
+                       
+                           $scope.commonData.game.balls = message.data.balls;
+                       
                        break;
                    case "strikesChanged":
-                       $scope.commonData.game.strikes = message.data.strikes;
+                       
+                           $scope.commonData.game.strikes = message.data.strikes;
+                       
+                       break;
+                   case "pitcherChanged":
+                       if ($scope.commonData.isGameScore === false) {
+                           $scope.commonData.game.pitcher = message.data.pitcher;
+                       }
+                       break;
+                   case "batterChanged":
+                       if ($scope.commonData.isGameScore === false) {
+                           $scope.commonData.game.batter = message.data.batter;
+                       }
+                       break;
+                   case "homeTeamChanged":
+                       if ($scope.commonData.isGameScore === false) {
+                           $scope.commonData.game.home = message.data.home;
+                       }
+                       break;
+                   case "guestTeamChanged":
+                       if ($scope.commonData.isGameScore === false) {
+                           $scope.commonData.game.guest = message.data.guest;
+                       }
+                       break;
+                   case "scoreGame":
+                       if ($scope.commonData.isGameScore === false) {
+                           $scope.commonData.game = message.data.game;
+                       }
+                       if ($scope.commonData.game.inningPosition === "top") {
+                           $scope.commonData.batters = $scope.commonData.game.guest.lineup;
+                           $scope.commonData.pitchers = $scope.commonData.game.home.lineup;
+                           $scope.commonData.game.pitcher = null;
+                           $scope.commonData.game.batter = null;
+                       } else {
+                           $scope.commonData.batters = $scope.commonData.game.home.lineup;
+                           $scope.commonData.pitchers = $scope.commonData.game.guest.lineup;
+                           $scope.commonData.game.pitcher = null;
+                           $scope.commonData.game.batter = null;
+                       }
                        break;
                }
                $scope.$apply();
@@ -263,21 +496,21 @@
                 $scope.$apply();
             });
 
-           $rootScope.$on('radarMonitor:batter', function (event, data) {
-               // use the data accordingly
-               //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
-               console.debug('radarMonitor:batter detected ', data);
-               $scope.commonData.batter = data.data;
-               $scope.$apply();
-           });
+           //$rootScope.$on('radarMonitor:batter', function (event, data) {
+           //    // use the data accordingly
+           //    //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
+           //    console.debug('radarMonitor:batter detected ', data);
+           //    $scope.commonData.batter = data.data;
+           //    $scope.$apply();
+           //});
 
-           $rootScope.$on('radarMonitor:pitcher', function (event, data) {
-               // use the data accordingly
-               //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
-               console.debug('radarMonitor:pitcher detected ', data);
-               $scope.commonData.pitcher = data.data;
-               $scope.$apply();
-           });
+           //$rootScope.$on('radarMonitor:pitcher', function (event, data) {
+           //    // use the data accordingly
+           //    //console.log('radarMonitor:softwareConfigProperty detected ' + data.Property + ' ' + data.data);
+           //    console.debug('radarMonitor:pitcher detected ', data);
+           //    $scope.commonData.pitcher = data.data;
+           //    $scope.$apply();
+           //});
 
             $rootScope.$on('radarMonitor:radarSpeedDataHistory', function(event, data) {
                 // use the data accordingly
@@ -336,108 +569,7 @@
             }
 
 
-           $scope.refreshTeams = function () {
-               refreshTeams();
-           }
            
-           $scope.homeTeamDeletePlayer = function (index, player) {
-               $scope.commonData.game.home.team.roster.splice(index, 1);
-               //$scope.$apply();
-           }
-
-           $scope.homeTeamAddPlayer = function () {
-               
-               $scope.commonData.game.home.team.roster.push(angular.copy($scope.commonData.emptyPlayer))
-           }
-
-           $scope.homeTeamSave = function () {
-               if ($scope.commonData.game.home.team.id === '00000000-0000-0000-0000-000000000000' ) {
-                   $scope.commonData.game.home.team.id = null;
-               }
-               $http.put('/data/team', $scope.commonData.game.home.team).
-                   then(function (response) {
-                       //$scope.commonData.teams = response.data;
-                   });
-                
-           }
-
-
-           $scope.gameEdit = function () {
-               $scope.commonData.gameEdit = true;
-               
-           }
-
-           $scope.guestTeamDeletePlayer = function (index, player) {
-               $scope.commonData.game.guest.team.roster.splice(index, 1);
-               
-           }
-
-           $scope.guestTeamAddPlayer = function () {
-               $scope.commonData.game.guest.team.roster.push(angular.copy($scope.commonData.emptyPlayer))
-           }
-
-           $scope.guestTeamEdit = function () {
-               $scope.commonData.guestTeamEdit = true;
-           }
-
-           $scope.homeTeamEdit = function () {
-               $scope.commonData.homeTeamEdit = true;
-           }
-
-           $scope.homeTeamLoad = function () {
-               
-               $scope.commonData.game.home.team = $scope.commonData.selectedHomeTeam;
-               $scope.commonData.homeTeamEdit = false;
-           }
-
-           $scope.guestTeamLoad = function () {
-
-               $scope.commonData.game.guest.team = $scope.commonData.selectedGuestTeam;
-               $scope.commonData.guestTeamEdit = false;
-           }
-           
-
-            //$scope.playerShow = function () {
-                
-            //    $scope.commonData.showPlayer = !$scope.commonData.showPlayer;
-            //}
-
-            //$scope.playerShowDone = function() {
-            //    $scope.commonData.showPlayer = false;
-            //}
-            //$scope.playerEdit = function () {
-            //    $scope.commonData.showPlayerEdit = true;
-            //}
-            //$scope.playerEditCancel = function () {
-            //    $scope.commonData.showPlayerEdit = false;
-            //}
-
-            //$scope.playerEditSave = function () {
-            //    $scope.commonData.showPlayerEdit = false;
-            //}
-
-            //$scope.teamShow = function () {
-
-            //    $scope.commonData.showTeam = !$scope.commonData.showTeam;
-            //}
-
-            //$scope.teamShowDone = function() {
-            //    $scope.commonData.showPlayer = true;
-            //}
-            //$scope.teamEdit = function () {
-            //    $scope.commonData.showTeamEdit = true;
-            //}
-            //$scope.teamEditCancel = function () {
-            //    $scope.commonData.showTeamEdit = false;
-            //}
-
-            //$scope.teamEditSave = function () {
-            //    $scope.commonData.showTeamEdit = false;
-            //}
-
-            $scope.showConfig = function () {
-                $scope.commonData.showConfig = !$scope.commonData.showConfig;
-            }
 
             $rootScope.$on('radarMonitor:gpsPosition', function (event, data) {
                 $scope.commonData.gpsPosition = data;

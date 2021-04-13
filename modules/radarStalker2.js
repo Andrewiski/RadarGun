@@ -641,9 +641,9 @@ var RadarStalker2 = function (options){
                 pitchCounter++;
                 //extend(commonData.currentRadarSpeedData, speedData);
                 commonData.currentRadarSpeedData.time = new Date();
-                commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
-                commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
-                commonData.currentRadarSpeedData.pitchCount = pitchCounter;
+                //commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
+                //commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
+                //commonData.currentRadarSpeedData.pitchCount = pitchCounter;
                 commonData.lastSpeedDataTimestamp = new Date();
                 commonData.radarSpeedDataHistory.unshift(extend({}, commonData.currentRadarSpeedData));
                 if (commonData.radarSpeedDataHistory.length > objOptions.softwareConfig.radarSpeedHistoryCount) {

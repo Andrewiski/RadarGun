@@ -9,7 +9,7 @@
     <SccProvider>SAK</SccProvider>
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
-    <Environment>DEBUG=app,radar,batteryMonitor,gpsMonitor,dataDisplay,adafruitLedBackpack,radarPacketParser</Environment>
+    <Environment>DEBUG=app,radar,batteryMonitor,gpsMonitor,dataDisplay,adafruitLedBackpack,radarPacketParser,ffmpegOverlay</Environment>
     <LaunchUrl>http://localhost:12336</LaunchUrl>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>

@@ -111,9 +111,9 @@ var RadarDatabase = function (options) {
         if (!game.id) {
             game.id = uuidv4();
         }
-        gamesDb.update(game, game).make(function (builder) {
-            //builder.between('age', 20, 30);
-            builder.callback(function (err, count) {
+        gamesDb.update(game, game).make(function (filter) {
+            filter.where('id', game.id);
+            filter.callback(function (err, count) {
                 debug('game_upsert ', count);
                 callback(err, count);
             });

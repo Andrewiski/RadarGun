@@ -55,7 +55,7 @@ var RadarEmulator = function (fakePortName, options) {
                             }
 
                             if (radarDataBufferLength >= i + configPacketLength) {
-                                var configPacket = new Buffer(configPacketLength);
+                                var configPacket = Buffer.alloc(configPacketLength);
                                 radarDataBuffer.copy(configPacket, 0, i, i + configPacketLength);
                                 i = i + configPacketLength - 1;
                                 //Todo Check Checksum to make sure its a valid packet
@@ -263,7 +263,7 @@ var RadarEmulator = function (fakePortName, options) {
               
             Buffer.from("885244202020333441205353532052525220525220523541205151512020512051205120203641202050205020502050205020200d", 'hex')
         */
-        var myBuff = new Buffer(23); 
+        var myBuff = Buffer.alloc(23); 
         myBuff[0] = 0x88; //be Speed Data
         myBuff[1] = 0x50; //01010000   Unit Config
         myBuff[2] = 0x44; //01000100  Unit Status
@@ -315,17 +315,17 @@ var RadarEmulator = function (fakePortName, options) {
         switch (ConfigProperty.datatype) {
             case 'int':
                 var numvalue
-                if (ConfigProperty.value == null) {
+                if (ConfigProperty.value === null) {
                     numvalue = parseInt(ConfigProperty.def);
                 } else {
                     numvalue = parseInt(ConfigProperty.value);
                 }
-                if (!isNaN(numvalue) == true) {
+                if (!isNaN(numvalue) === true) {
                     if (numvalue < 256) {
-                        valueBuff = new Buffer(1);
+                        valueBuff = new Buffer.alloc(1);
                         valueBuff.writeUInt8(numvalue, 0);
                     } else {
-                        valueBuff = new Buffer(2);
+                        valueBuff = new Buffer.alloc(2);
                         valueBuff.writeUInt16LE(numvalue, 0);
                     }
                 }
@@ -341,7 +341,7 @@ var RadarEmulator = function (fakePortName, options) {
                 break;
             case 'string':
                 var strValue;
-                if (ConfigProperty.value == null) {
+                if (ConfigProperty.value === null) {
                     
                     strValue = ConfigProperty.def
                     
@@ -350,14 +350,14 @@ var RadarEmulator = function (fakePortName, options) {
                     strValue = ConfigProperty.value;
                 }
                 //valueBuff = Buffer.from(ConfigProperty.def);
-                valueBuff = new Buffer(strValue.length);
+                valueBuff = Buffer.alloc(strValue.length);
                 for (var i = 0; i < strValue.length; i++) {
                     valueBuff[i] = strValue.charCodeAt(i);
                 }
                 break;
         }
 
-        var myBuf = new Buffer(10 + valueBuff.length);
+        var myBuf = Buffer.alloc(10 + valueBuff.length);
         myBuf[0] = 239;     // Start ID = 239
         myBuf[1] = 1;       // Destination Address = 1  back to the Computer
         myBuf[2] = 2;       // Source Address = 2  We are the radar gun 2 on rs232
@@ -389,11 +389,11 @@ var RadarEmulator = function (fakePortName, options) {
     }
 
     var sendData = function (data) {
-        //if (objOptions.parser) {
-        //    objOptions.parser(self, data);
-        //} else {
+        if (pipedPacketParser) {
+            pipedPacketParser.write(data);
+        } else {
             self.emit('data', data);  
-        //}
+        }
         
     }
     var recursiveTimerStartFakeRadar = function () {
@@ -404,6 +404,12 @@ var RadarEmulator = function (fakePortName, options) {
         if (objOptions.portIsOpen) {
             setTimeout(recursiveTimerStartFakeRadar, 1000);
         }
+    }
+    var pipedPacketParser = null
+    this.pipe = function (packetParser) {
+        pipedPacketParser = packetParser;
+        
+        return pipedPacketParser;
     }
 };
 

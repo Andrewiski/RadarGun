@@ -1,12 +1,12 @@
 'use strict';
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-const debug = require('debug')('testFfmpeg');
+const debug = require('debug')('ffmpegOverlay');
 const path = require('path');
 const nconf = require('nconf');
 const extend = require('extend');
 var ffmpeg = require('fluent-ffmpeg');
-
+const fs = require('fs');
 
 var FfmpegOverlay = function (options) {
 
@@ -111,11 +111,15 @@ var FfmpegOverlay = function (options) {
 
 
     if (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '') {
-        process.env.FFMPEG_PATH = path.join(__dirname, 'ffmpeg', 'ffmpeg.exe');
+        process.env.FFMPEG_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffmpeg.exe');
     }
 
     if (process.env.FFPROBE_PATH === undefined || process.env.FFPROBE_PATH === '') {
-        process.env.FFPROBE_PATH = path.join(__dirname, 'ffmpeg', 'ffmpeg.exe');
+        process.env.FFPROBE_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffprobe.exe');
+    }
+
+    if (process.env.FFPLAY_PATH === undefined || process.env.FFPLAY_PATH === '') {
+        process.env.FFPLAY_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffplay.exe');
     }
 
 
@@ -296,7 +300,7 @@ var FfmpegOverlay = function (options) {
             self.emit('streamStats', commonData.streamStats);
         
         }
-        proc_count++;
+        //proc_count++;
     };
 
     var commandEnd = function (result) {
@@ -315,7 +319,7 @@ var FfmpegOverlay = function (options) {
     };
 
 
-    var overlayFile = "overlay.txt"; //path.join(__dirname, "overlay.txt").replace(":", "\\:");
+    var overlayFileName = "overlay.txt"; //path.join(__dirname, "overlay.txt").replace(":", "\\:");
 
     var startIncomingStream = function () {
     
@@ -327,21 +331,22 @@ var FfmpegOverlay = function (options) {
         writeToLog("debug", "Source Video URL", objOptions.rtspUrl)
 
         command = ffmpeg({ source: objOptions.rtspUrl })
+            //.addInputOption('-r 24')
             .addInputOption('-rtsp_transport tcp')
             .addInputOption('-stimeout 30000000')
             .output(objOptions.rtmpUrl)
             .withOutputFormat('flv')
             .videoCodec('libx264')
-            
+            .outputOptions("-x264-params keyint=96:scenecut=0")
             .outputOptions('-pix_fmt +')    //If pix_fmt is a single +, ffmpeg selects the same pixel format as the input (or graph output) and automatic conversions are disabled.
-            .outputOptions('-g 60')
+            //.outputOptions('-g 60')
             .outputOptions('-c:v libx264')
             .outputOptions('-c:a aac')
             .videoFilters({
                 filter: "drawtext",
-                options: 'fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=' + overlayFile + ':reload=1'
+                options: 'fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=' + overlayFileName + ':reload=1'
             })
-            .addOption('-loglevel level+verbose')       //added by Andy so we can parse out stream info
+            .addOption('-loglevel level+warning')       //added by Andy so we can parse out stream info
             //.audioChannels(2)
             // TODO: make audioCodec a config item
             //.audioFilters(['volume=0.5', 'silencedetect=n=-50dB:d=5'])
@@ -390,7 +395,15 @@ var FfmpegOverlay = function (options) {
         }
     };
 
+    var updateOverlayText = function (overlayText) {
+        var overlayFilePath = path.join(__dirname, '..', overlayFileName);
+        try {
+            fs.writeFileSync(overlayFilePath, overlayText);
 
+        } catch (ex) {
+            debug("error", "Error Writing OverlayText File", ex);
+        }
+    }
 
    
 
@@ -405,14 +418,20 @@ var FfmpegOverlay = function (options) {
         streamStart();
     });
 
-   
+    self.updateOverlayText = updateOverlayText;
 
 
     self.on('commonData', function (data) {
         writeToLog('debug', 'event', 'commonData');
         self.emit('commonData', commonData);
     });
-    
+
+    self.streamStart = streamStart;
+    self.streamStop = streamStop;
+
+    self.commonData = function () {
+        return commonData;
+    }
 
 }
 // extend the EventEmitter class using our RadarMonitor class
