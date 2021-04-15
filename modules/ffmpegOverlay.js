@@ -339,7 +339,8 @@ var FfmpegOverlay = function (options) {
             .videoCodec('libx264')
             .outputOptions("-x264-params keyint=96:scenecut=0")
             .outputOptions('-pix_fmt +')    //If pix_fmt is a single +, ffmpeg selects the same pixel format as the input (or graph output) and automatic conversions are disabled.
-            //.outputOptions('-g 60')
+            .outputOptions('-g 4')
+            .outputOptions('-keyint_min 4')
             .outputOptions('-c:v libx264')
             .outputOptions('-c:a aac')
             .videoFilters({

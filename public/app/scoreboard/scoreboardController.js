@@ -93,6 +93,7 @@
                if ($scope.commonData.selectedGame.id === '00000000-0000-0000-0000-000000000000') {
                    $scope.commonData.selectedGame.id = null;
                }
+               $scope.commonData.game = $scope.commonData.selectedGame;
                $http.put('/data/scoreGame', $scope.commonData.selectedGame).
                    then(function (response) {
                        $scope.commonData.isGameEdit = false;

@@ -203,11 +203,13 @@ var updateOverlayText = function () {
         } else {
             OverlayText += "                   ";
         }
-        if (commonData.currentRadarSpeedData) {
-            OverlayText += " PV: " + commonData.currentRadarSpeedData.inMaxSpeed.toFixed(1).toString() + " MPH"
-        } else {
-            OverlayText += " PV: 00.0 MPH"
-        }
+    }
+    if (commonData.currentRadarSpeedData) {
+        OverlayText += " PV: " + commonData.currentRadarSpeedData.inMaxSpeed.toFixed(1).toString() + " MPH"
+    } else {
+        OverlayText += " PV: 00.0 MPH"
+    }
+    if (commonData.game) {
         let homeTeamName = "Home";
         if (commonData.game && commonData.game.home && commonData.game.home.team && commonData.game.home.team.name) {
             homeTeamName = commonData.game.home.team.shortName
@@ -231,11 +233,13 @@ var updateOverlayText = function () {
         } else {
             OverlayText += "                   ";
         }
-        if (commonData.currentRadarSpeedData) {
-            OverlayText += " EV: " + commonData.currentRadarSpeedData.outMaxSpeed.toFixed(1).toString() + " MPH";
-        } else {
-            OverlayText += " EV: 00.0 MPH";
-        }
+    }
+    if (commonData.currentRadarSpeedData) {
+        OverlayText += " EV: " + commonData.currentRadarSpeedData.outMaxSpeed.toFixed(1).toString() + " MPH";
+    } else {
+        OverlayText += " EV: 00.0 MPH";
+    }
+    if (commonData.game) {
         let guestTeamName = "Guest";
         if (commonData.game && commonData.game.guest && commonData.game.guest.team && commonData.game.guest.team.name) {
             guestTeamName = commonData.game.guest.team.shortName;

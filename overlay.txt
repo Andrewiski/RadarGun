@@ -1,2 +1,1 @@
-P: Luke Kerrins        PV: 57.4 MPH       Vicksburg:  4 Outs: 0 B-S: 2-1
-B: Logan Cohrs         EV: 67.8 MPH        Mattawan:  2 Inning:  1 bot
+ PV: 64.9 MPH EV: 0.0 MPH
