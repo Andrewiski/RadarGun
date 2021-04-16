@@ -20,7 +20,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>83aac9f6-1094-40fc-8ce9-2ca0fe8ccbac</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>app.js</StartupFile>
+    <StartupFile>SerialportCapture.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -155,6 +155,9 @@
     <Content Include="public\stylesheets\style.css" />
     <Content Include="README.md" />
     <Content Include="public\index.html" />
+    <Content Include="SerialportCapture.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="service\radarMonitor" />
     <Content Include="StartRadarApp.sh" />
     <Content Include="testBatteryVoltage.js">
