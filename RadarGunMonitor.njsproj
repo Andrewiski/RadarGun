@@ -119,6 +119,7 @@
     <Content Include="ffmpeg\doc\nut.html" />
     <Content Include="ffmpeg\doc\platform.html" />
     <Content Include="ffmpeg\doc\style.min.css" />
+    <Content Include="testsDak5000.js" />
     <None Include="ffmpeg\presets\ffprobe.xsd" />
     <Content Include="ffmpeg\ffmpeg.exe" />
     <Content Include="ffmpeg\ffplay.exe" />

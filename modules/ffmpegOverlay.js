@@ -337,7 +337,7 @@ var FfmpegOverlay = function (options) {
             .output(objOptions.rtmpUrl)
             .withOutputFormat('flv')
             .videoCodec('libx264')
-            .outputOptions("-x264-params keyint=96:scenecut=0")
+            .outputOptions("-x264-params keyint=4:scenecut=0")
             .outputOptions('-pix_fmt +')    //If pix_fmt is a single +, ffmpeg selects the same pixel format as the input (or graph output) and automatic conversions are disabled.
             .outputOptions('-g 4')
             .outputOptions('-keyint_min 4')
