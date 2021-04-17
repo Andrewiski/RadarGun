@@ -15,7 +15,8 @@ var RadarDatabase = function (options) {
     var defaultOptions = {
         deviceId: "",
         teamsFile: "./data/teams.nosql",
-        gamesFile: "./data/games.nosql"
+        gamesFile: "./data/games.nosql",
+        gamesFolder: "./data/games/"
     }
     nconf.file('./configs/radarDatabaseConfig.json');
     var configFileSettings = nconf.get();
@@ -111,6 +112,11 @@ var RadarDatabase = function (options) {
         if (!game.id) {
             game.id = uuidv4();
         }
+
+        path.join(__dirname, 'node_modules', 'angular-route')
+
+        var gameDbExists = fs.existsSync(objOptions.gamesFolder);
+        var gamesDb = NoSQL.load(path. objOptions.gamesFile);
         gamesDb.update(game, game).make(function (filter) {
             filter.where('id', game.id);
             filter.callback(function (err, count) {

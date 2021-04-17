@@ -263,6 +263,15 @@
                             </select>
                         </div>
                     </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary" ng-click="inning()">I</button>
+                            <button type="button" class="btn btn-primary" ng-click="out()">O</button>
+                            <button type="button" class="btn btn-primary" ng-click="ball()">B</button>
+                            <button type="button" class="btn btn-primary" ng-click="strike()">S</button>
+
+                        </div>
+                    </div>
 
                 </div>
                 <div class="row">
@@ -743,6 +752,32 @@
                             <td>#{{rsdItem.batter.player.jerseyNumber }} {{rsdItem.batter.player.firstName}} {{rsdItem.batter.player.lastName}}</td>
                             <td>{{rsdItem.outMaxSpeed}}</td>
                             <td>{{rsdItem.outMinSpeed}}</td>
+                            <td>
+                                <div class="form-group">
+                                    <button type="button" class="btn" ng-click="pitchBall()">B</button>
+                                    <button type="button" class="btn" ng-click="pitchStrikeSwinging()">SS</button>
+                                    <button type="button" class="btn" ng-click="pitchStrikeWatching()">SW</button>
+                                    <button type="button" class="btn" ng-click="pitchFoul()">F</button>
+                                </div>
+                                
+                            </td>
+                            <td>
+                              
+                                <div class="form-group">
+                                    <button type="button" class="btn" ng-click="pitchFlyOut()">FO</button>
+                                    <button type="button" class="btn" ng-click="pitchGroundOut()">GO</button>
+                                    <button type="button" class="btn" ng-click="pitchLineOut()">LO</button>
+                                </div>
+                                
+                            </td>
+                            <td>
+                                
+                                <div class="form-group">
+                                    <button type="button" class="btn" ng-click="pitchFlyBall()">FB</button>
+                                    <button type="button" class="btn" ng-click="pitchGroundBall()">GB</button>
+                                    <button type="button" class="btn" ng-click="pitchLineDrive()">LD</button>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

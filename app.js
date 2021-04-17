@@ -163,6 +163,10 @@ routes.get('/data/game', function (req, res) {
     res.json(commonData.game);
 });
 
+routes.get('/data/game/?', function (req, res) {
+    //res.json(commonData.game);
+});
+
 routes.put('/data/game', function (req, res) {
     radarDatabase.game_upsert(req.body, function (err, response) {
         if (err) {
@@ -390,6 +394,7 @@ radarStalker2.on('radarSpeed', function (data) {
     if (commonData.game) {
         data.pitcher = commonData.game.pitcher;
         data.batter = commonData.game.batter;
+        commonData,game.pitchLog.push(JSON.parse(JSON.stringify(data)));
     }    
     dataDisplay.updateSpeedData(data);
     io.emit('radarSpeed', data);

@@ -79,6 +79,13 @@
                refreshTeams();
                refreshGames();
                getCurrentGame();
+
+               if (window.location.hash === "scoreGame") {
+                   $scope.commonData.selectedGame = $scope.commonData.game; 
+                   $scope.commonData.isGameSelected = true;
+                   $scope.commonData.isGameScore = true;
+                   
+               }
                
            }
 
@@ -99,6 +106,7 @@
                        $scope.commonData.isGameEdit = false;
                        $scope.commonData.isGameSelected = true;
                        $scope.commonData.isGameScore = true;
+                       window.location.hash="scoreGame"
                    });
 
                
