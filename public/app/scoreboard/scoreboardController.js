@@ -1,8 +1,81 @@
 ﻿(function () {
-
    'use strict';
 
     angular.module('scoreboardapp')
+
+        .filter('uniquePlayer', function () {
+            return function (allPlayers, selectedPlayersIndex,  selectedPlayers, selectedPlayersPlayerProperty, allPlayersPlayerProperty) {
+                if (allPlayers && Array.isArray(allPlayers) === true && Array.isArray(selectedPlayers) === true) {
+                    var filtered = [];
+                    
+                    angular.forEach(allPlayers, function (allItem) {
+                        var playerFound = false;
+                        for (var i = 0; i < selectedPlayers.length; i++) {
+                            let selectedItem = selectedPlayers[i];
+                            let selectedPlayer = null;
+                            if (selectedPlayersPlayerProperty) {
+                                selectedPlayer = selectedItem[selectedPlayersPlayerProperty];
+                            } else {
+                                selectedPlayer = selectedItem;
+                            }
+                            let allPlayer = null;
+                            if (allPlayersPlayerProperty) {
+                                allPlayer = allItem[allPlayersPlayerProperty];
+                            } else {
+                                allPlayer = allItem;
+                            }
+                            if (selectedPlayer && allPlayer && i !== selectedPlayersIndex) {
+                                if (selectedPlayer.jerseyNumber === allPlayer.jerseyNumber || selectedPlayer.firstName === allPlayer.firstName || selectedPlayer.lastName === allPlayer.lastName) {
+                                    playerFound = true;  
+                                    
+                                    break;
+                                }
+                            }
+                        }
+                        if (playerFound === false) {
+                            filtered.push(allItem);
+                        }
+                    });
+
+                    return filtered;
+
+                } else {
+                    return allPlayers;
+                }
+            }
+        })
+
+        .filter('uniqueLineupPosition', function () {
+            return function (allPositions, selectedPlayersIndex, selectedPlayers) {
+                if (allPositions && Array.isArray(allPositions) === true && Array.isArray(selectedPlayers) === true) {
+                    var filtered = [];
+
+                    angular.forEach(allPositions, function (allPosition) {
+                        var positionFound = false;
+                        if (allPosition.value !== "99" && allPosition.value !== "12") {  // always add bench 99  Position  and EH 12 as can have multple EH if batting open
+                            for (var i = 0; i < selectedPlayers.length; i++) {
+                                let selectedPlayer = selectedPlayers[i];
+                                if (selectedPlayer && i !== selectedPlayersIndex) {
+                                    if (selectedPlayer.fieldingPosition === allPosition.value) {
+                                        positionFound = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (positionFound === false) {
+                            filtered.push(allPosition);
+                        }
+                    });
+
+                    return filtered;
+
+                } else {
+                    return allPositions;
+                }
+            }
+        })
+        
        .controller('scoreboardController', ['$rootScope', '$scope', '$uibModal', '$filter', '$log', '$http', 'radarMonitor', function ($rootScope, $scope, $uibModal, $filter, $log, $http, radarMonitor) {
            $scope.commonData = {
                emptyPlayer: { "firstName": "", "lastName": "", "jerseyNumber": "" },
@@ -50,7 +123,21 @@
                },
                gpsPosition: null,
                isRadarEmulator: false,
-               isConnected:true
+               isConnected: true,
+               fieldingPositions: [
+                   { name: "Bench", value: "99" },
+                   { name: "1 (P)", value: "1" },
+                   { name: "2 (C)", value: "2" },
+                   { name: "3 (1st)", value: "3" },
+                   { name: "4 (2nd)", value: "4" },
+                   { name: "5 (3rd)", value: "5" },
+                   { name: "6 (SS)", value: "6" },
+                   { name: "7 (LF)", value: "7" },
+                   { name: "8 (CF)", value: "8" },
+                   { name: "9 (RF)", value: "9" },
+                   { name: "11 (DH)", value: "11" },
+                   { name: "12 (EH)", value: "12" },
+               ]
            }
 
 
@@ -136,10 +223,21 @@
                    $scope.commonData.isGameEdit = true;
                    $scope.commonData.isSelectHomeTeam = true;
                    $scope.commonData.isSelectGuestTeam = true;
+                   $scope.commonData.isGameSelected = true;
+                   $scope.commonData.isGameSelect = false;
+               } else {
+                   $http.get('/data/game/' + $scope.commonData.selectedGame.id).
+                       then(function (response) {
+                           $scope.commonData.selectedGame = response.data;
+                           $scope.commonData.isGameEdit = false;
+                           $scope.commonData.isSelectHomeTeam = false;
+                           $scope.commonData.isSelectGuestTeam = false;
+                           $scope.commonData.isGameSelected = true;
+                           $scope.commonData.isGameSelect = false;
+                       });
                }
                
-               $scope.commonData.isGameSelected = true;
-               $scope.commonData.isGameSelect = false;
+               
 
            }
 
@@ -293,11 +391,11 @@
 
 
            $scope.guestTeamLinupAdd = function () {
-               $scope.commonData.selectedGame.guest.lineup.push({ player: null, position: "99" })
+               $scope.commonData.selectedGame.guest.lineup.push({ player: null, fieldingPosition: "99" })
            }
 
            $scope.homeTeamLinupAdd = function () {
-               $scope.commonData.selectedGame.home.lineup.push({ player: null, position: "99" })
+               $scope.commonData.selectedGame.home.lineup.push({ player: null, fieldingPosition: "99" })
            }
 
 

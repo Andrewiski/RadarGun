@@ -1,7 +1,8 @@
 # DataFile
+data/games
 data/teams.nosql
-data/player.nosql
-data/radarData.nosq"
+data/games.nosql
+
 
 RadarGunMonitor.njsproj.FileListAbsolute.txt 
 RadarGunMonitor.njsprojAssemblyReference.cache

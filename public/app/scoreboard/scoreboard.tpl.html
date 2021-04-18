@@ -446,7 +446,7 @@
                                                 <div class="form-group form-control-sm">
                                                     <ui-select ng-model="commonData.selectedGame.home.lineup[index].player" theme="bootstrap">
                                                         <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
-                                                        <ui-select-choices repeat="item in commonData.selectedGame.home.team.roster | filter: $select.search">
+                                                        <ui-select-choices repeat="item in commonData.selectedGame.home.team.roster | filter: $select.search | uniquePlayer : index : commonData.selectedGame.home.lineup : 'player'">
                                                             #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
                                                             <span ng-bind-html="item.firstName | highlight: $select.search"></span>
                                                             <span ng-bind-html="item.lastName | highlight: $select.search"></span>
@@ -456,27 +456,17 @@
                                             </td>
                                             <td>
                                                 <div class="form-group form-control-sm">
-                                                    <!--<lable class="form-control" ng-bind="player.fielding" />-->
-                                                    <select class="form-control" ng-model="player.fielding" placeholder="Fielding">
-                                                        <option value="99">Bench</option>
-                                                        <option value="1">1 (P)</option>
-                                                        <option value="2">2 (C)</option>
-                                                        <option value="3">3 (1st)</option>
-                                                        <option value="4">4 (2nd)</option>
-                                                        <option value="5">5 (SS)</option>
-                                                        <option value="6">6 (3rd)</option>
-                                                        <option value="7">7 (LF)</option>
-                                                        <option value="8">8 (CF)</option>
-                                                        <option value="9">9 (RF)</option>
-                                                        <option value="11">11 (DH)</option>
-                                                        <option value="12">12 (EH)</option>
+                                                    
+                                                    <select class="form-control" ng-model="commonData.selectedGame.home.lineup[index].fieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.home.lineup">
+                                                        
                                                     </select>
                                                 </div>
                                             </td>
 
                                             <td>
                                                 <div class="form-group btn-group" role="group" aria-label="Buttons">
-                                                    <button type="button" class="btn btn-primary" ng-click="homeTeamLineupSub()"><i class="fa fa-minus-circle"></i></button>
+                                                    <button type="button" class="btn" ng-click="commonData.selectedGame.home.lineup[index].player = null"><i class="fa fa-ban"></i></button>
+                                                    <button type="button" class="btn btn-danger" ng-click="homeTeamLineupSub()"><i class="fa fa-minus-circle"></i></button>                                                    
                                                 </div>
                                             </td>
                                         </tr>
@@ -593,7 +583,7 @@
                                                 <div class="form-group form-control-sm">
                                                     <ui-select ng-model="commonData.selectedGame.guest.lineup[index].player" theme="bootstrap">
                                                         <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
-                                                        <ui-select-choices repeat="item in commonData.selectedGame.guest.team.roster | filter: $select.search">
+                                                        <ui-select-choices repeat="item in commonData.selectedGame.guest.team.roster | filter: $select.search | uniquePlayer : index : commonData.selectedGame.guest.lineup : 'player'">
                                                             #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
                                                             <span ng-bind-html="item.firstName | highlight: $select.search"></span>
                                                             <span ng-bind-html="item.lastName | highlight: $select.search"></span>
@@ -604,19 +594,7 @@
                                             <td>
                                                 <div class="form-group form-control-sm">
                                                     <!--<lable class="form-control" ng-bind="player.fielding" />-->
-                                                    <select class="form-control" ng-model="player.fielding" placeholder="Fielding">
-                                                        <option value="99">Bench</option>
-                                                        <option value="1">1 (P)</option>
-                                                        <option value="2">2 (C)</option>
-                                                        <option value="3">3 (1st)</option>
-                                                        <option value="4">4 (2nd)</option>
-                                                        <option value="5">5 (SS)</option>
-                                                        <option value="6">6 (3rd)</option>
-                                                        <option value="7">7 (LF)</option>
-                                                        <option value="8">8 (CF)</option>
-                                                        <option value="9">9 (RF)</option>
-                                                        <option value="11">11 (DH)</option>
-                                                        <option value="12">12 (EH)</option>
+                                                    <select class="form-control" ng-model="commonData.selectedGame.guest.lineup[index].fieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.guest.lineup">
                                                     </select>
                                                 </div>
                                             </td>

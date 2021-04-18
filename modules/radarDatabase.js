@@ -10,13 +10,14 @@ var nconf = require('nconf');
 var fs = require("fs");
 var NoSQL = require('nosql');
 const uuidv4 = require('uuid/v4');
+var path = require('path');
 var RadarDatabase = function (options) {
     var self = this;
     var defaultOptions = {
         deviceId: "",
         teamsFile: "./data/teams.nosql",
         gamesFile: "./data/games.nosql",
-        gamesFolder: "./data/games/"
+        gamesFolder: "./data/games"
     }
     nconf.file('./configs/radarDatabaseConfig.json');
     var configFileSettings = nconf.get();
@@ -108,22 +109,69 @@ var RadarDatabase = function (options) {
 
     }
 
+    this.game_get = function (gameId, callback) {
+
+        let gameFile = path.join(objOptions.gamesFolder, gameId, "game.nosql");
+        
+        if (fs.existsSync(gameFile)) {
+            let gameDb = NoSQL.load(gameFile);
+            gameDb.one().where("id", gameId).make(function (builder) {
+                builder.callback(function (err, response) {
+                    debug('game_get ', response);
+                    callback(err, response);
+                });
+            });
+        }
+
+    }
+
+
     this.game_upsert = function (game, callback) {
         if (!game.id) {
             game.id = uuidv4();
         }
 
-        path.join(__dirname, 'node_modules', 'angular-route')
+       
 
-        var gameDbExists = fs.existsSync(objOptions.gamesFolder);
-        var gamesDb = NoSQL.load(path. objOptions.gamesFile);
-        gamesDb.update(game, game).make(function (filter) {
+        if (fs.existsSync(objOptions.gamesFolder) === false) {
+            fs.mkdirSync(objOptions.gamesFolder);
+        }
+
+        if (fs.existsSync(path.join(objOptions.gamesFolder, game.id)) === false) {
+            fs.mkdirSync(path.join(objOptions.gamesFolder, game.id));
+        }
+
+        let gameFile = path.join(objOptions.gamesFolder, game.id, "game.nosql");
+        
+
+        let gameDb = NoSQL.load(gameFile);
+
+        gameDb.update(game, game).make(function (filter) {
             filter.where('id', game.id);
             filter.callback(function (err, count) {
                 debug('game_upsert ', count);
-                callback(err, count);
+                let gameName = "";
+                if (game.home && game.home.team && game.home.team.name) {
+                    gameName += game.home.team.name + " vs ";
+                }
+                if (game.guest && game.guest.team && game.guest.team.name) {
+                    gameName += game.guest.team.name;
+                }
+                if (gameName === "") {
+                    gameName = game.id;
+                }
+                let gamesData = { id: game.id, name: gameName, startDate: game.startDate, endDate: game.endDate, status: game.status }
+                gamesDb.update(gamesData, gamesData).make(function (filter) {
+                    filter.where('id', gamesData.id);
+                    filter.callback(function (err, count) {
+                        debug('games_upsert ', count);
+                        callback(err, count);
+                    });
+                });
             });
         });
+
+        
     }
 
     this.game_delete = function (game, callback) {
@@ -154,132 +202,14 @@ var RadarDatabase = function (options) {
 
     if (gamesDbExists === false) {
         self.game_upsert(
-            { "id": "00000000-0000-0000-0000-000000000001", "name": "New Game", "date": "", "home": "", "guest": "", "status": 1 }    
+            { "id": "00000000-0000-0000-0000-000000000000", "name": "New Game", "shortName": "", "startDate": null, "endDate": null, "inning": 1, "inningPosition": "top", "outs": 0, "balls": 0, "strikes": 0, "score": { "home": 0, "guest": 0 }, "home": { "lineup": [], "team": null }, "guest": { "lineup": [], "team": null }, "status": 1, "log": [] }    
         ,
         function (err, callback) {
             debug("Anonymous Game Inserted");
         });
     }
     if (teamsDbExists === false) {
-        self.team_upsert({
-            "id": "00000000-0000-0000-0000-000000000001",
-            "status": 1,
-            "name": "Vicksburg Bulldogs Varsity",
-            "roster": [
-                {
-                    "firstName": "Cole",
-                    "lastName": "Gebben",
-                    "jerseyNumber": "1",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Jacob",
-                    "lastName": "Conklin",
-                    "jerseyNumber": "2",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Zach",
-                    "lastName": "Myers",
-                    "jerseyNumber": "4",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Tyler",
-                    "lastName": "DeVries",
-                    "jerseyNumber": "5",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Ben",
-                    "lastName": "Hackman",
-                    "jerseyNumber": "6",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Jimmy",
-                    "lastName": "Cutshaw",
-                    "jerseyNumber": "7",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Logan",
-                    "lastName": "Cohrs",
-                    "jerseyNumber": "8",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Brenden",
-                    "lastName": "Monroe",
-                    "jerseyNumber": "9",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Brenden",
-                    "lastName": "Owen",
-                    "jerseyNumber": "10",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Carter",
-                    "lastName": "Brown",
-                    "jerseyNumber": "11",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Parker",
-                    "lastName": "Wilson",
-                    "jerseyNumber": "12",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Dylan",
-                    "lastName": "Zemitans",
-                    "jerseyNumber": "13",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Drew",
-                    "lastName": "Habel",
-                    "jerseyNumber": "14",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Trevor",
-                    "lastName": "Young",
-                    "jerseyNumber": "15",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Evan",
-                    "lastName": "Anderson",
-                    "jerseyNumber": "18",
-                    "fielding": 99,
-                    "batting": 99
-                },
-                {
-                    "firstName": "Colin",
-                    "lastName": "Klinger",
-                    "jerseyNumber": "22",
-                    "fielding": 99,
-                    "batting": 99
-                }
-            ]
-        },
+        self.team_upsert({ "id": "00000000-0000-0000-0000-000000000000", "status": 1, "name": "New Team", "roster": [{ "firstName": "", "lastName": "", "jerseyNumber": "" }] },
         function (err, callback) {
             debug("Anonymous Game Inserted");
         });

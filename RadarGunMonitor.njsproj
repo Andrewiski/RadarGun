@@ -173,8 +173,6 @@
     <Content Include="TestNanoVideo2.js" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="data\games\" />
-    <Folder Include="data\games\00000000-0000-0000-0000-000000000001\" />
     <Folder Include="ffmpeg\doc\" />
     <Folder Include="ffmpeg\presets\" />
     <Folder Include="modules\" />

@@ -163,8 +163,15 @@ routes.get('/data/game', function (req, res) {
     res.json(commonData.game);
 });
 
-routes.get('/data/game/?', function (req, res) {
+routes.get('/data/game/:id', function (req, res) {
     //res.json(commonData.game);
+    radarDatabase.game_get(req.params.id, function (err, response) {
+        if (err) {
+            res.json(500, { err: err })
+        } else {
+            res.json(response);
+        }
+    })
 });
 
 routes.put('/data/game', function (req, res) {
@@ -194,13 +201,13 @@ var updateOverlayText = function () {
     if (commonData.game) {
         OverlayText = "P: "
         if (commonData.game.pitcher) {
-            var pitcherName = commonData.game.pitcher.player.firstName + " " + commonData.game.pitcher.player.lastName;
+            var pitcherName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.pitcher.player.firstName + " " + commonData.game.pitcher.player.lastName;
 
             if (pitcherName.length > 19) {
-                pitcherName = commonData.game.pitcher.player.firstName.substring(0, 1) + ".  " + commonData.game.pitcher.player.lastName;
+                pitcherName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.pitcher.player.firstName.substring(0, 1) + ".  " + commonData.game.pitcher.player.lastName;
             }
             if (pitcherName.length > 19) {
-                pitcherName = commonData.game.pitcher.player.lastName.substring(0, 19);
+                pitcherName = ("#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.pitcher.player.lastName).substring(0, 19);
             }
             //need checks to ControlLength pad and truncate
             OverlayText += pitcherName.padEnd(19);
@@ -209,7 +216,7 @@ var updateOverlayText = function () {
         }
     }
     if (commonData.currentRadarSpeedData) {
-        OverlayText += " PV: " + commonData.currentRadarSpeedData.inMaxSpeed.toFixed(1).toString() + " MPH"
+        OverlayText += " PV: " + commonData.currentRadarSpeedData.inMaxSpeed.toFixed(1).toString().padStart(4,"0") + " MPH"
     } else {
         OverlayText += " PV: 00.0 MPH"
     }
@@ -224,13 +231,14 @@ var updateOverlayText = function () {
         OverlayText += "\n";
         OverlayText += "B: "
         if (commonData.game.batter) {
-            var batterName = commonData.game.batter.player.firstName + " " + commonData.game.batter.player.lastName;
+            var batterName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.firstName + " " + commonData.game.batter.player.lastName;
+
             //need checks to ControlLength pad and truncate
             if (batterName.length > 19) {
-                batterName = commonData.game.batter.player.firstName.substring(0, 1) + ".  " + commonData.game.batter.player.lastName;
+                batterName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.firstName.substring(0, 1) + ".  " + commonData.game.batter.player.lastName;
             }
             if (batterName.length > 19) {
-                batterName = commonData.game.batter.player.lastName.substring(0, 19);
+                batterName = ("#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.lastName).substring(0, 19);
             }
 
             OverlayText += batterName.padEnd(19);
@@ -239,7 +247,7 @@ var updateOverlayText = function () {
         }
     }
     if (commonData.currentRadarSpeedData) {
-        OverlayText += " EV: " + commonData.currentRadarSpeedData.outMaxSpeed.toFixed(1).toString() + " MPH";
+        OverlayText += " EV: " + commonData.currentRadarSpeedData.outMaxSpeed.toFixed(1).toString().padStart(4, "0") + " MPH";
     } else {
         OverlayText += " EV: 00.0 MPH";
     }
@@ -266,6 +274,30 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 }); 
 
 
+let periodicTimer = null;
+const periodicTimerInterval = 60000;
+
+var periodicTimerEvent = function () {
+    if (commonData.gameIsDirty) {
+        radarDatabase.game_upsert(commonData.game);
+        commonData.gameIsDirty = false;
+    }
+}
+
+var StartPeriodicTimerEvent = function () {
+    if (periodicTimer !== null) {
+        clearTimeout(periodicTimer);
+        periodicTimer = null
+    }
+    setTimeout(periodicTimerEvent, periodicTimerInterval )
+}
+
+var StopPeriodicTimerEvent = function () {
+    if (periodicTimer !== null) {
+        clearTimeout(periodicTimer);
+        periodicTimer = null
+    }
+}
 
 var io = require('socket.io')(server);
 io.on('connection', function(socket) {
@@ -299,47 +331,56 @@ io.on('connection', function(socket) {
         switch (message.cmd) {
             case "inningChange":
                 commonData.game.inning = message.data.inning;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "inningChanged", data: { inning: commonData.game.inning } });      //use io to send it to everyone
                 updateOverlayText();
                 break;
             case "inningPositionChange":
                 commonData.game.inningPosition = message.data.inningPosition;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "inningPositionChanged", data: { inningPosition: commonData.game.inningPosition } });      //use io to send it to everyone
                 updateOverlayText();
                 break;
             case "homeScoreChange":
                 commonData.game.score.home = message.data.score.home;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "homeScoreChanged", data: { score: { home: commonData.game.score.home } } });      //use io to send it to everyone
                 updateOverlayText();
                 break;
             case "guestScoreChange":
                 commonData.game.score.guest = message.data.score.guest;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "guestScoreChanged", data: { score: { guest: commonData.game.score.guest } } });      //use io to send it to everyone
                 updateOverlayText();
                 break;
             case "outsChange":
                 commonData.game.outs = message.data.outs;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "outsChanged", data: { outs: commonData.game.outs } });      //use io to send it to everyone
                 updateOverlayText();
                 break;
             case "strikesChange":
                 commonData.game.strikes = message.data.strikes;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "strikesChanged", data: { strikes: commonData.game.strikes } });      //use io to send it to everyone
                 updateOverlayText();
                 break;
             case "ballsChange":
                 commonData.game.balls = message.data.balls;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "ballsChanged", data: { balls: commonData.game.balls } });      //use io to send it to everyone
                 updateOverlayText();
                 break;
             case "pitcherChange":
                 commonData.game.pitcher = message.data.pitcher;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "pitcherChanged", data: { pitcher: commonData.game.pitcher } });      //use io to send it to everyone
                 //radarStalker2.pitcher({ data: data.pitcher, socket: socket });
                 updateOverlayText();
                 break;
             case "batterChange":
                 commonData.game.batter = message.data.batter;
+                commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "batterChanged", data: { batter: commonData.game.batter } });      //use io to send it to everyone
                 //radarStalker2.batter({ data: data.batter, socket: socket });
                 updateOverlayText();
@@ -394,7 +435,8 @@ radarStalker2.on('radarSpeed', function (data) {
     if (commonData.game) {
         data.pitcher = commonData.game.pitcher;
         data.batter = commonData.game.batter;
-        commonData,game.pitchLog.push(JSON.parse(JSON.stringify(data)));
+        commonData.game.log.push(JSON.parse(JSON.stringify(data)));
+        commonData.gameIsDirty = true;
     }    
     dataDisplay.updateSpeedData(data);
     io.emit('radarSpeed', data);
