@@ -41,7 +41,7 @@ var radarDatabase = new RadarDatabase({});;
 
 
 var commonData = {
-    game: null,
+    game: {},
     currentRadarSpeedData: null
 
 }
@@ -197,72 +197,96 @@ routes.put('/data/team', function (req, res) {
 
 
 var updateOverlayText = function () {
-    var OverlayText = ""
-    if (commonData.game) {
-        OverlayText = "P: "
-        if (commonData.game.pitcher) {
-            var pitcherName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.pitcher.player.firstName + " " + commonData.game.pitcher.player.lastName;
+    try {
+        var OverlayText = ""
+        if (commonData.game) {
+            if (commonData.game.pitcher) {
+                OverlayText = "P: "
+                var pitcherName = " ";
+                if (commonData.game.pitcher.player) {
+                    pitcherName = "#" + commonData.game.pitcher.player.jerseyNumber + " " + commonData.game.pitcher.player.firstName + " " + commonData.game.pitcher.player.lastName;
 
-            if (pitcherName.length > 19) {
-                pitcherName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.pitcher.player.firstName.substring(0, 1) + ".  " + commonData.game.pitcher.player.lastName;
+                    if (pitcherName.length > 19) {
+                        pitcherName = "#" + commonData.game.pitcher.player.jerseyNumber + " " + commonData.game.pitcher.player.firstName.substring(0, 1) + ".  " + commonData.game.pitcher.player.lastName;
+                    }
+                    if (pitcherName.length > 19) {
+                        pitcherName = ("#" + commonData.game.pitcher.player.jerseyNumber + " " + commonData.game.pitcher.player.lastName).substring(0, 19);
+                    }
+                }
+                //need checks to ControlLength pad and truncate
+                OverlayText += pitcherName.padEnd(19);
+            } else {
+                OverlayText += " ".padEnd(22);
             }
-            if (pitcherName.length > 19) {
-                pitcherName = ("#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.pitcher.player.lastName).substring(0, 19);
-            }
-            //need checks to ControlLength pad and truncate
-            OverlayText += pitcherName.padEnd(19);
+        }
+        if (commonData.currentRadarSpeedData) {
+            OverlayText += " PV: " + commonData.currentRadarSpeedData.inMaxSpeed.toFixed(1).toString().padStart(4, "0") + " MPH"
         } else {
-            OverlayText += "                   ";
+            OverlayText += " PV: 00.0 MPH"
         }
-    }
-    if (commonData.currentRadarSpeedData) {
-        OverlayText += " PV: " + commonData.currentRadarSpeedData.inMaxSpeed.toFixed(1).toString().padStart(4,"0") + " MPH"
-    } else {
-        OverlayText += " PV: 00.0 MPH"
-    }
-    if (commonData.game) {
-        let homeTeamName = "Home";
-        if (commonData.game && commonData.game.home && commonData.game.home.team && commonData.game.home.team.name) {
-            homeTeamName = commonData.game.home.team.shortName
+        if (commonData.game) {
+            let homeTeamName = "Home";
+            if (commonData.game && commonData.game.home && commonData.game.home.team && commonData.game.home.team.name) {
+                homeTeamName = commonData.game.home.team.shortName
+            }
+            if (commonData.game.score && commonData.game.score.home) {
+                OverlayText += homeTeamName.padStart(16) + ": " + commonData.game.score.home.toString().padStart(2);
+            }
+            if (commonData.game.outs) {
+                OverlayText += " Outs: " + commonData.game.outs.toString();
+            }
+            if (commonData.game.balls && commonData.game.strikes) {
+                OverlayText += " B-S: " + commonData.game.balls + "-" + commonData.game.strikes;
+            }
+            OverlayText += "\n";
+
+            if (commonData.game.batter ) {
+                OverlayText += "B: ";
+                var batterName = "";
+                if (commonData.game.batter.player) {
+                    batterName =  "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.firstName + " " + commonData.game.batter.player.lastName;
+
+                    //need checks to ControlLength pad and truncate
+                    if (batterName.length > 19) {
+                        batterName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.firstName.substring(0, 1) + ".  " + commonData.game.batter.player.lastName;
+                    }
+                    if (batterName.length > 19) {
+                        batterName = ("#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.lastName).substring(0, 19);
+                    }
+                }
+
+                OverlayText += batterName.padEnd(19);
+            } else {
+                OverlayText += " ".padEnd(22);
+            }
         }
-        OverlayText += homeTeamName.padStart(16) + ": " + commonData.game.score.home.toString().padStart(2);
-        OverlayText += " Outs: " + commonData.game.outs.toString();
-        OverlayText += " B-S: " + commonData.game.balls + "-" + commonData.game.strikes;
-        OverlayText += "\n";
-        OverlayText += "B: "
-        if (commonData.game.batter) {
-            var batterName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.firstName + " " + commonData.game.batter.player.lastName;
-
-            //need checks to ControlLength pad and truncate
-            if (batterName.length > 19) {
-                batterName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.firstName.substring(0, 1) + ".  " + commonData.game.batter.player.lastName;
-            }
-            if (batterName.length > 19) {
-                batterName = ("#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.lastName).substring(0, 19);
-            }
-
-            OverlayText += batterName.padEnd(19);
+        if (commonData.currentRadarSpeedData) {
+            OverlayText += " EV: " + commonData.currentRadarSpeedData.outMaxSpeed.toFixed(1).toString().padStart(4, "0") + " MPH";
         } else {
-            OverlayText += "                   ";
+            OverlayText += " EV: 00.0 MPH";
+        }
+        if (commonData.game) {
+            let guestTeamName = "Guest";
+            if (commonData.game && commonData.game.guest && commonData.game.guest.team && commonData.game.guest.team.name) {
+                guestTeamName = commonData.game.guest.team.shortName;
+            }
+            if (commonData.game.score && commonData.game.score.home) {
+                OverlayText += guestTeamName.padStart(16) + ": " + commonData.game.score.guest.toString().padStart(2);
+            }
+            if (commonData.game.inning && commonData.game.inningPosition) {
+                OverlayText += " Inning: " + commonData.game.inning.toString().padStart(2) + " " + commonData.game.inningPosition.substring(0, 3);
+            }
+        }
+
+        ffmpegOverlay.updateOverlayText(OverlayText);
+    } catch (ex) {
+        debug("error", "error updating Overlay text", ex);
+        try {
+            ffmpegOverlay.updateOverlayText("");
+        } catch (ex2) {
+            debug("error", "error blanking Overlay text", ex2)
         }
     }
-    if (commonData.currentRadarSpeedData) {
-        OverlayText += " EV: " + commonData.currentRadarSpeedData.outMaxSpeed.toFixed(1).toString().padStart(4, "0") + " MPH";
-    } else {
-        OverlayText += " EV: 00.0 MPH";
-    }
-    if (commonData.game) {
-        let guestTeamName = "Guest";
-        if (commonData.game && commonData.game.guest && commonData.game.guest.team && commonData.game.guest.team.name) {
-            guestTeamName = commonData.game.guest.team.shortName;
-        }
-        OverlayText += guestTeamName.padStart(16) + ": " + commonData.game.score.guest.toString().padStart(2);
-
-        
-        OverlayText += " Inning: " + commonData.game.inning.toString().padStart(2) + " " + commonData.game.inningPosition.substring(0, 3);
-    }
-    ffmpegOverlay.updateOverlayText(OverlayText);
-
 }
 
 app.use('/', routes);
@@ -342,12 +366,18 @@ io.on('connection', function(socket) {
                 updateOverlayText();
                 break;
             case "homeScoreChange":
+                if (commonData.game.score === undefined) {
+                    commonData.game.score = {};
+                }
                 commonData.game.score.home = message.data.score.home;
                 commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "homeScoreChanged", data: { score: { home: commonData.game.score.home } } });      //use io to send it to everyone
                 updateOverlayText();
                 break;
             case "guestScoreChange":
+                if (commonData.game.score === undefined) {
+                    commonData.game.score = {};
+                }
                 commonData.game.score.guest = message.data.score.guest;
                 commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "guestScoreChanged", data: { score: { guest: commonData.game.score.guest } } });      //use io to send it to everyone
