@@ -362,6 +362,7 @@ var FfmpegOverlay = function (options) {
 
             //.pipe(transStream, { end: false });
             .run();
+        debug("info", "ffmpeg Started");
     };
 
 

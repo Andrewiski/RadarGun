@@ -25,7 +25,7 @@
                                 allPlayer = allItem;
                             }
                             if (selectedPlayer && allPlayer && i !== selectedPlayersIndex) {
-                                if (selectedPlayer.jerseyNumber === allPlayer.jerseyNumber || selectedPlayer.firstName === allPlayer.firstName || selectedPlayer.lastName === allPlayer.lastName) {
+                                if (selectedPlayer.jerseyNumber === allPlayer.jerseyNumber && selectedPlayer.firstName === allPlayer.firstName && selectedPlayer.lastName === allPlayer.lastName) {
                                     playerFound = true;  
                                     
                                     break;

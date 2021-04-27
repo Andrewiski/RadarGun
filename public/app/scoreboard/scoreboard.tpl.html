@@ -677,9 +677,9 @@
                                     <div class="btn-group" role="group" aria-label="Buttons">
                                         
                                         <button type="button" class="btn btn-primary" ng-hide="commonData.isGameAdmin && (commonData.isGuestTeamEdit == true || commonData.isSelectGuestTeam == true) " ng-click="guestTeamEdit()">Edit</button>
-                                        <button type="button" class="btn btn-primary" ng-show="commonData.isGameAdmin && (commonData.isGameEdit && commonData.isSelectGuestTeam == false)" ng-click="guestTeamSelect()">Select</button>
+                                        <button type="button" class="btn btn-primary" ng-show="commonData.isGameAdmin && ( commonData.isSelectGuestTeam == false)" ng-click="guestTeamSelect()">Select</button>
                                         <button type="button" class="btn btn-primary" ng-show="commonData.isGameAdmin && (commonData.isGuestTeamEdit  && commonData.isSelectGuestTeam == false)" ng-click="guestTeamSave()">Save</button>
-                                        <!--<button type="button" class="btn btn-danger" ng-show="commonData.isGuestTeamEdit  && commonData.isSelectGuestTeam == false" ng-click="guestTeamCancel()">Cancel</button>-->
+                                        <button type="button" class="btn btn-danger" ng-show="commonData.isGuestTeamEdit  && commonData.isSelectGuestTeam == false" ng-click="guestTeamCancel()">Cancel</button>
                                     </div>
                                 </div>
                             </div>
