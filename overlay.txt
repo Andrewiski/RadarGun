@@ -1,2 +1,2 @@
-P: Ben Hambright       PV: 68.1 MPH       Vicksburg: 17 Outs: 0 B-S: 0-0
-B:  Oh                 EV: 0.0 MPH         Paw Paw:  1 Inning:  3 top
+P: #6 Cayden Staley    PV: 00.0 MPH       Vicksburg:  2 Outs: 1 B-S: 2-2
+B:                     EV: 00.0 MPH        Dowagiac:  2 Inning:  1 bot
