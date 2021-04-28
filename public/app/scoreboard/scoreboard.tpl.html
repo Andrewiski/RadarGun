@@ -87,11 +87,11 @@
             <div class="row form-inline">
                 <div class="col-sm-6">
                     <label class="control-label">Pitcher</label>
-                    <span class="form-control" ng-bind="'#' + commonData.game.pitcher.player.jerseyNumber + ' ' + commonData.game.pitcher.player.firstName + ' ' + commonData.game.pitcher.player.lastName "></span>
+                    <span class="form-control" ng-bind="'#' + commonData.game.pitcher.player.jerseyNumber + ' ' + commonData.game.pitcher.player.firstName + ' ' + commonData.game.pitcher.player.lastName + ' - ' + getPlayerPositionLongName(commonData.game.pitcher.fieldingPosition) "></span>
                 </div>
                 <div class="col-sm-6">
                     <label class="control-label">Batter</label>
-                    <span class="form-control" ng-bind="'#' + commonData.game.batter.player.jerseyNumber + ' ' + commonData.game.batter.player.firstName + ' ' + commonData.game.batter.player.lastName + ' ' + getPlayerPositionLongName(commonData.game.pitcher.fieldingPosition)  "></span>
+                    <span class="form-control" ng-bind="'#' + commonData.game.batter.player.jerseyNumber + ' ' + commonData.game.batter.player.firstName + ' ' + commonData.game.batter.player.lastName + ' - ' + getPlayerPositionLongName(commonData.game.batter.fieldingPosition)  "></span>
                 </div>
             </div>
         </div>

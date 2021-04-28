@@ -353,72 +353,149 @@ io.on('connection', function(socket) {
         debug('gameChange:' + ', message:' + message + ', client id:' + socket.id);
 
         switch (message.cmd) {
-            case "inningChange":
-                commonData.game.inning = message.data.inning;
-                commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "inningChanged", data: { inning: commonData.game.inning } });      //use io to send it to everyone
-                updateOverlayText();
-                break;
-            case "inningPositionChange":
-                commonData.game.inningPosition = message.data.inningPosition;
-                commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "inningPositionChanged", data: { inningPosition: commonData.game.inningPosition } });      //use io to send it to everyone
-                updateOverlayText();
-                break;
-            case "homeScoreChange":
-                if (commonData.game.score === undefined) {
-                    commonData.game.score = {};
+
+            case "gameChange":
+                if (message.data.inning !== undefined) {
+                    commonData.game.inning = message.data.inning;
                 }
-                commonData.game.score.home = message.data.score.home;
-                commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "homeScoreChanged", data: { score: { home: commonData.game.score.home } } });      //use io to send it to everyone
-                updateOverlayText();
-                break;
-            case "guestScoreChange":
-                if (commonData.game.score === undefined) {
-                    commonData.game.score = {};
+                if (message.data.inningPosition !== undefined) {
+                    commonData.game.inningPosition = message.data.inningPosition;
                 }
-                commonData.game.score.guest = message.data.score.guest;
+
+                if (message.data.score !== undefined) {
+                    if (commonData.game.score === undefined) {
+                        commonData.game.score = {};
+                    }
+                    if (message.data.score.guest !== undefined) {
+                        commonData.game.score.guest = message.data.score.guest;
+                    }
+                    if (message.data.score.home !== undefined) {
+                        commonData.game.score.home = message.data.score.home;
+                    }
+
+                }
+
+
+                if (message.data.guest !== undefined) {
+                    if (commonData.game.guest === undefined) {
+                        commonData.game.guest = {};
+                    }
+                    if (message.data.guest.team !== undefined) {
+                        commonData.game.guest.team = message.data.guest.team;
+                    }
+                    if (message.data.guest.lineup !== undefined) {
+                        commonData.game.guest.lineup = message.data.guest.lineup;
+                    }
+                    if (message.data.guest.batterIndex !== undefined) {
+                        commonData.game.guest.batterIndex = message.data.guest.batterIndex;
+                    }
+
+                }
+
+                if (message.data.home !== undefined) {
+                    if (commonData.game.home === undefined) {
+                        commonData.game.home = {};
+                    }
+                    if (message.data.home.team !== undefined) {
+                        commonData.game.home.team = message.data.home.team;
+                    }
+                    if (message.data.home.lineup !== undefined) {
+                        commonData.game.home.lineup = message.data.home.lineup;
+                    }
+                    if (message.data.home.batterIndex !== undefined) {
+                        commonData.game.home.batterIndex = message.data.home.batterIndex;
+                    }
+
+                }
+
+
+                if (message.data.outs !== undefined) {
+                    commonData.game.outs = message.data.outs;
+                }
+                if (message.data.strikes !== undefined) {
+                    commonData.game.strikes = message.data.strikes;
+                }
+                if (message.data.balls !== undefined) {
+                    commonData.game.balls = message.data.balls;
+                }
+                if (message.data.pitcher !== undefined) {
+                    commonData.game.pitcher = message.data.pitcher;
+                }
+                if (message.data.batter !== undefined) {
+                    commonData.game.batter = message.data.batter;
+                }
                 commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "guestScoreChanged", data: { score: { guest: commonData.game.score.guest } } });      //use io to send it to everyone
+                io.emit("gameChanged", { cmd: "gameChanged", data: message.data });      //use io to send it to everyone
                 updateOverlayText();
                 break;
-            case "outsChange":
-                commonData.game.outs = message.data.outs;
-                commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "outsChanged", data: { outs: commonData.game.outs } });      //use io to send it to everyone
-                updateOverlayText();
-                break;
-            case "strikesChange":
-                commonData.game.strikes = message.data.strikes;
-                commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "strikesChanged", data: { strikes: commonData.game.strikes } });      //use io to send it to everyone
-                updateOverlayText();
-                break;
-            case "ballsChange":
-                commonData.game.balls = message.data.balls;
-                commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "ballsChanged", data: { balls: commonData.game.balls } });      //use io to send it to everyone
-                updateOverlayText();
-                break;
-            case "pitcherChange":
-                commonData.game.pitcher = message.data.pitcher;
-                commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "pitcherChanged", data: { pitcher: commonData.game.pitcher } });      //use io to send it to everyone
-                //radarStalker2.pitcher({ data: data.pitcher, socket: socket });
-                updateOverlayText();
-                break;
-            case "batterChange":
-                commonData.game.batter = message.data.batter;
-                commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "batterChanged", data: { batter: commonData.game.batter } });      //use io to send it to everyone
-                //radarStalker2.batter({ data: data.batter, socket: socket });
-                updateOverlayText();
-                break;
+
+
+            //case "inningChange":
+            //    commonData.game.inning = message.data.inning;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "inningChanged", data: { inning: commonData.game.inning } });      //use io to send it to everyone
+            //    updateOverlayText();
+            //    break;
+            //case "inningPositionChange":
+            //    commonData.game.inningPosition = message.data.inningPosition;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "inningPositionChanged", data: { inningPosition: commonData.game.inningPosition } });      //use io to send it to everyone
+            //    updateOverlayText();
+            //    break;
+            //case "homeScoreChange":
+            //    if (commonData.game.score === undefined) {
+            //        commonData.game.score = {};
+            //    }
+            //    commonData.game.score.home = message.data.score.home;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "homeScoreChanged", data: { score: { home: commonData.game.score.home } } });      //use io to send it to everyone
+            //    updateOverlayText();
+            //    break;
+            //case "guestScoreChange":
+            //    if (commonData.game.score === undefined) {
+            //        commonData.game.score = {};
+            //    }
+            //    commonData.game.score.guest = message.data.score.guest;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "guestScoreChanged", data: { score: { guest: commonData.game.score.guest } } });      //use io to send it to everyone
+            //    updateOverlayText();
+            //    break;
+            //case "outsChange":
+            //    commonData.game.outs = message.data.outs;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "outsChanged", data: { outs: commonData.game.outs } });      //use io to send it to everyone
+            //    updateOverlayText();
+            //    break;
+            //case "strikesChange":
+            //    commonData.game.strikes = message.data.strikes;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "strikesChanged", data: { strikes: commonData.game.strikes } });      //use io to send it to everyone
+            //    updateOverlayText();
+            //    break;
+            //case "ballsChange":
+            //    commonData.game.balls = message.data.balls;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "ballsChanged", data: { balls: commonData.game.balls } });      //use io to send it to everyone
+            //    updateOverlayText();
+            //    break;
+            //case "pitcherChange":
+            //    commonData.game.pitcher = message.data.pitcher;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "pitcherChanged", data: { pitcher: commonData.game.pitcher } });      //use io to send it to everyone
+            //    //radarStalker2.pitcher({ data: data.pitcher, socket: socket });
+            //    updateOverlayText();
+            //    break;
+            //case "batterChange":
+            //    commonData.game.batter = message.data.batter;
+            //    commonData.gameIsDirty = true;
+            //    io.emit("gameChanged", { cmd: "batterChanged", data: { batter: commonData.game.batter } });      //use io to send it to everyone
+            //    //radarStalker2.batter({ data: data.batter, socket: socket });
+            //    updateOverlayText();
+            //    break;
             
         }
 
-        updateOverlayText();
+        //updateOverlayText();
         
     })
 

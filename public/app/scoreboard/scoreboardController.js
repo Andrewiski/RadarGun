@@ -143,21 +143,21 @@
 
 
            var refreshTeams = function () {
-               $http.get('/data/teams').
+               return $http.get('/data/teams').
                    then(function (response) {
                        $scope.commonData.teams = response.data;
                    });
            }
 
            var refreshGames = function () {
-               $http.get('/data/games').
+               return $http.get('/data/games').
                    then(function (response) {
                        $scope.commonData.games = response.data;
                    });
            }
 
            var getCurrentGame = function () {
-               $http.get('/data/game').
+               return $http.get('/data/game').
                    then(function (response) {
                        $scope.commonData.game = response.data;
                    });
@@ -166,18 +166,23 @@
            var initData = function () {
                refreshTeams();
                refreshGames();
-               getCurrentGame();
+               getCurrentGame().then(
+                   function (response) {
+                       if (window.location.hash === "#scoreGame") {
+                           $scope.commonData.selectedGame = $scope.commonData.game;
+                           $scope.commonData.isGameSelected = true;
+                           $scope.commonData.isGameScore = true;
+                           $scope.commonData.isGameAdmin = true;
+                           $scope.updatePitchersBatters();
+                       }
+                   }
+               );
 
-               if (window.location.hash === "scoreGame") {
-                   $scope.commonData.selectedGame = $scope.commonData.game; 
-                   $scope.commonData.isGameSelected = true;
-                   $scope.commonData.isGameScore = true;
-                   
-               }
+               
                
            }
 
-           initData();
+           
 
 
            $scope.gameSelect = function () {
@@ -254,43 +259,163 @@
 
            $scope.batterChange = function () {
                //Tell server the inningChanged
-               radarMonitor.sendServerCommand("gameChange", { cmd: "batterChange", data: { batter: $scope.commonData.selectedGame.batter } });
+               let data = {};
+
+               
+               if ($scope.commonData.selectedGame.inningPosition === "top") {
+                   let index = $scope.commonData.selectedGame.guest.lineup.indexOf($scope.commonData.selectedGame.batter);
+                   data.guest = { batterIndex: index };
+               } else {
+                   let index = $scope.commonData.selectedGame.home.lineup.indexOf($scope.commonData.selectedGame.batter);
+                   data.home = { batterIndex: index };
+               }
+               data.batter = $scope.commonData.selectedGame.batter;
+           
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.pitcherChange = function () {
                //Tell server the inningChanged
-               radarMonitor.sendServerCommand("gameChange", { cmd: "pitcherChange", data: { pitcher: $scope.commonData.selectedGame.pitcher } });
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { pitcher: $scope.commonData.selectedGame.pitcher } });
+           }
+
+           $scope.out = function () {
+               
+               if ($scope.commonData.selectedGame.outs >= 2) {
+                   $scope.inning(); 
+               } else {
+                   var data = {};
+                   $scope.commonData.selectedGame.outs++;
+                   data.outs = $scope.commonData.selectedGame.outs;
+                   radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+               }  
+           }
+
+           $scope.ball = function () {
+               
+               if ($scope.commonData.selectedGame.balls >= 3) {
+                   $scope.nextBatter();
+               } else {
+                   var data = {};
+                   $scope.commonData.selectedGame.balls++;
+                   data.balls = $scope.commonData.selectedGame.balls;
+                   radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+               }
+           }
+
+           $scope.strike = function () {
+
+               if ($scope.commonData.selectedGame.strikes >= 2) {
+                   $scope.nextBatter();
+                   $scope.out();
+               } else {
+                   var data = {};
+                   $scope.commonData.selectedGame.strikes++;
+                   data.strikes = $scope.commonData.selectedGame.strikes;
+                   radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+               }
+           }
+
+           $scope.nextBatter = function() {
+               var data = {};
+               if ($scope.commonData.selectedGame.inningPosition === "top") {
+                   if ($scope.commonData.selectedGame.guest.batterIndex === undefined) {
+                       $scope.commonData.selectedGame.guest.batterIndex = 0;
+                   }
+                   $scope.commonData.selectedGame.guest.batterIndex++;
+                   if ($scope.commonData.selectedGame.guest.batterIndex >= $scope.commonData.selectedGame.guest.lineup.length) {
+                       $scope.commonData.selectedGame.guest.batterIndex = 0;
+                   }
+                   $scope.commonData.selectedGame.batter = $scope.commonData.selectedGame.guest.lineup[$scope.commonData.selectedGame.guest.batterIndex]
+                   
+                   data.guest = { batterIndex: $scope.commonData.selectedGame.guest.batterIndex };
+                   data.batter = $scope.commonData.selectedGame.batter;
+               } else {
+                   if ($scope.commonData.selectedGame.home.batterIndex === undefined) {
+                       $scope.commonData.selectedGame.home.batterIndex = 0;
+                   }
+                   $scope.commonData.selectedGame.home.batterIndex++;
+                   if ($scope.commonData.selectedGame.home.batterIndex >= $scope.commonData.selectedGame.home.lineup.length) {
+                       $scope.commonData.selectedGame.home.batterIndex = 0;
+                   }
+                   $scope.commonData.selectedGame.batter = $scope.commonData.selectedGame.home.lineup[$scope.commonData.selectedGame.home.batterIndex]
+                   data.home = { batterIndex: $scope.commonData.selectedGame.home.batterIndex };
+                   data.batter = $scope.commonData.selectedGame.batter;
+               }
+               $scope.commonData.selectedGame.strikes = 0;
+               $scope.commonData.selectedGame.balls = 0;
+               data.strikes = $scope.commonData.selectedGame.strikes;
+               data.balls = $scope.commonData.selectedGame.balls;
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+           }
+
+           $scope.inning = function () {
+               //Tell server the inningChanged
+               var data = {};
+               if ($scope.commonData.selectedGame.inningPosition === "top") {
+                   $scope.commonData.selectedGame.inningPosition = "bottom";
+                   $scope.updatePitchersBatters();
+                   data.inningPosition = $scope.commonData.selectedGame.inningPosition;
+                   data.pitcher = $scope.commonData.selectedGame.pitcher;                   
+                   data.batter = $scope.commonData.selectedGame.batter;
+               } else {
+                   $scope.commonData.selectedGame.inning++;
+                   $scope.commonData.selectedGame.inningPosition = "top";
+                   $scope.updatePitchersBatters();
+                   data.inning = $scope.commonData.selectedGame.inning;
+                   data.inningPosition = $scope.commonData.selectedGame.inningPosition;
+                   data.pitcher = $scope.commonData.selectedGame.pitcher;
+                   data.batter = $scope.commonData.selectedGame.batter;
+               }
+
+               if ($scope.commonData.selectedGame.strikes !== 0) {
+                   $scope.commonData.selectedGame.strikes = 0;
+                   data.strikes = $scope.commonData.selectedGame.strikes;
+               }
+
+               if ($scope.commonData.selectedGame.balls !== 0) {
+                   $scope.commonData.selectedGame.balls = 0;
+                   data.balls = $scope.commonData.selectedGame.balls;
+               }
+
+               if ($scope.commonData.selectedGame.outs !== 0) {
+                   $scope.commonData.selectedGame.outs = 0;
+                   data.outs = $scope.commonData.selectedGame.outs;
+               }
+
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.inningChange = function () {
                //Tell server the inningChanged
-               radarMonitor.sendServerCommand("gameChange", { cmd: "inningChange", data: { inning: $scope.commonData.selectedGame.inning } });
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { inning: $scope.commonData.selectedGame.inning } });
            }
 
            $scope.inningPositionChange = function () {
                //Tell server the inningPositionChanged
                $scope.updatePitchersBatters();
-               radarMonitor.sendServerCommand("gameChange", { cmd: "inningPositionChange", data: { inningPosition: $scope.commonData.selectedGame.inningPosition } });
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { inningPosition: $scope.commonData.selectedGame.inningPosition, pitcher: $scope.commonData.selectedGame.pitcher, batter: $scope.commonData.selectedGame.batter } });
+               
            }
 
            $scope.homeScoreChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "homeScoreChange", data: { score: { home: $scope.commonData.selectedGame.score.home }} });               
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { score: { home: $scope.commonData.selectedGame.score.home }} });               
            }
 
            $scope.guestScoreChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "guestScoreChange", data: { score: { guest: $scope.commonData.selectedGame.score.guest } } });
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { score: { guest: $scope.commonData.selectedGame.score.guest } } });
            }
 
            $scope.outsChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "outsChange", data: { outs: $scope.commonData.selectedGame.outs } });
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { outs: $scope.commonData.selectedGame.outs } });
            }
 
            $scope.ballsChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "ballsChange", data: { balls: $scope.commonData.selectedGame.balls } });
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { balls: $scope.commonData.selectedGame.balls } });
            }
 
            $scope.strikesChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "strikesChange", data: { strikes: $scope.commonData.selectedGame.strikes } });
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { strikes: $scope.commonData.selectedGame.strikes } });
            }
 
            $scope.refreshTeams = function () {
@@ -338,17 +463,31 @@
 
            }
 
+           var findPitcher = function(lineup){
+               let pitcher = null;
+               for (var i = 0; i < lineup.length; i++) {
+                   if (lineup[i].fieldingPosition === "1" || lineup[i].fieldingPosition === 1) {
+                       pitcher = lineup[i];
+                       break;
+                   }
+                   
+               }
+               return pitcher;
+           }
+
            $scope.updatePitchersBatters = function () {
                if ($scope.commonData.selectedGame.inningPosition === "top") {
                    $scope.commonData.batters = $scope.commonData.selectedGame.guest.lineup;
                    $scope.commonData.pitchers = $scope.commonData.selectedGame.home.lineup;
-                   $scope.commonData.selectedGame.pitcher = null;
-                   $scope.commonData.selectedGame.batter = null;
+
+                   
+                   $scope.commonData.selectedGame.pitcher = findPitcher($scope.commonData.selectedGame.home.lineup) ;
+                   $scope.commonData.selectedGame.batter = $scope.commonData.selectedGame.guest.lineup[$scope.commonData.selectedGame.guest.batterIndex]
                } else {
                    $scope.commonData.batters = $scope.commonData.selectedGame.home.lineup;
                    $scope.commonData.pitchers = $scope.commonData.selectedGame.guest.lineup;
-                   $scope.commonData.selectedGame.pitcher = null;
-                   $scope.commonData.selectedGame.batter = null;
+                   $scope.commonData.selectedGame.pitcher = findPitcher($scope.commonData.selectedGame.guest.lineup);
+                   $scope.commonData.selectedGame.batter = $scope.commonData.selectedGame.home.lineup[$scope.commonData.selectedGame.home.batterIndex]
                }
            }
 
@@ -451,58 +590,93 @@
                // use the data accordingly
                console.log('gameChanged', message);
                switch (message.cmd) {
-                   case "inningChanged":
-                       $scope.commonData.game.inning = message.data.inning;
-                       break;
-                   case "inningPositionChanged":
-                       $scope.commonData.game.inningPosition = message.data.inningPosition;
-                       
-                       break;
-                   case "homeScoreChanged":
-                       $scope.commonData.game.score.home = message.data.score.home;
-                       break;
-                   case "guestScoreChanged":
-                       $scope.commonData.game.score.guest = message.data.score.guest;
-                       break;
-                   case "outsChanged":
-                       $scope.commonData.game.outs = message.data.outs;
-                       break;
-                   case "ballsChanged":
-                       
-                           $scope.commonData.game.balls = message.data.balls;
-                       
-                       break;
-                   case "strikesChanged":
-                       
+                   case "gameChanged":
+
+                       if (message.data.inning !== undefined) {
+                           $scope.commonData.game.inning = message.data.inning;
+                       }
+                       if (message.data.inningPosition !== undefined) {
+                           $scope.commonData.game.inningPosition = message.data.inningPosition;
+                       }
+
+                       if (message.data.score !== undefined) {
+                           if ($scope.commonData.game.score === undefined) {
+                               $scope.commonData.game.score = {};
+                           }
+                           if (message.data.score.guest !== undefined) {
+                               $scope.commonData.game.score.guest = message.data.score.guest;
+                           }
+                           if (message.data.score.home !== undefined) {
+                               $scope.commonData.game.score.home = message.data.score.home;
+                           }
+
+                       }
+
+                       if (message.data.outs !== undefined) {
+                           $scope.commonData.game.outs = message.data.outs;
+                       }
+                       if (message.data.strikes !== undefined) {
                            $scope.commonData.game.strikes = message.data.strikes;
-                       
-                       break;
-                   case "pitcherChanged":
-                       if ($scope.commonData.isGameScore === false) {
+                       }
+                       if (message.data.balls !== undefined) {
+                           $scope.commonData.game.balls = message.data.balls;
+                       }
+                       if (message.data.pitcher !== undefined) {
                            $scope.commonData.game.pitcher = message.data.pitcher;
                        }
-                       break;
-                   case "batterChanged":
-                       if ($scope.commonData.isGameScore === false) {
+                       if (message.data.batter !== undefined) {
                            $scope.commonData.game.batter = message.data.batter;
                        }
-                       break;
-                   case "homeTeamChanged":
-                       if ($scope.commonData.isGameScore === false) {
-                           $scope.commonData.game.home = message.data.home;
+
+                       if (message.data.guest !== undefined) {
+                           if ($scope.commonData.game.guest === undefined) {
+                               $scope.commonData.game.guest = {};
+                           }
+                           if (message.data.guest.team !== undefined) {
+                               $scope.commonData.game.guest.team = message.data.guest.team;
+                           }
+                           if (message.data.guest.lineup !== undefined) {
+                               $scope.commonData.game.guest.lineup = message.data.guest.lineup;
+                           }
+                           if (message.data.guest.batterIndex !== undefined) {
+                               $scope.commonData.game.guest.batterIndex = message.data.guest.batterIndex;
+                           }
+
                        }
-                       break;
-                   case "guestTeamChanged":
-                       if ($scope.commonData.isGameScore === false) {
-                           $scope.commonData.game.guest = message.data.guest;
+
+                       if (message.data.home !== undefined) {
+                           if ($scope.commonData.game.home === undefined) {
+                               $scope.commonData.game.home = {};
+                           }
+                           if (message.data.home.team !== undefined) {
+                               $scope.commonData.game.home.team = message.data.home.team;
+                           }
+                           if (message.data.home.lineup !== undefined) {
+                               $scope.commonData.game.home.lineup = message.data.home.lineup;
+                           }
+                           if (message.data.home.batterIndex !== undefined) {
+                               $scope.commonData.game.home.batterIndex = message.data.home.batterIndex;
+                           }
+
                        }
+
                        break;
-                   case "scoreGame":
-                       if ($scope.commonData.isGameScore === false) {
-                           $scope.commonData.game = message.data.game;
-                       }
-                       $scope.updatePitchersBatters();
-                       break;
+                   //case "homeTeamChanged":
+                   //    if ($scope.commonData.isGameScore === false) {
+                   //        $scope.commonData.game.home = message.data.home;
+                   //    }
+                   //    break;
+                   //case "guestTeamChanged":
+                   //    if ($scope.commonData.isGameScore === false) {
+                   //        $scope.commonData.game.guest = message.data.guest;
+                   //    }
+                   //    break;
+                   //case "scoreGame":
+                   //    if ($scope.commonData.isGameScore === false) {
+                   //        $scope.commonData.game = message.data.game;
+                   //    }
+                   //    $scope.updatePitchersBatters();
+                   //    break;
                }
                $scope.$apply();
            });
@@ -604,8 +778,8 @@
                 console.debug(data);
                 $scope.commonData.radarConfig[data.Property].value = data.data;
                 //Handle Radar Off Pop the Dialog
-                if (data.Property == "TransmiterControl") {
-                    if (data.data == 0) {
+                if (data.Property === "TransmiterControl") {
+                    if (data.data === 0) {
                         $scope.showRadarOffModal();
                     } else {
                        // $('#radarOffDialog').modal('hide')
@@ -742,7 +916,8 @@
                 //$scope.commonData.gpsPosition = data;
                 $scope.$apply();
             });
-            
+
+           initData();
           }
        ]);
 })();
