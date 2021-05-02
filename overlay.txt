@@ -1,2 +1,2 @@
-P: #2 Jacob Conklin    PV: 73.4 MPH       Vicksburg:  2 Outs: 2 B-S: 3-2
-B: #10 Cole Weller     EV: 67.8 MPH        Dowagiac:  2 Inning:  4 top
+                       PV: 00.0 MPH   
+   B: #11 Carter Brown    EV: 00.0 MPH   
