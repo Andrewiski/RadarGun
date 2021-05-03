@@ -43,6 +43,12 @@
 
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div style="float:right" ng-hide="commonData.isGameAdmin"><button ng-click="commonData.isGameAdmin = true" class="btn btn-primary">Login</button></div>
+            <div style="float:right" ng-show="commonData.isGameAdmin"><button ng-click="commonData.isGameAdmin = false" class="btn btn-danger">Logout</button></div>
+        </div>
+    </div>
 
     <div ng-hide="commonData.game === null">
 
@@ -96,9 +102,7 @@
             </div>
         </div>
     </div>
-    <div ng-hide="commonData.isGameAdmin">
-        <div style="float:right"><button ng-click="commonData.isGameAdmin = true" class="btn btn-primary">Login</button></div>
-    </div>
+    
     <div ng-show="commonData.isGameAdmin">
         <div ng-show="commonData.isRadarEmulator" class="row">
             <div class=" col-lg-12 radarEmulator">
@@ -340,7 +344,7 @@
                     <button class="btn btn-primary" ng-click="gameSave()">Save Game</button>
                     <button class="btn btn-primary" ng-show="commonData.selectedGame !== null && commonData.isGameEdit == false" ng-click="gameEdit()">Edit Game</button>
                     
-                    <button ng-click="commonData.isGameAdmin = false" class="btn btn-danger">Logout</button>
+                    
                 </div>
             </div>
         </div>
