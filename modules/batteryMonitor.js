@@ -99,7 +99,7 @@ var BatteryMonitor = function (options) {
 
     var b = undefined;
     if (process.platform !== 'win32') {
-        const isPi = require('./modules/platformDetect.js');
+        const isPi = require('./platformDetect.js');
         //b = require('bonescript');
 
         if (isPi()) {
