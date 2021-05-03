@@ -50,9 +50,9 @@
         </div>
     </div>
 
-    <div ng-hide="commonData.game === null">
+    <div>
 
-        <div ng-hide="commonData.isGameAdmin">
+        <div ng-hide="commonData.isGameAdmin || commonData.game === null">
             <div class="clear" />
             <div class="row form-inline">
                 <div class="col-sm-1">
@@ -822,18 +822,21 @@
                 </uib-tab>
                 <uib-tab index="4" ng-show="commonData.isGameAdmin">
                     <uib-tab-heading>
-                        <i class="fa fa-music"></i> Config
+                        <i class="fa fa-music"></i> Audio Files
                     </uib-tab-heading>
                     <div>
-                        <div> <button type="button" class="btn" ng-click="refreshWalkupFiles()"><i class="fa fa-refresh"></i></button>
-                            <button type="button" class="btn" ng-click="audioFilePlayWalkup(commonData.walkupFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
+                        <div class="input-group">
                             <ui-select ng-model="commonData.walkupFile" theme="bootstrap">
                                 <ui-select-match placeholder="Select or search a song in the list...">{{$select.selected.fileName}}</ui-select-match>
                                 <ui-select-choices repeat="item in commonData.walkupFiles | filter: $select.search">
                                     <div ng-bind-html="item.fileName | highlight: $select.search"></div>
                                 </ui-select-choices>
-
                             </ui-select>
+                            <span class="input-group-btn">
+                                <button type="button" class="btn" ng-click="refreshWalkupFiles()"><i class="fa fa-refresh"></i></button>
+                                <button type="button" class="btn" ng-click="audioFilePlayWalkup(commonData.walkupFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
+                                <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                            </span>
                         </div>
                     </div>
                 </uib-tab>

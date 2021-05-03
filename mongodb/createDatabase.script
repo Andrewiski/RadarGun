@@ -1,0 +1,45 @@
+use RadarGunMonitor
+db.createUser(
+{
+   user:"RadarGunMonitorUser",
+   pwd:"PasswordGoesHere",
+   roles: [ { role: "dbOwner", db: "RadarGunMonitor" }]
+}
+)
+
+
+db.createCollection( "games",
+   {     
+     
+   }
+)
+
+db.games.createIndex( { "id": 1 } )
+
+db.createCollection( "teams",
+   {     
+     
+   }
+)
+
+db.teams.createIndex( { "id": 1 } )
+
+db.createCollection( "audioFiles",
+  
+)
+
+db.audioFiles.createIndex( { "id": 1 } )
+
+db.games.insert(
+[
+    {"id":"00000000-0000-0000-0000-000000000000","name":"New Game","shortName":"","startDate":null,"endDate":null,"inning":1,"inningPosition":"top","outs":0,"balls":0,"strikes":0,"score":{"home":0,"guest":0},"home":{"battingIndex":0,"lineup":[],"team":null},"guest":{"battingIndex":0,"lineup":[],"team":null},"status":1,"log":[]}
+]
+)
+
+db.teams.insert(
+[
+    {"id":"00000000-0000-0000-0000-000000000000","status":1,"name":"New Team","roster":[{"firstName":"","lastName":"","jerseyNumber":""}]},
+    {"id":"6ca51788-4810-4a24-83c0-61388d43c2ed","status":1,"shortName":"Vicksburg","name":"Vicksburg Bulldogs Varsity","roster":[{"firstName":"Cole","lastName":"Gebben","jerseyNumber":"1","walkupFile":{"fileName":"Big_Hypnotize.m4a"}},{"firstName":"Jacob","lastName":"Conklin","jerseyNumber":"2","walkupFile":{"fileName":"LilBabyGunna_IAm.m4a"}},{"firstName":"Zach","lastName":"Myers","jerseyNumber":"4","walkupFile":{"fileName":"2Pac_AmbitionzAzaRidah.m4a"}},{"firstName":"Tyler","lastName":"DeVries","jerseyNumber":"5","walkupFile":{"fileName":"ACDC_HellsBells.m4a"}},{"firstName":"Ben","lastName":"Hackman","jerseyNumber":"6","walkupFile":{"fileName":"EdithPiaf_NonJeNeRegrette.m4a"}},{"firstName":"Jimmy","lastName":"Cutshaw","jerseyNumber":"7","walkupFile":{"fileName":"Eminem_WithoutMe.m4a"}},{"firstName":"Logan","lastName":"Cohrs","jerseyNumber":"8","walkupFile":{"fileName":"ACDC_ThunderStruck.m4a"}},{"firstName":"Brenden","lastName":"Monroe","jerseyNumber":"9","walkupFile":{"fileName":"2pac_California.m4a"}},{"firstName":"Brenden","lastName":"Owen","jerseyNumber":"10","walkupFile":{"fileName":"ACDC_YouShookMeAllNightLong.m4a"}},{"firstName":"Carter","lastName":"Brown","jerseyNumber":"11","walkupFile":{"fileName":"Drake_WantsAndNeeds.m4a"}},{"firstName":"Parker","lastName":"Wilson","jerseyNumber":"12","walkupFile":{"fileName":"Desiigner_Outlet.m4a"}},{"firstName":"Dylan","lastName":"Zemitans","jerseyNumber":"13","walkupFile":{"fileName":"Metallica_EnterSandman_Intro.m4a"}},{"firstName":"Drew","lastName":"Habel","jerseyNumber":"14","fielding":"99","batting":"99","walkupFile":{"fileName":"ACDC_HighwayToHell.m4a"}},{"firstName":"Trevor","lastName":"Young","jerseyNumber":"15","fielding":"99","batting":"99","walkupFile":{"fileName":"AlanAztec_AK50.m4a"}},{"firstName":"Evan","lastName":"Anderson","jerseyNumber":"18","fielding":"99","batting":"99","walkupFile":{"fileName":"BIG_BigPoppa.m4a"}},{"firstName":"Colin","lastName":"Klinger","jerseyNumber":"22","walkupFile":{"fileName":"GunsAndRoses_WelcomeToTheJungle.m4a"}}]}
+
+]
+)

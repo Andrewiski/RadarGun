@@ -153,10 +153,13 @@
     <Content Include="ffmpeg\doc\nut.html" />
     <Content Include="ffmpeg\doc\platform.html" />
     <Content Include="ffmpeg\doc\style.min.css" />
+    <Content Include="modules\logger.js" />
+    <Content Include="modules\remoteDBServer.js" />
     <Content Include="modules\ffplay.js" />
     <Content Include="modules\platformDetect.js">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="mongodb\createDatabase.script" />
     <Content Include="testsDak5000.js" />
     <None Include="ffmpeg\presets\ffprobe.xsd" />
     <Content Include="ffmpeg\ffmpeg.exe" />
@@ -221,6 +224,7 @@
     <Folder Include="dts\" />
     <Folder Include="data\" />
     <Folder Include="ffmpeg\" />
+    <Folder Include="mongodb\" />
     <Folder Include="wifidog\" />
     <Folder Include="service\" />
     <Folder Include="public\" />
