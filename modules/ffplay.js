@@ -6,9 +6,18 @@ var path = require('path');
 
 function FFplay(folder, file, opts) {
 
-	if (process.env.FFPLAY_PATH === undefined || process.env.FFPLAY_PATH === '') {
-		process.env.FFPLAY_PATH = path.join(__dirname, 'ffmpeg', 'ffplay.exe');
-	}
+	var ffplayPath = "";
+	if (process.env.FFPLAY_PATH !== undefined) {
+
+		ffplayPath = path.join(__dirname, process.env.FFPLAY_PATH);
+
+	} else {
+		if (process.platform === 'win32') {
+			ffplayPath = path.join(__dirname, '..', 'ffmpeg', 'ffplay.exe');
+		} else {
+			ffplayPath = 'ffplay'
+        }
+    }
 
 	var filePath = path.join(folder, file);
 	// Get custom options or fallback to defaults
@@ -16,7 +25,7 @@ function FFplay(folder, file, opts) {
 	opts.unshift(filePath);
 
 	// Spawn process
-	this.proc = spawn(process.env.FFPLAY_PATH, opts);
+	this.proc = spawn(ffplayPath, opts);
 
 	this.file = file;
 	

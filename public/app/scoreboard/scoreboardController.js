@@ -786,7 +786,7 @@
             }
 
             $scope.showRadarOffModal = function () {
-                if (radarOffModalInstance == null) {
+                if (radarOffModalInstance === null) {
                     radarOffModalInstance = $uibModal.open({
                         animation: $scope.animationsEnabled,
                         templateUrl: '/app/scoreboard/radarOffModal.html',

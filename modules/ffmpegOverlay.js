@@ -110,17 +110,15 @@ var FfmpegOverlay = function (options) {
 
 
 
-    if (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '') {
+    if (process.platform === 'win32' && (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '')) {
         process.env.FFMPEG_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffmpeg.exe');
     }
 
-    if (process.env.FFPROBE_PATH === undefined || process.env.FFPROBE_PATH === '') {
+    if (process.platform === 'win32' && (process.env.FFPROBE_PATH === undefined || process.env.FFPROBE_PATH === '')) {
         process.env.FFPROBE_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffprobe.exe');
     }
 
-    if (process.env.FFPLAY_PATH === undefined || process.env.FFPLAY_PATH === '') {
-        process.env.FFPLAY_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffplay.exe');
-    }
+    
 
 
 

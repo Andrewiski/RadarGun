@@ -3,5 +3,5 @@
   "win32WebserverPort": 12336,
   "useNoSql": true,
   "mongoDbServerUrl": "mongodb://RadarGunMonitorUser:R@d@rGunMonitor@demongodb1.internal.digitalexample.com:27017?connectTimeoutMS=300000&authSource=RadarGunMonitor",
-  "mongoDbDatabaseName": "DigitalExampleDETools"
+  "mongoDbDatabaseName": "RadarGunMonitor"
 }
