@@ -154,6 +154,9 @@
     <Content Include="ffmpeg\doc\platform.html" />
     <Content Include="ffmpeg\doc\style.min.css" />
     <Content Include="modules\ffplay.js" />
+    <Content Include="modules\platformDetect.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="testsDak5000.js" />
     <None Include="ffmpeg\presets\ffprobe.xsd" />
     <Content Include="ffmpeg\ffmpeg.exe" />
