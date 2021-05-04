@@ -1,8 +1,8 @@
 var SerialPort = require("serialport");
 const { Stream } = require("stream");
 
-let serialPort = new SerialPort("com3", {
-    baudRate: 19200,
+let serialPort = new SerialPort("com5", {
+    baudRate: 9600,
     autoOpen: false
 }); 
         
@@ -11,7 +11,7 @@ var incomingMonitorStream = new Stream.Writable({});
 // Consume the stream
 incomingMonitorStream._write = (chunk, encoding, next) => {
     
-    console.log('trace', "incomingTransStream Monitor: " + chunk.toString('hex'));
+    console.log('trace', "incomingTransStream Monitor: length " + chunk.length + " : "  + chunk.toString('hex'));
      
     next();
 };
@@ -22,5 +22,5 @@ serialPort.open(function (err) {
     if (err) {
         console.log('open Error' + err);
     }
-    
+    console.log('Port opened');
 });
