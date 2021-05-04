@@ -28,12 +28,12 @@
            });
 
            Service.socket.on('ping', function (message) {
-               console.log('radarMonitorService ping', message);
+               //console.log('radarMonitorService ping', message);
                $rootScope.$emit("radarMonitor:ping", message);
            });
 
            Service.socket.on('pong', function (message) {
-               console.log('radarMonitorService pong', );
+               //console.log('radarMonitorService pong', );
                $rootScope.$emit("radarMonitor:ping", message);
            });
 

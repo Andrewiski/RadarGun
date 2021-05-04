@@ -1,7 +1,3 @@
-{"id":"00000000-0000-0000-0000-000000000000","name":"New Game","shortName":"","startDate":null,"endDate":null,"inning":1,"inningPosition":"top","outs":0,"balls":0,"strikes":0,"score":{"home":0,"guest":0},"home":{"lineup":[],"team":null},"guest":{"lineup":[],"team":null},"status":1,"log":[]}
+{"id":"00000000-0000-0000-0000-000000000000","name":"New Game","shortName":"","startDate":null,"endDate":null,"inning":1,"inningPosition":"top","outs":0,"balls":0,"strikes":0,"score":{"home":0,"guest":0},"home":{"battingIndex":0,"lineup":[],"team":null},"guest":{"battingIndex":0,"lineup":[],"team":null},"status":1,"log":[]}
 {"id":"cc7035ba-7250-4605-b164-62368e55d7cf","name":"Vicksburg Bulldogs Varsity vs Mattawan Varsity","startDate":"2021-04-18T02:27:58.315Z","endDate":null,"status":1}
-{"id":"efc6b998-808f-45ba-bfea-55b55656d3e9","name":"Vicksburg Bulldogs Varsity vs Allegan Varsity","startDate":"2021-04-22T18:32:42.136Z","endDate":null,"status":1}
-{"id":"5d59336b-e7cd-4187-bbca-0f31a3aa5461","name":"Vicksburg Bulldogs Varsity vs Allegan Varsity","startDate":"2021-04-22T21:49:19.178Z","endDate":null,"status":1}
-{"id":"51cb8e05-4b70-4d1c-8825-01b14aeca98a","name":"51cb8e05-4b70-4d1c-8825-01b14aeca98a","startDate":"2021-04-27T15:39:48.008Z","endDate":null,"status":1}
-{"id":"b8ec6a68-7865-43c1-a40d-8e9745447263","name":"Vicksburg Bulldogs Varsity vs Dowagiac Chieftains Varsity","startDate":"2021-04-27T19:41:41.813Z","endDate":null,"status":1}
-{"id":"d01da23b-58b7-4f15-94f6-04dcda23a6bb","name":"Vicksburg Bulldogs Varsity vs Dowagiac Chieftains Varsity","startDate":"2021-04-27T21:39:23.455Z","endDate":null,"status":1}
+{"id":"51cb8e05-4b70-4d1c-8825-01b14aeca98a","name":"Vicksburg Bulldogs Varsity vs Dowagiac Chieftains Varsity","startDate":"2021-04-27T15:39:48.008Z","endDate":null,"status":1}

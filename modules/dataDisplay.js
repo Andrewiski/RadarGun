@@ -79,7 +79,7 @@ var dataDisplay = function (options) {
         try{
             debug('updateSpeedData ', speedData);
             if (objOptions.displayLocation) {
-                if (objOptions.displayLocation.inMaxSpeed && objOptions.displayLocation.inMaxSpeed.enabled == true) {
+                if (objOptions.displayLocation.inMaxSpeed && objOptions.displayLocation.inMaxSpeed.enabled === true) {
                     debug('inMaxSpeed enabled ', objOptions.displayLocation.inMaxSpeed);
                     switch (objOptions.displayLocation.inMaxSpeed.type) {
                         case "ledDisplays":
@@ -101,7 +101,7 @@ var dataDisplay = function (options) {
 
                 }
 
-                if (objOptions.displayLocation.outMaxSpeed && objOptions.displayLocation.outMaxSpeed.enabled == true) {
+                if (objOptions.displayLocation.outMaxSpeed && objOptions.displayLocation.outMaxSpeed.enabled === true) {
                     debug('outMaxSpeed enabled ', objOptions.displayLocation.outMaxSpeed);
                     switch (objOptions.displayLocation.outMaxSpeed.type) {
                         case "ledDisplays":
@@ -109,7 +109,7 @@ var dataDisplay = function (options) {
                             if (ledDisplays && ledDisplays[objOptions.displayLocation.outMaxSpeed.index]) {
                                 debug('outMaxSpeed ledDisplays ');
                                 var myLed =  ledDisplays[objOptions.displayLocation.outMaxSpeed.index];
-                                if (myLed.ledDisplay.enabled == true) {
+                                if (myLed.ledDisplay.enabled === true) {
                                     var myAdafruitLedbackPack = myLed.led;
                                     myAdafruitLedbackPack.writeNumber(speedData.outMaxSpeed, false, function (err, speedData) {
                                         debug('outMaxSpeed ledDisplay ' + objOptions.displayLocation.outMaxSpeed.index + ' writeNumber ' + speedData.outMaxSpeed, err);
@@ -140,7 +140,7 @@ var dataDisplay = function (options) {
             commonData.ledDisplays.push(ledData);
             ledData.led = new AdafruitLedBackpack();
             debug('attempting adafruitLedBackpack init', ledDisplay);
-            if (ledDisplay.enabled == true) {
+            if (ledDisplay.enabled === true) {
                 ledDisplay.enabled = false; //set to false tell we are done initing
                 ledData.led.Initialize({ I2CAddress: ledDisplay.I2CAddress, I2CDevice: ledDisplay.I2CDevice }, function (err, ledData) {
                     debug('i2c adafruitLedBackpack Inited ' + ledData.index, err );

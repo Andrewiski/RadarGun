@@ -1,2 +1,2 @@
-P: #9 Brenden Monroe   PV: 69.7 MPH       Vicksburg: 10
-B: #2 Jordan Simpson   EV: 62.6 MPH        Dowagiac:  0 Inning:  5 bot
+   Vicksburg:  3   P: #2 Jordan Simpson   PV: 00.0 MPH    O: 1 B: 0 S: 0
+    Dowagiac:  2   B: #2 Jacob Conklin    EV: 00.0 MPH    I: 4 bottom
