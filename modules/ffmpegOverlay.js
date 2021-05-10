@@ -12,12 +12,15 @@ var FfmpegOverlay = function (options) {
 
     var self = this;
     var defaultOptions = {
-        "rtspUrl": "rtsp://10.100.32.95:7447/0MxYqhH8uDMLeQ4j",
+        "input": "video='Integrated Camera':audio='Microphone (Realtek High Definition Audio)'",  // "rtsp://10.100.32.95:7447/0MxYqhH8uDMLeQ4j",
         "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/7w0t-zhy3-0wzw-9kw8-b1md",
         "logLevel": "debug",
-        "audioCodec": "copy",
-        "videoCodec": "libx264"
+        //"videoCodec": "h264_nvenc",  // libx264
+        "inputOptions": ["-f dshow", "-stimeout 30000000"], // ["-rtsp_transport tcp","-stimeout 30000000"]
+        "outputOptions": ["-hwaccel cuda", "-hwaccel_output_format cuda", "-pix_fmt +", "-keyint_min 4", "-c:v h264_nvenc", "-c:a aac", "-f flv"]    //["-x264-params keyint=4:scenecut=0", "-pix_fmt +", "-keyint_min 4", "-c:v libx264","-c:a aac"]
     }
+
+    //
 
     nconf.file('./configs/ffmpegConfig.json');
 
@@ -329,30 +332,15 @@ var FfmpegOverlay = function (options) {
         writeToLog("debug", "Source Video URL", objOptions.rtspUrl)
 
         command = ffmpeg({ source: objOptions.rtspUrl })
-            //.addInputOption('-r 24')
-            .addInputOption('-rtsp_transport tcp')
-            .addInputOption('-stimeout 30000000')
-            .output(objOptions.rtmpUrl)
-            .withOutputFormat('flv')
-            .videoCodec('libx264')
-            .outputOptions("-x264-params keyint=4:scenecut=0")
-            .outputOptions('-pix_fmt +')    //If pix_fmt is a single +, ffmpeg selects the same pixel format as the input (or graph output) and automatic conversions are disabled.
-            //.outputOptions('-g 4')
-            .outputOptions('-keyint_min 4')
-            .outputOptions('-c:v libx264')
-            .outputOptions('-c:a aac')
+            
+            .inputOptions(objOptions.inputOptions) 
+            .outputOptions(objOptions.outputOptions)
             .videoFilters({
                 filter: "drawtext",
                 options: 'fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=' + overlayFileName + ':reload=1'
             })
-            .addOption('-loglevel level+warning')       //added by Andy so we can parse out stream info
-            //.audioChannels(2)
-            // TODO: make audioCodec a config item
-            //.audioFilters(['volume=0.5', 'silencedetect=n=-50dB:d=5'])
-            //.audioCodec(objOptions.audioCodec)  //pcm_mulaw or pcm_alaw
-            //.audioFrequency('8000')
-            //.audioBitrate('100k')
-
+            .output(objOptions.rtmpUrl)
+            .addOption('-loglevel level+warning')       //added by Andy so we can parse out stream info            
             .on('error', commandError)
             .on('progress', commandProgress)
             .on('stderr', commandStdError)
@@ -362,12 +350,6 @@ var FfmpegOverlay = function (options) {
             .run();
         debug("info", "ffmpeg Started");
     };
-
-
-
-
-
-
 
     var streamStart = function (throwError) {
     writeToLog('info', 'streamStart Command');

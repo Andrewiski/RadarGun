@@ -1,2 +1,2 @@
-   Vicksburg:  3   P: #2 Jordan Simpson   PV: 00.0 MPH    O: 1 B: 0 S: 0
-    Dowagiac:  2   B: #2 Jacob Conklin    EV: 00.0 MPH    I: 4 bottom
+                       PV: 70.0 MPH   
+   B: #3 Bryce Smith      EV: 76.1 MPH   
