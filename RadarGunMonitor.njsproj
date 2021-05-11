@@ -74,6 +74,15 @@
     <Content Include=".gitattributes" />
     <Content Include=".gitignore" />
     <Content Include="configs\Andy Configure Pro II Speed Sensor 232 2.0.1.cfg" />
+    <Content Include="configs\debug\Andy Configure Pro II Speed Sensor 232 2.0.1.cfg" />
+    <Content Include="configs\debug\batteryMonitorConfig.json" />
+    <Content Include="configs\debug\dataDisplayConfig.json" />
+    <Content Include="configs\debug\ffmpegConfig.json" />
+    <Content Include="configs\debug\gpsMonitorConfig.json" />
+    <Content Include="configs\debug\radarDatabaseConfig.json" />
+    <Content Include="configs\debug\radarEmulatorConfig.json" />
+    <Content Include="configs\debug\radarGunMonitorConfig.json" />
+    <Content Include="configs\debug\radarStalker2Config.json" />
     <Content Include="configs\ffmpegConfig.json" />
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />
@@ -215,6 +224,7 @@
     <Content Include="TestNanoVideo2.js" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="configs\debug\" />
     <Folder Include="data\audioFiles\" />
     <Folder Include="data\audioFiles\walkup\" />
     <Folder Include="ffmpeg\doc\" />
