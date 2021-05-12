@@ -22,7 +22,15 @@ var RadarDatabase = require("./modules/radarDatabase.js");
 var FfmpegOverlay = require("./modules/ffmpegOverlay.js");
 var FFplay = require('./modules/ffplay.js');
 const uuidv4 = require('uuid/v4');
-nconf.file('./configs/radarGunMonitorConfig.json');
+
+
+
+if (process.env.localDebug === 'true') {
+    nconf.file('./configs/debug/radarGunMonitorConfig.json');
+} else {
+    nconf.file('./configs/radarGunMonitorConfig.json');
+}
+
 var configFileSettings = nconf.get();
 var defaultOptions = {
     //loaded from the config file
@@ -432,7 +440,7 @@ io.on('connection', function(socket) {
                     audioFilePlay("", message.data.audioFile);
                     break;
                 case "audioFilePlayWalkup":
-                    audioFilePlay("audioFiles/walkup", message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=20:d=5'])
+                    audioFilePlay("audioFiles/walkup", message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5'])
                     break;
                 case "audioFileStop":
                     audioFileStop();

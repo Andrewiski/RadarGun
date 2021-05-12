@@ -7,22 +7,26 @@ const nconf = require('nconf');
 const extend = require('extend');
 var ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
-
+const { Stream } = require("stream");
 var FfmpegOverlay = function (options) {
 
     var self = this;
     var defaultOptions = {
-        "input": "video='Integrated Camera':audio='Microphone (Realtek High Definition Audio)'",  // "rtsp://10.100.32.95:7447/0MxYqhH8uDMLeQ4j",
+        "input": "video='Integrated Camera':audio='Microphone (Realtek High Definition Audio)'",  // "rtsp://10.199.0.2:7447/t2N7OTZ2n8ScSTtu",
         "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/7w0t-zhy3-0wzw-9kw8-b1md",
         "logLevel": "debug",
         //"videoCodec": "h264_nvenc",  // libx264
         "inputOptions": ["-f dshow", "-stimeout 30000000"], // ["-rtsp_transport tcp","-stimeout 30000000"]
-        "outputOptions": ["-hwaccel cuda", "-hwaccel_output_format cuda", "-pix_fmt +", "-keyint_min 4", "-c:v h264_nvenc", "-c:a aac", "-f flv"]    //["-x264-params keyint=4:scenecut=0", "-pix_fmt +", "-keyint_min 4", "-c:v libx264","-c:a aac"]
+        "outputOptions": ["-pix_fmt +", "-keyint_min 4", "-c:v h264_nvenc", "-c:a aac", "-f flv"],    //["-x264-params keyint=4:scenecut=0", "-pix_fmt +", "-keyint_min 4", "-c:v libx264","-c:a aac"]
+        "capture":true
     }
 
     //
-
-    nconf.file('./configs/ffmpegConfig.json');
+    if (process.env.localDebug === 'true') {
+        nconf.file('./configs/debug/ffmpegConfig.json');
+    } else {
+        nconf.file('./configs/ffmpegConfig.json');
+    }
 
 
     var configFileSettings = nconf.get();
@@ -134,7 +138,8 @@ var FfmpegOverlay = function (options) {
             status: "disconnected",
             error: null,
             metadata: {},
-        }
+        },
+        activeMp4Streams: []
     };
 
 
@@ -322,6 +327,28 @@ var FfmpegOverlay = function (options) {
 
     var overlayFileName = "overlay.txt"; //path.join(__dirname, "overlay.txt").replace(":", "\\:");
 
+
+    var transStream = null;
+
+
+    // incoming and backup transtream pipe to this depending on active source  to transform stream
+    var transChunkCounter = 0;
+    transStream = new Stream.Transform();
+    transStream._transform = function (chunk, encoding, done) {
+        
+        writeToLog('trace', '[' + transChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+        this.push(chunk);
+        //Write to any active mp4 streams
+        for (const item of Object.values(commonData.activeMp4Streams)) {
+            //if (item.type === "mp3") {
+            item.res.write(chunk);
+            //}
+        }
+        return done();
+    };
+
+
+
     var startIncomingStream = function () {
     
         if (!(command === null || command === undefined)) {
@@ -331,23 +358,28 @@ var FfmpegOverlay = function (options) {
         self.emit('streamStats', commonData.streamStats);
         writeToLog("debug", "Source Video URL", objOptions.rtspUrl)
 
-        command = ffmpeg({ source: objOptions.rtspUrl })
+        command = ffmpeg({ source: objOptions.input });
+
             
-            .inputOptions(objOptions.inputOptions) 
-            .outputOptions(objOptions.outputOptions)
-            .videoFilters({
+        command.inputOptions(objOptions.inputOptions)
+            
+        command.videoFilters({
                 filter: "drawtext",
                 options: 'fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=' + overlayFileName + ':reload=1'
             })
-            .output(objOptions.rtmpUrl)
-            .addOption('-loglevel level+warning')       //added by Andy so we can parse out stream info            
-            .on('error', commandError)
-            .on('progress', commandProgress)
-            .on('stderr', commandStdError)
-            .on('end', commandEnd)
-
-            //.pipe(transStream, { end: false });
-            .run();
+        command.outputOptions(objOptions.outputOptions)
+        command.addOption('-loglevel level+warning')       //added by Andy so we can parse out stream info            
+        command.on('error', commandError)
+        command.on('progress', commandProgress)
+        command.on('stderr', commandStdError)
+        command.on('end', commandEnd);
+        if (objOptions.capture === true) {
+            command.pipe(transStream, { end: false });
+        } else {
+            
+            command.output(objOptions.rtmpUrl)
+            command.run();
+        }
         debug("info", "ffmpeg Started");
     };
 

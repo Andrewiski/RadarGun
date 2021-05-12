@@ -1,9 +1,13 @@
 var SerialPort = require("serialport");
 const { Stream } = require("stream");
 
-let serialPort = new SerialPort("com5", {
-    baudRate: 9600,
-    autoOpen: false
+let serialPort = new SerialPort("com8", {
+    baudRate: 19200,
+    autoOpen: false,
+    rtscts: false,
+    xon:false, 
+    xoff: false,
+    xany: false
 }); 
         
 

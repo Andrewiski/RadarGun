@@ -9,7 +9,8 @@
     <SccProvider>SAK</SccProvider>
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
-    <Environment>DEBUG=app,radar,batteryMonitor,ffmpegOverlay,ffplay</Environment>
+    <Environment>localDebug=true
+DEBUG=app,radar,batteryMonitor,ffmpegOverlay,ffplay</Environment>
     <LaunchUrl>http://localhost:12336</LaunchUrl>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
