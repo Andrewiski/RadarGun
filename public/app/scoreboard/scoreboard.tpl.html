@@ -272,10 +272,25 @@
                 <div class="col-sm-2">
                     <div class="form-group">
                         <button type="button" class="btn btn-primary" ng-click="inning()">I</button>
-                        <button type="button" class="btn btn-primary" ng-click="out()">O</button>
+                        <button type="button" class="btn btn-primary" ng-click="batterOut()">O</button>
                         <button type="button" class="btn btn-primary" ng-click="ball()">B</button>
                         <button type="button" class="btn btn-primary" ng-click="strike()">S</button>
-
+                        <button type="button" class="btn btn-primary" ng-click="foul()">F</button>
+                        <button type="button" class="btn btn-primary" ng-click="groundOut()">GO</button>
+                        <button type="button" class="btn btn-primary" ng-click="flyOut()">FO</button>
+                        <button type="button" class="btn btn-primary" ng-click="lineOut()">LO</button>
+                        <button type="button" class="btn btn-primary" ng-click="groundBall()">GB</button>
+                        <button type="button" class="btn btn-primary" ng-click="flyBall()">FB</button>
+                        <button type="button" class="btn btn-primary" ng-click="lineDrive()">LD</button>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" ng-click="stolenBase2()"  title="Stole Second">SB2</button>
+                        <button type="button" class="btn btn-primary" ng-click="stolenBase3()"  title="Stole Third">SB3</button>
+                        <button type="button" class="btn btn-primary" ng-click="stolenBase4()" title="Stole Home">SB4</button>
+                        <button type="button" class="btn btn-primary" ng-click="runnerOut()" title="Back Pick">BP</button>
+                        <button type="button" class="btn btn-primary" ng-click="runnerOut()" title="Caught Stealing">CS</button>
                     </div>
                 </div>
 
@@ -433,6 +448,9 @@
 
 
                                 <div>
+                                    <div class="btn-group" role="group" aria-label="Buttons">
+                                        <button type="button" class="btn btn-primary" ng-click="homeTeamLinupAdd()">Add</button>
+                                    </div>
                                     <table class="table table-bordered table-striped">
                                         <thead class="thead-light">
                                             <tr>
@@ -495,6 +513,9 @@
                                 </div>
 
                                 <div>
+                                    <div class="btn-group" role="group" aria-label="Buttons">
+                                        <button type="button" class="btn btn-primary" ng-click="guestTeamLinupAdd()">Add</button>
+                                    </div>
                                     <table class="table table-bordered table-striped">
                                         <thead class="thead-light">
                                             <tr>
@@ -629,6 +650,9 @@
                                         <input class="form-control" ng-model="commonData.selectedGame.home.team.shortName" placeholder="Team Short Name" />
                                     </div>
                                 </div>
+                                <div class="btn-group" role="group" aria-label="Buttons">
+                                    <button type="button" class="btn btn-primary" ng-click="homeTeamAddPlayer()">Add</button>
+                                </div>
                                 <table class="table table-bordered table-striped">
                                     <thead>
 
@@ -640,7 +664,7 @@
 
                                             <td>&nbsp;</td>
                                             <!--<td><label class="control-label">Fielding</label></td>
-                                <td><label class="control-label">Batting</label></td>-->
+                <td><label class="control-label">Batting</label></td>-->
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -757,7 +781,9 @@
                                         <input class="form-control" ng-model="commonData.selectedGame.guest.team.shortName" placeholder="Team Short Name" />
                                     </div>
                                 </div>
-
+                                <div class="btn-group" role="group" aria-label="Buttons">
+                                    <button type="button" class="btn btn-primary" ng-click="guestTeamAddPlayer()">Add</button>
+                                </div>
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr>
@@ -767,7 +793,7 @@
                                             <td><label class="control-label">Walkup</label><button type="button" class="btn" ng-click="refreshWalkupFiles()"><i class="fa fa-refresh"></i></button> </td>
                                             <td>&nbsp;</td>
                                             <!--<td><label class="control-label">Fielding</label></td>
-                                <td><label class="control-label">Batting</label></td>-->
+                <td><label class="control-label">Batting</label></td>-->
                                         </tr>
                                     </thead>
                                     <tbody>

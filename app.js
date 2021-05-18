@@ -157,6 +157,7 @@ routes.put('/data/scoregame', function (req, res) {
     commonData.game = game;
     updateOverlayText();
     io.emit("gameChanged", { cmd: "scoreGame", data: { game: commonData.game } });
+    res.json({ game: commonData.game });
     
 });
 

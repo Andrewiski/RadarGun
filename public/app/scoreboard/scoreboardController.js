@@ -80,6 +80,7 @@
            $scope.commonData = {
                activeTabIndex : 1,
                emptyPlayer: { "firstName": "", "lastName": "", "jerseyNumber": "" },
+               emptyLineup: { player: null, fieldingPosition: "99" },
                teams: [],
                pitchers: null,
                batters: null,
@@ -209,7 +210,7 @@
                        $scope.commonData.isGameEdit = false;
                        $scope.commonData.isGameSelected = true;
                        $scope.commonData.isGameScore = true;
-                       window.location.hash="scoreGame"
+                       window.location.hash="#scoreGame"
                    });
 
                
@@ -291,16 +292,35 @@
                radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { pitcher: $scope.commonData.selectedGame.pitcher } });
            }
 
-           $scope.out = function () {
+           $scope.batterOut = function () {
                
                if ($scope.commonData.selectedGame.outs >= 2) {
+                   $scope.nextBatter();
                    $scope.inning(); 
+               } else {
+                   var data = {};
+                   $scope.commonData.selectedGame.outs++;
+                   $scope.commonData.selectedGame.balls = 0;
+                   $scope.commonData.selectedGame.strikes = 0;
+                   data.outs = $scope.commonData.selectedGame.outs;
+                   data.strikes = 0;
+                   data.balls = 0;
+                   $scope.nextBatter();
+                   radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+               }  
+           }
+
+           $scope.runnerOut = function () {
+
+               if ($scope.commonData.selectedGame.outs >= 2) {
+                   
+                   $scope.inning();
                } else {
                    var data = {};
                    $scope.commonData.selectedGame.outs++;
                    data.outs = $scope.commonData.selectedGame.outs;
                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
-               }  
+               }
            }
 
            $scope.ball = function () {
@@ -326,6 +346,35 @@
                    data.strikes = $scope.commonData.selectedGame.strikes;
                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                }
+           }
+
+           $scope.foul = function () {
+               if ($scope.commonData.selectedGame.strikes >= 2) {
+                   //tag Pitch as foul
+               } else {
+                   var data = {};
+                   $scope.commonData.selectedGame.strikes++;
+                   data.strikes = $scope.commonData.selectedGame.strikes;
+                   radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+               }
+           }
+           $scope.groundOut = function () {
+
+           }
+           $scope.flyOut = function () {
+
+           }
+           $scope.lineOut = function () {
+
+           }
+           $scope.groundBall = function () {
+
+           }
+           $scope.flyBall = function () {
+
+           }
+           $scope.lineDrive = function () {
+
            }
 
            $scope.nextBatter = function() {
@@ -568,6 +617,19 @@
                    $scope.commonData.selectedGame.home.team = JSON.parse(JSON.stringify($scope.commonData.selectedHomeTeam));
                    $scope.commonData.selectedGame.home.team.id = radarMonitor.uuid();
                    $scope.commonData.selectedGame.home.team.name = "";
+                   if ($scope.commonData.selectedGame.home.team.roster === undefined) {
+                       $scope.commonData.selectedGame.home.team.roster = [];
+                   }
+                   for (var i = 0; i < 10; i++) {
+                       $scope.commonData.selectedGame.home.team.roster.push($scope.commonData.emptyPlayer)
+                   }
+
+                   if ($scope.commonData.selectedGame.home.lineup === undefined) {
+                       $scope.commonData.selectedGame.home.lineup = [];
+                   }
+                   for (var i = 0; i < 10; i++) {
+                       $scope.commonData.selectedGame.home.lineup.push($scope.commonData.emptyLineup)
+                   }
                    $scope.commonData.isHomeTeamEdit = true;
                } else {
                    $scope.commonData.selectedGame.home.team = $scope.commonData.selectedHomeTeam;
@@ -591,6 +653,20 @@
                    $scope.commonData.selectedGame.guest.team = JSON.parse(JSON.stringify($scope.commonData.selectedGuestTeam));
                    $scope.commonData.selectedGame.guest.team.id = radarMonitor.uuid();
                    $scope.commonData.selectedGame.guest.team.name = "";
+                   if ($scope.commonData.selectedGame.guest.team.roster === undefined) {
+                       $scope.commonData.selectedGame.guest.team.roster = [];
+                   }
+                   for (var i = 0; i < 10; i++) {
+                       $scope.commonData.selectedGame.guest.team.roster.push($scope.commonData.emptyPlayer)
+                   }
+
+                   if ($scope.commonData.selectedGame.guest.lineup === undefined) {
+                       $scope.commonData.selectedGame.guest.lineup = [];
+                   }
+                   for (var i = 0; i < 10; i++) {
+                       $scope.commonData.selectedGame.guest.lineup.push($scope.commonData.emptyLineup)
+                   }
+
                    $scope.commonData.isGuestTeamEdit = true;
                } else {
                    $scope.commonData.selectedGame.guest.team = $scope.commonData.selectedGuestTeam;
@@ -617,11 +693,11 @@
            }
 
            $scope.guestTeamLinupAdd = function () {
-               $scope.commonData.selectedGame.guest.lineup.push({ player: null, fieldingPosition: "99" })
+               $scope.commonData.selectedGame.guest.lineup.push($scope.commonData.emptyLineup)
            }
 
            $scope.homeTeamLinupAdd = function () {
-               $scope.commonData.selectedGame.home.lineup.push({ player: null, fieldingPosition: "99" })
+               $scope.commonData.selectedGame.home.lineup.push($scope.commonData.emptyLineup)
            }
 
 
@@ -720,8 +796,9 @@
                    case "scoreGame":
                        if ($scope.commonData.isGameScore === false) {
                            $scope.commonData.game = message.data.game;
+                           $scope.updatePitchersBatters();
                        }
-                       $scope.updatePitchersBatters();
+                       
                        break;
                }
                $scope.$apply();
