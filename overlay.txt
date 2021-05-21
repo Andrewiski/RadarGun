@@ -1,2 +1,2 @@
-   P: #9 Brenden Monroe   PV: 57.4 MPH    B: 0 S: 0
-   B:                     EV: 67.8 MPH    I: 1 top
+   Vicksburg:  3   P: #2 Jacob Conklin    PV: 57.4 MPH    O: 2 B: 0 S: 0
+    Dowagiac:  2   B: #5 Ethan Hannapel   EV: 67.8 MPH    I: 1 top

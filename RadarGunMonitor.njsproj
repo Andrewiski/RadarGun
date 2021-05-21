@@ -10,7 +10,7 @@
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
     <Environment>localDebug=true
-DEBUG=app,radar,batteryMonitor,ffmpegOverlay,ffplay</Environment>
+DEBUG=app,radar,batteryMonitor,ffmpegOverlay,youtubeEncoderClient</Environment>
     <LaunchUrl>http://localhost:12336</LaunchUrl>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
@@ -84,6 +84,7 @@ DEBUG=app,radar,batteryMonitor,ffmpegOverlay,ffplay</Environment>
     <Content Include="configs\debug\radarEmulatorConfig.json" />
     <Content Include="configs\debug\radarGunMonitorConfig.json" />
     <Content Include="configs\debug\radarStalker2Config.json" />
+    <Content Include="configs\debug\youtubeEncoderClientConfig.json" />
     <Content Include="configs\ffmpegConfig.json" />
     <Content Include="configs\gpsMonitorConfig.json" />
     <Content Include="configs\batteryMonitorConfig.json" />

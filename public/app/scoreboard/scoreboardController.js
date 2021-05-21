@@ -268,6 +268,18 @@
                radarMonitor.sendServerCommand("stream", { cmd: "stop" });
            }
 
+
+           $scope.streamStartRemote = function () {
+               //Tell server the inningChanged
+               radarMonitor.sendServerCommand("stream", { cmd: "startRemote" });
+           }
+
+           $scope.streamStopRemote = function () {
+               //Tell server the inningChanged
+               radarMonitor.sendServerCommand("stream", { cmd: "stopRemote" });
+           }
+
+
            $scope.batterChange = function () {
                //Tell server the inningChanged
                let data = {};

@@ -8,5 +8,10 @@
   "logLevel": "debug",
   "inputOptions": [ "-rtsp_transport tcp", "-stimeout 30000000" ],
   "outputOptions": [ "-pix_fmt +", "-c:v libx264", "-preset:very fast", "-c:a aac", "-f flv" ],
-  "capture": false
+  "capture": false,
+  "overlayFileName": "overlay.txt",
+  "videoFilters": {
+    "filter": "drawtext",
+    "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
+  }
 }

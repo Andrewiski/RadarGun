@@ -2,7 +2,7 @@
 var extend = require('extend');
 var nconf = require('nconf');
 var debug = require('debug')('youtubeEncoderClient');
-
+var FfmpegOverlay = require("./modules/ffmpegOverlay.js");
 try {
     var defaultOptions = {
         //loaded from the config file
@@ -22,6 +22,7 @@ try {
 
     }
 
+    var ffmpegOverlay = new FfmpegOverlay(objOptions.ffmpegOverlayConfig);
 
     var updateOverlayText = function () {
         try {
@@ -153,13 +154,28 @@ try {
         updateOverlayText();
     });
 
+    socket.on("stream", function (data) {
+        switch (data.cmd) {
+            case "startRemote":
+                ffmpegOverlay.streamStart();
+                break;
+            case "stopRemote":
+                ffmpegOverlay.streamStop();
+                break;
+        }
+        
+    })
+    
+
     socket.on("gameChange", function (message) {
         debug('gameChange:' + ', message:' + message + ', client id:' + socket.id);
         if (commonData.game === null) {
             commonData.game = {};
         }
         switch (message.cmd) {
-
+            case "scoreGame":
+                commonData.game = message.data.game;
+                break;
             case "gameChange":
                 if (message.data.inning !== undefined) {
                     commonData.game.inning = message.data.inning;

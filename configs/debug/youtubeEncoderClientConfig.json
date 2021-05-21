@@ -5,12 +5,12 @@
     "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/7w0t-zhy3-0wzw-9kw8-b1md",
     "logLevel": "debug",
     "inputOptions": [ "-y", "-hwaccel cuda", "-rtsp_transport tcp", "-stimeout 30000000" ],
-    "outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-preset fast", "-f flv" ],
+    "outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-r 24", "-preset llhq", "-rc vbr_hq",  "-f flv" ],
     "capture": false,
     "overlayFileName": "overlay.txt",
     "videoFilters": {
       "filter": "drawtext",
-      "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
+      "options": "fontfile=arial.ttf:fontsize=100:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
     }
   }
 }

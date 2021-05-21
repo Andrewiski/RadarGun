@@ -32,7 +32,7 @@ var FfmpegOverlay = function (options) {
     var configFileSettings = nconf.get();
 
 
-    var objOptions = extend({}, defaultOptions, configFileSettings);
+    var objOptions = extend({}, defaultOptions, configFileSettings, options);
 
     var isObject = function (a) {
         return (!!a) && (a.constructor === Object);
@@ -327,7 +327,7 @@ var FfmpegOverlay = function (options) {
     };
 
 
-    var overlayFileName = "overlay.txt"; //path.join(__dirname, "overlay.txt").replace(":", "\\:");
+    //var overlayFileName = "overlay.txt"; //path.join(__dirname, "overlay.txt").replace(":", "\\:");
 
 
     var transStream = null;
@@ -393,10 +393,9 @@ var FfmpegOverlay = function (options) {
         if (objOptions.capture === true) {
             command.pipe(transStream, { end: false });
         } else {
-            command.videoFilters({
-                filter: "drawtext",
-                options: 'fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=' + overlayFileName + ':reload=1'
-            })
+            if (objOptions.videoFilters) {
+                command.videoFilters(objOptions.videoFilters);
+            }
             command.output(objOptions.rtmpUrl)
             command.run();
         }
@@ -430,7 +429,7 @@ var FfmpegOverlay = function (options) {
     };
 
     var updateOverlayText = function (overlayText) {
-        var overlayFilePath = path.join(__dirname, '..', overlayFileName);
+        var overlayFilePath = path.join(__dirname, '..', objOptions.overlayFileName);
         try {
             fs.writeFileSync(overlayFilePath, overlayText);
 
