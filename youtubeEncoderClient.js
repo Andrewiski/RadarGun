@@ -9,13 +9,14 @@ try {
         host: "http://127.0.0.1:12336"
     };
     if (process.env.localDebug === 'true') {
+        console.log("localDebug Mode Enabled")
         nconf.file('./configs/debug/youtubeEncoderClientConfig.json');
     } else {
         nconf.file('./configs/youtubeEncoderClientConfig.json');
     }
     var configFileSettings = nconf.get();
     var objOptions = extend({}, defaultOptions, configFileSettings);
-
+    console.log("Host: " + objOptions.host)
     var commonData = {
         game: null,
         currentRadarSpeedData: null
