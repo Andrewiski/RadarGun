@@ -1,2 +1,2 @@
-   P: #9 Brenden Monroe   PV: 57.4 MPH    B: 0 S: 0
-   B:                     EV: 67.8 MPH    I: 1 top
+   Vicksburg:  5   P: #6 Jared Spencer    PV: 73.5 MPH    B: 0 S: 0
+ Centerville:  2   B: #7 Jimmy Cutshaw    EV: 00.0 MPH    I: 8 bottom

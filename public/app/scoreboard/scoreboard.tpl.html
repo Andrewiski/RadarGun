@@ -664,7 +664,7 @@
 
                                             <td>&nbsp;</td>
                                             <!--<td><label class="control-label">Fielding</label></td>
-                <td><label class="control-label">Batting</label></td>-->
+                                <td><label class="control-label">Batting</label></td>-->
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -793,7 +793,7 @@
                                             <td><label class="control-label">Walkup</label><button type="button" class="btn" ng-click="refreshWalkupFiles()"><i class="fa fa-refresh"></i></button> </td>
                                             <td>&nbsp;</td>
                                             <!--<td><label class="control-label">Fielding</label></td>
-                <td><label class="control-label">Batting</label></td>-->
+                                <td><label class="control-label">Batting</label></td>-->
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -866,104 +866,156 @@
                         </div>
                     </div>
                 </uib-tab>
-                    <uib-tab index="5" ng-show="commonData.isGameAdmin">
-                        <uib-tab-heading>
-                            <i class="glyphicon glyphicon-bell"></i> Config
-                        </uib-tab-heading>
+                <uib-tab index="5" ng-show="commonData.isGameAdmin">
+                    <uib-tab-heading>
+                        <i class="glyphicon glyphicon-bell"></i> Config
+                    </uib-tab-heading>
+                    <div>
                         <div>
-                            <div>
-                                <div class="player" ng-show="commonData.showPlayer">
-                                    <div>Name: {{commonData.player.lastName}}, {{commonData.player.firstName}} </div>
-                                    <div class="btn-group" role="group" aria-label="Buttons">
-                                        <button type="button" class="btn btn-secondary" ng-click="playerShowDone()">Done</button>
-                                        <button type="button" class="btn btn-primary" ng-click="playerEdit()">Edit</button>
-                                    </div>
-                                </div>
-
-                                <div class="playerEdit" ng-show="commonData.showPlayerEdit">
-                                    <div>First Name:<input style="width:45px" type="number" ng-model="commonData.player.firstName" /></div>
-                                    <div>Last Name:<input style="width:45px" type="number" ng-model="commonData.player.lastName" /></div>
-                                    <div class="btn-group" role="group" aria-label="Buttons">
-                                        <button type="button" class="btn btn-secondary" ng-click="playerEditCancel()">Cancel</button>
-                                        <button type="button" class="btn btn-primary" ng-click="playerEditSave()">Save</button>
-                                    </div>
-                                </div>
-
-                                <div class="team" ng-show="commonData.showTeam">
-                                    <div>Name: {{commonData.team.name}}</div>
-                                    <div class="btn-group" role="group" aria-label="Buttons">
-                                        <button type="button" class="btn btn-secondary" ng-click="teamShowDone()">Done</button>
-                                        <button type="button" class="btn btn-primary" ng-click="teamEdit()">Edit</button>
-                                    </div>
-                                </div>
-
-                                <div class="teamEdit" ng-show="commonData.showTeamEdit">
-                                    <div>Team Name:<input style="width:45px" type="number" ng-model="commonData.team.name" ng-change="commonData.team.isDirty = true" /></div>
-                                    <div class="btn-group" role="group" aria-label="Buttons">
-                                        <button type="button" class="btn btn-secondary" ng-click="teamEditCancel()">Cancel</button>
-                                        <button type="button" class="btn btn-primary" ng-click="teamEditSave()">Save</button>
-                                    </div>
-                                </div>
-                                <div class="wifidog">
-                                    <form class="wifidogform" style="display: ;" action="config?act=config" name="wifi_info" method="post">
-                                        <select id='ssid' name="ssid" onclick='select_click()'>
-                                            <option value="note">click to select ssid</option>
-                                        </select>
-                                        <input type="password" name="password" placeholder="Password" autocomplete="wifi_pwd" />
-                                        <input type="hidden" name="admin" placeholder="Your board password" />
-                                        <input type="button" class='btn' size="15" style="background-color: transparent; border: 0;" onclick="check()" value="OK" />
-                                    </form>
-                                </div>
-
-
-
-                                <div class="radarConfig" ng-show="commonData.showRadarConfig">
-                                    <div>
-                                        <div ng-hide="commonData.radarConfig.TransmiterControl.value == 1"><a class="btn btn-sm btn-danger" ng-click="radarCommand('TransmiterControl',1)">Off</a>(Click to Turn On)</div>
-                                        <div ng-show="commonData.radarConfig.TransmiterControl.value == 1"><a class="btn btn-sm btn-success" ng-click="radarCommand('TransmiterControl',0)">On</a> (Click to Turn Off)</div>
-                                        <!--<div data-toggle-switch data-model="radarPower"></div>-->
-                                        <img ng-hide="!commonData.isradarCommandPending" src="app/img/spinner.gif" ng-style='{"margin-left":"8px"}' width="24" height="24" alt="" />
-                                    </div>
-
-                                    <div ng-hide="commonData.editRadarConfig == true">
-                                        <div>Radar Model: {{commonData.radarConfig.ProductID.value}}</div>
-                                        <div>Low Speed Threshold:{{commonData.radarConfig.LowSpeedThreshold.value}}</div>
-                                        <div>High Speed Threshold:{{commonData.radarConfig.HighSpeedThreshold.value}}</div>
-
-                                        <div>Left Right Angle:{{commonData.radarConfig.CosignAngle1.value}}</div>
-                                        <div>Up Down Angle:{{commonData.radarConfig.CosignAngle2.value}}</div>
-                                        <div>Range:{{commonData.radarConfig.Range.value}}</div>
-                                        <div>Message Period:{{commonData.radarConfig.MessagePeriod.value}}</div>
-                                        <div>Auto Clear Delay:{{commonData.radarConfig.AutoClearDelay.value}}</div>
-                                        <div>Hit Speed Enable:{{commonData.radarConfig.HitSpeedEnable.value}}</div>
-                                        <div>Target Direction:{{commonData.radarConfig.TargetDirection.value}}</div>
-                                        <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="commonData.editRadarConfig = true">edit</a></div>
-                                    </div>
-                                    <div ng-show="commonData.editRadarConfig == true">
-
-
-                                        <div>{{commonData.radarConfig.ProductID.value}}</div>
-                                        <div>Low Speed Threshold:<input style="width:45px" type="number" ng-model="commonData.radarConfig.LowSpeedThreshold.value" ng-change="commonData.radarConfig.LowSpeedThreshold.isDirty = true" /></div>
-                                        <div>High Speed Threshold:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HighSpeedThreshold.value" ng-change="commonData.radarConfig.HighSpeedThreshold.isDirty = true" /></div>
-                                        <div>Left Right Angle:<input style="width:45px" type="number" ng-model="commonData.radarConfig.CosignAngle1.value" ng-change="commonData.radarConfig.CosignAngle1.isDirty = true" /></div>
-                                        <div>Up Down Angle:<input style="width:45px" type="number" ng-model="commonData.radarConfig.CosignAngle2.value" ng-change="commonData.radarConfig.CosignAngle2.isDirty = true" /></div>
-                                        <div>Range:<input style="width:45px" type="number" ng-model="commonData.radarConfig.Range.value" ng-change="commonData.radarConfig.Range.isDirty = true" /></div>
-                                        <div>Message Period:<input style="width:45px" type="number" ng-model="commonData.radarConfig.MessagePeriod.value" ng-change="commonData.radarConfig.MessagePeriod.isDirty = true" /></div>
-                                        <div>Auto Clear Delay:<input style="width:45px" type="number" ng-model="commonData.radarConfig.AutoClearDelay.value" ng-change="commonData.radarConfig.AutoClearDelay.isDirty = true" /></div>
-                                        <div>Hit Speed Enable:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HitSpeedEnable.value" ng-change="commonData.radarConfig.HitSpeedEnable.isDirty = true" /></div>
-                                        <div>Target Direction:<input style="width:45px" type="number" ng-model="commonData.radarConfig.TargetDirection.value" ng-change="commonData.radarConfig.TargetDirection.isDirty = true" />0 Outbound, 1 InBound, 2 Both</div>
-                                        <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="updateRadarConfig(); commonData.editRadarConfig = false;">Save</a></div>
-                                    </div>
-                                    <div>
-                                        <div>Battery Voltage: {{commonData.batteryVoltage.batteryVoltage}}</div>
-                                        <div>{{commonData.batteryVoltage.time | date : 'M/d/yy hh:mm:ss'}}</div>
-                                    </div>
-                                    <div id="googleMap"></div>
+                            <div class="player" ng-show="commonData.showPlayer">
+                                <div>Name: {{commonData.player.lastName}}, {{commonData.player.firstName}} </div>
+                                <div class="btn-group" role="group" aria-label="Buttons">
+                                    <button type="button" class="btn btn-secondary" ng-click="playerShowDone()">Done</button>
+                                    <button type="button" class="btn btn-primary" ng-click="playerEdit()">Edit</button>
                                 </div>
                             </div>
-                        </div>
-                    </uib-tab>
 
+                            <div class="playerEdit" ng-show="commonData.showPlayerEdit">
+                                <div>First Name:<input style="width:45px" type="number" ng-model="commonData.player.firstName" /></div>
+                                <div>Last Name:<input style="width:45px" type="number" ng-model="commonData.player.lastName" /></div>
+                                <div class="btn-group" role="group" aria-label="Buttons">
+                                    <button type="button" class="btn btn-secondary" ng-click="playerEditCancel()">Cancel</button>
+                                    <button type="button" class="btn btn-primary" ng-click="playerEditSave()">Save</button>
+                                </div>
+                            </div>
+
+                            <div class="team" ng-show="commonData.showTeam">
+                                <div>Name: {{commonData.team.name}}</div>
+                                <div class="btn-group" role="group" aria-label="Buttons">
+                                    <button type="button" class="btn btn-secondary" ng-click="teamShowDone()">Done</button>
+                                    <button type="button" class="btn btn-primary" ng-click="teamEdit()">Edit</button>
+                                </div>
+                            </div>
+
+                            <div class="teamEdit" ng-show="commonData.showTeamEdit">
+                                <div>Team Name:<input style="width:45px" type="number" ng-model="commonData.team.name" ng-change="commonData.team.isDirty = true" /></div>
+                                <div class="btn-group" role="group" aria-label="Buttons">
+                                    <button type="button" class="btn btn-secondary" ng-click="teamEditCancel()">Cancel</button>
+                                    <button type="button" class="btn btn-primary" ng-click="teamEditSave()">Save</button>
+                                </div>
+                            </div>
+                            <div class="wifidog">
+                                <form class="wifidogform" style="display: ;" action="config?act=config" name="wifi_info" method="post">
+                                    <select id='ssid' name="ssid" onclick='select_click()'>
+                                        <option value="note">click to select ssid</option>
+                                    </select>
+                                    <input type="password" name="password" placeholder="Password" autocomplete="wifi_pwd" />
+                                    <input type="hidden" name="admin" placeholder="Your board password" />
+                                    <input type="button" class='btn' size="15" style="background-color: transparent; border: 0;" onclick="check()" value="OK" />
+                                </form>
+                            </div>
+
+
+
+                            <div class="radarConfig" ng-show="commonData.showRadarConfig">
+                                <div>
+                                    <div ng-hide="commonData.radarConfig.TransmiterControl.value == 1"><a class="btn btn-sm btn-danger" ng-click="radarCommand('TransmiterControl',1)">Off</a>(Click to Turn On)</div>
+                                    <div ng-show="commonData.radarConfig.TransmiterControl.value == 1"><a class="btn btn-sm btn-success" ng-click="radarCommand('TransmiterControl',0)">On</a> (Click to Turn Off)</div>
+                                    <!--<div data-toggle-switch data-model="radarPower"></div>-->
+                                    <img ng-hide="!commonData.isradarCommandPending" src="app/img/spinner.gif" ng-style='{"margin-left":"8px"}' width="24" height="24" alt="" />
+                                </div>
+
+                                <div ng-hide="commonData.editRadarConfig == true">
+                                    <div>Radar Model: {{commonData.radarConfig.ProductID.value}}</div>
+                                    <div>Low Speed Threshold:{{commonData.radarConfig.LowSpeedThreshold.value}}</div>
+                                    <div>High Speed Threshold:{{commonData.radarConfig.HighSpeedThreshold.value}}</div>
+
+                                    <div>Left Right Angle:{{commonData.radarConfig.CosignAngle1.value}}</div>
+                                    <div>Up Down Angle:{{commonData.radarConfig.CosignAngle2.value}}</div>
+                                    <div>Range:{{commonData.radarConfig.Range.value}}</div>
+                                    <div>Message Period:{{commonData.radarConfig.MessagePeriod.value}}</div>
+                                    <div>Auto Clear Delay:{{commonData.radarConfig.AutoClearDelay.value}}</div>
+                                    <div>Hit Speed Enable:{{commonData.radarConfig.HitSpeedEnable.value}}</div>
+                                    <div>Target Direction:{{commonData.radarConfig.TargetDirection.value}}</div>
+                                    <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="commonData.editRadarConfig = true">edit</a></div>
+                                </div>
+                                <div ng-show="commonData.editRadarConfig == true">
+
+
+                                    <div>{{commonData.radarConfig.ProductID.value}}</div>
+                                    <div>Low Speed Threshold:<input style="width:45px" type="number" ng-model="commonData.radarConfig.LowSpeedThreshold.value" ng-change="commonData.radarConfig.LowSpeedThreshold.isDirty = true" /></div>
+                                    <div>High Speed Threshold:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HighSpeedThreshold.value" ng-change="commonData.radarConfig.HighSpeedThreshold.isDirty = true" /></div>
+                                    <div>Left Right Angle:<input style="width:45px" type="number" ng-model="commonData.radarConfig.CosignAngle1.value" ng-change="commonData.radarConfig.CosignAngle1.isDirty = true" /></div>
+                                    <div>Up Down Angle:<input style="width:45px" type="number" ng-model="commonData.radarConfig.CosignAngle2.value" ng-change="commonData.radarConfig.CosignAngle2.isDirty = true" /></div>
+                                    <div>Range:<input style="width:45px" type="number" ng-model="commonData.radarConfig.Range.value" ng-change="commonData.radarConfig.Range.isDirty = true" /></div>
+                                    <div>Message Period:<input style="width:45px" type="number" ng-model="commonData.radarConfig.MessagePeriod.value" ng-change="commonData.radarConfig.MessagePeriod.isDirty = true" /></div>
+                                    <div>Auto Clear Delay:<input style="width:45px" type="number" ng-model="commonData.radarConfig.AutoClearDelay.value" ng-change="commonData.radarConfig.AutoClearDelay.isDirty = true" /></div>
+                                    <div>Hit Speed Enable:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HitSpeedEnable.value" ng-change="commonData.radarConfig.HitSpeedEnable.isDirty = true" /></div>
+                                    <div>Target Direction:<input style="width:45px" type="number" ng-model="commonData.radarConfig.TargetDirection.value" ng-change="commonData.radarConfig.TargetDirection.isDirty = true" />0 Outbound, 1 InBound, 2 Both</div>
+                                    <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="updateRadarConfig(); commonData.editRadarConfig = false;">Save</a></div>
+                                </div>
+                                <div>
+                                    <div>Battery Voltage: {{commonData.batteryVoltage.batteryVoltage}}</div>
+                                    <div>{{commonData.batteryVoltage.time | date : 'M/d/yy hh:mm:ss'}}</div>
+                                </div>
+                                <div id="googleMap"></div>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab index="6">
+                    <uib-tab-heading>
+                        <i class="fa fa-database"></i> Game Pitch History
+                    </uib-tab-heading>
+                    <div class="container-fluid ">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <table class="table table-striped speedHistoryTable">
+                                    <thead>
+                                        <tr><th>Time</th><th>Pitcher</th><th>Max In</th><th>Min In</th><th>Batter</th><th>Max Out</th><th>Min Out</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="rsdItem in commonData.selectedGame.radarSpeedData">
+                                            <td>{{rsdItem.time | date : 'M/d/yy hh:mm:ss'}}</td>
+                                            <td>#{{rsdItem.pitcher.player.jerseyNumber }} {{rsdItem.pitcher.player.firstName}} {{rsdItem.pitcher.player.lastName}}</td>
+                                            <td>{{rsdItem.inMaxSpeed}}</td>
+                                            <td>{{rsdItem.inMinSpeed}}</td>
+                                            <td>#{{rsdItem.batter.player.jerseyNumber }} {{rsdItem.batter.player.firstName}} {{rsdItem.batter.player.lastName}}</td>
+                                            <td>{{rsdItem.outMaxSpeed}}</td>
+                                            <td>{{rsdItem.outMinSpeed}}</td>
+                                            <!--<td>
+                                                <div class="form-group">
+                                                    <button type="button" class="btn" ng-click="pitchBall()">B</button>
+                                                    <button type="button" class="btn" ng-click="pitchStrikeSwinging()">SS</button>
+                                                    <button type="button" class="btn" ng-click="pitchStrikeWatching()">SW</button>
+                                                    <button type="button" class="btn" ng-click="pitchFoul()">F</button>
+                                                </div>
+
+                                            </td>
+                                            <td>
+
+                                                <div class="form-group">
+                                                    <button type="button" class="btn" ng-click="pitchFlyOut()">FO</button>
+                                                    <button type="button" class="btn" ng-click="pitchGroundOut()">GO</button>
+                                                    <button type="button" class="btn" ng-click="pitchLineOut()">LO</button>
+                                                </div>
+
+                                            </td>
+                                            <td>
+
+                                                <div class="form-group">
+                                                    <button type="button" class="btn" ng-click="pitchFlyBall()">FB</button>
+                                                    <button type="button" class="btn" ng-click="pitchGroundBall()">GB</button>
+                                                    <button type="button" class="btn" ng-click="pitchLineDrive()">LD</button>
+                                                </div>
+                                            </td>-->
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
 
             </uib-tabset>
         </div>

@@ -9,7 +9,7 @@
     <SccProvider>SAK</SccProvider>
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
-    <Environment>localDebug=true
+    <Environment>localDebug=false
 DEBUG=app,radar,batteryMonitor,ffmpegOverlay,ffplay</Environment>
     <LaunchUrl>http://localhost:12336</LaunchUrl>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
