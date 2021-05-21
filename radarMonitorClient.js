@@ -1,10 +1,8 @@
 ﻿
 var extend = require('extend');
 var nconf = require('nconf');
-var debug = require('debug')('app');
-var boneScript;
-var commonData = { ledDisplays: {} };
-AdafruitLedBackpack = require('./AdafruitLedBackpack.js');
+var debug = require('debug')('radarMonitorClient');
+
 try {
     var defaultOptions = {
         //loaded from the config file

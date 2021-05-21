@@ -1,2 +1,2 @@
-   Vicksburg:  5   P: #6 Jared Spencer    PV: 73.5 MPH    B: 0 S: 0
- Centerville:  2   B: #7 Jimmy Cutshaw    EV: 00.0 MPH    I: 8 bottom
+   Vicksburg:  3   P: #2 Jacob Conklin    PV: 57.4 MPH    O: 2 B: 0 S: 0
+    Dowagiac:  2   B: #5 Ethan Hannapel   EV: 67.8 MPH    I: 1 top

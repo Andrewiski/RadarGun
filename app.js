@@ -27,6 +27,7 @@ const uuidv4 = require('uuid/v4');
 
 if (process.env.localDebug === 'true') {
     nconf.file('./configs/debug/radarGunMonitorConfig.json');
+    console.log("localDebug Mode Enabled");
 } else {
     nconf.file('./configs/radarGunMonitorConfig.json');
 }
@@ -380,6 +381,31 @@ var StopPeriodicTimerEvent = function () {
     }
 }
 
+var audioFilePlayer = null;
+
+var playAudioFileComplete = function (audioFile) {
+    io.emit("audio", { cmd: "audioPlayComplete", data: { audioFile: audioFile } });
+}
+
+var audioFilePlay = function (audioFilePath, audioFile, options) {
+
+    if (audioFilePlayer !== null) {
+        audioFilePlayer.stop();
+        audioFilePlayer = null;
+    }
+    var audioFolderPath = path.join(__dirname, "data", audioFilePath);
+    audioFilePlayer = new FFplay(audioFolderPath, audioFile.fileName, options);
+
+    audioFilePlayer.on("stopped", playAudioFileComplete);
+
+}
+var audioFileStop = function () {
+    if (audioFilePlayer !== null) {
+        audioFilePlayer.stop();
+        audioFilePlayer = null;
+    }
+}
+
 var io = require('socket.io')(server);
 io.on('connection', function(socket) {
     debug('socket.io client Connection');
@@ -402,34 +428,17 @@ io.on('connection', function(socket) {
             case "stop":
                 ffmpegOverlay.streamStop();
                 break;
+            case "startRemote":
+                io.emit('stream', message);
+                break;
+            case "stopRemote":
+                io.emit('stream', message);
+                break;
         }
-        
+
     });
 
-    var audioFilePlayer = null;
-
-    var playAudioFileComplete = function (audioFile) {
-        io.emit("audio", { cmd: "audioPlayComplete", data: { audioFile : audioFile} }); 
-    }
-
-    var audioFilePlay = function (audioFilePath, audioFile, options) {
-
-        if (audioFilePlayer !== null) {
-            audioFilePlayer.stop();
-            audioFilePlayer = null;
-        }
-        var audioFolderPath = path.join(__dirname, "data", audioFilePath);
-        audioFilePlayer = new FFplay(audioFolderPath, audioFile.fileName, options);
-
-        audioFilePlayer.on("stopped", playAudioFileComplete);
-        
-    }
-    var audioFileStop = function () {
-        if (audioFilePlayer !== null) {
-            audioFilePlayer.stop();
-            audioFilePlayer = null;
-        }
-    }
+    
 
     socket.on("audio", function (message) {
         //audioFile: audioFile
@@ -615,27 +624,40 @@ io.on('connection', function(socket) {
     //    radarStalker2.batter({ data: data, socket: socket });
     //})
 
-    socket.on("pitch", function (data) {
-        debug('pitch:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
-        radarStalker2.pitch({ data: data, socket: socket });
+    socket.on("pitch", function (message) {
+        debug('pitch:' + message.cmd + ', value:' + message.data + ', client id:' + socket.id);
+        radarStalker2.pitch({ data: message, socket: socket });
     })
 
     socket.on('ping', function(data) {
         debug('ping: client id:' + socket.id);
     });
 
-    socket.on("startStream", function (data) {
-        ffmpegOverlay.startStream();
-    })
-    socket.on("stopStream", function (data) {
-        ffmpegOverlay.stopStream();
-    })
 
-    if (socket.client.request.headers["origin"] != "ArduinoSocketIo") {
+    
+
+    //socket.on("startStream", function (data) {
+    //    ffmpegOverlay.startStream();
+    //})
+    //socket.on("stopStream", function (data) {
+    //    ffmpegOverlay.stopStream();
+    //})
+
+
+    //socket.on("startRemoteStream", function (data) {
+    //    io.emit('startRemoteStream', data);
+    //})
+    //socket.on("stopRemoteStream", function (data) {
+    //    io.emit('stopRemoteStream', data);
+    //})
+
+
+    if (socket.client.request.headers["origin"] !== "ArduinoSocketIo") {
         //send the current Config to the new client Connections
         io.emit('radarConfig', radarStalker2.getRadarConfig());
         io.emit('softwareConfig', radarStalker2.getSoftwareConfig());
         io.emit('radarSpeedDataHistory', radarStalker2.getradarSpeedDataHistory());
+        io.emit('gameChanged', {cmd:"gameChanged", data:commonData.game});
     }
     //send the current Battery Voltage
     io.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
