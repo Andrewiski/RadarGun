@@ -315,17 +315,18 @@
            $scope.batterOut = function () {
                
                if ($scope.commonData.selectedGame.outs >= 2) {
-                   $scope.nextBatter();
-                   $scope.inning(); 
+                   var data = {};
+                   $scope.nextBatter(data);
+                   $scope.inning(data); 
                } else {
                    var data = {};
                    $scope.commonData.selectedGame.outs++;
-                   $scope.commonData.selectedGame.balls = 0;
-                   $scope.commonData.selectedGame.strikes = 0;
+                   //$scope.commonData.selectedGame.balls = 0;
+                   //$scope.commonData.selectedGame.strikes = 0;
                    data.outs = $scope.commonData.selectedGame.outs;
-                   data.strikes = 0;
-                   data.balls = 0;
-                   $scope.nextBatter();
+                   //data.strikes = 0;
+                   //data.balls = 0;
+                   $scope.nextBatter(data);
                    addToGameLog(data);
                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                }  
