@@ -18,7 +18,12 @@ var RadarStalker2 = function (options){
         //loaded from the config file
         emulator:false
     };
-    nconf.file('./configs/radarStalker2Config.json');
+
+    if (process.env.localDebug === 'true') {
+        nconf.file('./configs/debug/radarStalker2Config.json');
+    } else {
+        nconf.file('./configs/radarStalker2Config.json');
+    }
     var configFileSettings = nconf.get();
     var objOptions = extend({}, defaultOptions, configFileSettings, options);
 

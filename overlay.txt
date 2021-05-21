@@ -1,2 +1,2 @@
-                       PV: 00.0 MPH    B: 0 S: 0
-                       EV: 00.0 MPH    I: 1 top
+   P: #9 Brenden Monroe   PV: 57.4 MPH    B: 0 S: 0
+   B:                     EV: 67.8 MPH    I: 1 top
