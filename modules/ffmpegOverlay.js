@@ -42,6 +42,8 @@ var FfmpegOverlay = function (options) {
         return (!!a) && (a.constructor === Array);
     };
 
+    var CircularChunkArray = [];
+
     var arrayPrint = function (obj) {
         var retval = '';
         var i;
@@ -331,20 +333,38 @@ var FfmpegOverlay = function (options) {
     var transStream = null;
 
 
+    var first100 = false;
+
     // incoming and backup transtream pipe to this depending on active source  to transform stream
     var transChunkCounter = 0;
     transStream = new Stream.Transform();
     transStream._transform = function (chunk, encoding, done) {
-        
-        writeToLog('trace', '[' + transChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
-        this.push(chunk);
-        //Write to any active mp4 streams
-        for (const item of Object.values(commonData.activeMp4Streams)) {
-            //if (item.type === "mp3") {
-            item.res.write(chunk);
+        try {
+            writeToLog('debug', '[' + transChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+            this.push(chunk);
+            //Write to any active mp4 streams
+            //for (const item of Object.values(commonData.activeMp4Streams)) {
+            //    //if (item.type === "mp3") {
+            //    item.res.write(chunk);
+            //    //}
             //}
+            CircularChunkArray.push(new Buffer(chunk))
+            if (CircularChunkArray.length > 100) {
+                if (first100 === false) {
+                    first100 = true;
+                    var mp4Stream = fs.createWriteStream('./output.mp4');
+                    for (var i = 0; i < CircularChunkArray.length; i++) {
+                        mp4Stream.write(CircularChunkArray[i]);
+                    }
+
+                }
+                CircularChunkArray.shift()
+            }
+
+            return done();
+        } catch (ex) {
+            writeToLog('trace', "error", ex);
         }
-        return done();
     };
 
 
@@ -363,12 +383,9 @@ var FfmpegOverlay = function (options) {
             
         command.inputOptions(objOptions.inputOptions)
             
-        command.videoFilters({
-                filter: "drawtext",
-                options: 'fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=' + overlayFileName + ':reload=1'
-            })
+        
         command.outputOptions(objOptions.outputOptions)
-        command.addOption('-loglevel level+warning')       //added by Andy so we can parse out stream info            
+        command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info            
         command.on('error', commandError)
         command.on('progress', commandProgress)
         command.on('stderr', commandStdError)
@@ -376,7 +393,10 @@ var FfmpegOverlay = function (options) {
         if (objOptions.capture === true) {
             command.pipe(transStream, { end: false });
         } else {
-            
+            command.videoFilters({
+                filter: "drawtext",
+                options: 'fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=' + overlayFileName + ':reload=1'
+            })
             command.output(objOptions.rtmpUrl)
             command.run();
         }

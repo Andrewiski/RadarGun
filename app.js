@@ -27,6 +27,7 @@ const uuidv4 = require('uuid/v4');
 
 if (process.env.localDebug === 'true') {
     nconf.file('./configs/debug/radarGunMonitorConfig.json');
+    console.log("localDebug Mode Enabled");
 } else {
     nconf.file('./configs/radarGunMonitorConfig.json');
 }
@@ -630,7 +631,7 @@ io.on('connection', function(socket) {
         ffmpegOverlay.stopStream();
     })
 
-    if (socket.client.request.headers["origin"] != "ArduinoSocketIo") {
+    if (socket.client.request.headers["origin"] !== "ArduinoSocketIo") {
         //send the current Config to the new client Connections
         io.emit('radarConfig', radarStalker2.getRadarConfig());
         io.emit('softwareConfig', radarStalker2.getSoftwareConfig());
