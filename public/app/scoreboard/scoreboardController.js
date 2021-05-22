@@ -395,22 +395,27 @@
                }
            }
            $scope.groundOut = function () {
-
+               $scope.batterOut();
            }
            $scope.flyOut = function () {
-
+               $scope.batterOut();
            }
            $scope.lineOut = function () {
-
+               $scope.batterOut();
            }
            $scope.groundBall = function () {
-
+               $scope.nextBatter();
            }
            $scope.flyBall = function () {
-
+               $scope.nextBatter();
            }
            $scope.lineDrive = function () {
+               $scope.nextBatter();
+           }
 
+           $scope.hitByPitch = function () {
+               
+               $scope.nextBatter();
            }
 
            $scope.nextBatter = function() {
