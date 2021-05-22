@@ -1,2 +1,2 @@
-   Vicksburg:  3   P: #2 Jacob Conklin    PV: 57.4 MPH    O: 2 B: 0 S: 0
-    Dowagiac:  2   B: #5 Ethan Hannapel   EV: 67.8 MPH    I: 1 top
+   P: #13 Dylan Zemitans  PV: 65.4 MPH    B: 1 S: 0
+   B: #5 S Bissett        EV: 74.3 MPH    I: 1 top

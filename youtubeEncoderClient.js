@@ -168,16 +168,18 @@ try {
     })
     
 
-    socket.on("gameChange", function (message) {
-        debug('gameChange:' + ', message:' + message + ', client id:' + socket.id);
+    socket.on("gameChanged", function (message) {
+        debug('gameChanged:' + ', message:' + message + ', client id:' + socket.id);
+        console.log("gameChanged");
         if (commonData.game === null) {
             commonData.game = {};
         }
         switch (message.cmd) {
             case "scoreGame":
                 commonData.game = message.data.game;
+                updateOverlayText();
                 break;
-            case "gameChange":
+            case "gameChanged":
                 if (message.data.inning !== undefined) {
                     commonData.game.inning = message.data.inning;
                 }
