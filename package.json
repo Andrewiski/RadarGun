@@ -69,6 +69,8 @@
     "stylus": "^0.54.7",
     "ui-select": "^0.19.8",
     "uuid": "^3.4.0",
-    "verror": "1.6.x"
+    "verror": "1.6.x",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5"
   }
 }

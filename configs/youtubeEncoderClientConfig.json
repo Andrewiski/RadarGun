@@ -1,4 +1,5 @@
 {
+  "webserverPort": 12336,
   "host": "http://10.100.32.95:12336",
   "ffmpegOverlayConfig": {
     "input": "rtsp://10.100.32.95:7447/t2N7OTZ2n8ScSTtu",

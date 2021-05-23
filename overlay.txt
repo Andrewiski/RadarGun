@@ -1,2 +1,2 @@
-   P: #13 Dylan Zemitans  PV: 65.4 MPH    B: 1 S: 0
-   B: #5 S Bissett        EV: 74.3 MPH    I: 1 top
+   P: #13 Dylan Zemitans  PV: 00.0 MPH    O: 2 B: 0 S: 0
+   B: #10  Gialey         EV: 00.0 MPH    I: 2 top
