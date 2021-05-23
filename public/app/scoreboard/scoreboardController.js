@@ -191,6 +191,13 @@
                
            }
 
+           var addToGameLog = function(data){
+               if ($scope.commonData.selectedGame.log === undefined) {
+                   $scope.commonData.selectedGame.log = [];
+               }
+               $scope.commonData.selectedGame.log.push({ timestamp: moment(), data: data });
+           }
+
            $scope.refreshWalkupFiles = function () {
                refreshWalkupFiles();
            }
@@ -281,7 +288,7 @@
 
 
            $scope.batterChange = function () {
-               //Tell server the inningChanged
+               
                let data = {};
 
                
@@ -295,29 +302,32 @@
                    data.home = { batterIndex: index };
                }
                data.batter = $scope.commonData.selectedGame.batter;
-           
+               addToGameLog(data);
                radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.pitcherChange = function () {
-               //Tell server the inningChanged
-               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { pitcher: $scope.commonData.selectedGame.pitcher } });
+               let data = { pitcher: $scope.commonData.selectedGame.pitcher };
+               addToGameLog(data );
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.batterOut = function () {
                
                if ($scope.commonData.selectedGame.outs >= 2) {
-                   $scope.nextBatter();
-                   $scope.inning(); 
+                   var data = {};
+                   $scope.nextBatter(data);
+                   $scope.inning(data); 
                } else {
                    var data = {};
                    $scope.commonData.selectedGame.outs++;
-                   $scope.commonData.selectedGame.balls = 0;
-                   $scope.commonData.selectedGame.strikes = 0;
+                   //$scope.commonData.selectedGame.balls = 0;
+                   //$scope.commonData.selectedGame.strikes = 0;
                    data.outs = $scope.commonData.selectedGame.outs;
-                   data.strikes = 0;
-                   data.balls = 0;
-                   $scope.nextBatter();
+                   //data.strikes = 0;
+                   //data.balls = 0;
+                   $scope.nextBatter(data);
+                   addToGameLog(data);
                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                }  
            }
@@ -331,6 +341,7 @@
                    var data = {};
                    $scope.commonData.selectedGame.outs++;
                    data.outs = $scope.commonData.selectedGame.outs;
+                   addToGameLog(data );
                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                }
            }
@@ -343,6 +354,7 @@
                    var data = {};
                    $scope.commonData.selectedGame.balls++;
                    data.balls = $scope.commonData.selectedGame.balls;
+                   addToGameLog(data);
                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                }
            }
@@ -350,43 +362,60 @@
            $scope.strike = function () {
 
                if ($scope.commonData.selectedGame.strikes >= 2) {
-                   $scope.nextBatter();
-                   $scope.out();
+                   //$scope.nextBatter();
+                   $scope.batterOut();
                } else {
                    var data = {};
                    $scope.commonData.selectedGame.strikes++;
                    data.strikes = $scope.commonData.selectedGame.strikes;
+                   addToGameLog( data);
                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                }
            }
 
            $scope.foul = function () {
+               if ($scope.commonData.selectedGame.fouls === undefined) {
+                   $scope.commonData.selectedGame.fouls = 0;
+               }
                if ($scope.commonData.selectedGame.strikes >= 2) {
                    //tag Pitch as foul
+                   var data = {};
+                   $scope.commonData.selectedGame.fouls++;
+                   data.fouls = $scope.commonData.selectedGame.fouls;
+                   addToGameLog(data);
+                   radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                } else {
                    var data = {};
+                   $scope.commonData.selectedGame.fouls++;
+                   data.fouls = $scope.commonData.selectedGame.fouls;
                    $scope.commonData.selectedGame.strikes++;
                    data.strikes = $scope.commonData.selectedGame.strikes;
+                   addToGameLog(data);
                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                }
            }
            $scope.groundOut = function () {
-
+               $scope.batterOut();
            }
            $scope.flyOut = function () {
-
+               $scope.batterOut();
            }
            $scope.lineOut = function () {
-
+               $scope.batterOut();
            }
            $scope.groundBall = function () {
-
+               $scope.nextBatter();
            }
            $scope.flyBall = function () {
-
+               $scope.nextBatter();
            }
            $scope.lineDrive = function () {
+               $scope.nextBatter();
+           }
 
+           $scope.hitByPitch = function () {
+               
+               $scope.nextBatter();
            }
 
            $scope.nextBatter = function() {
@@ -419,6 +448,7 @@
                $scope.commonData.selectedGame.balls = 0;
                data.strikes = $scope.commonData.selectedGame.strikes;
                data.balls = $scope.commonData.selectedGame.balls;
+               addToGameLog(data);
                radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
@@ -455,24 +485,30 @@
                    $scope.commonData.selectedGame.outs = 0;
                    data.outs = $scope.commonData.selectedGame.outs;
                }
-
+               addToGameLog(data);
                radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.inningChange = function () {
                //Tell server the inningChanged
-               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { inning: $scope.commonData.selectedGame.inning } });
+               let data = { inning: $scope.commonData.selectedGame.inning }
+               addToGameLog(data);
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.inningPositionChange = function () {
                //Tell server the inningPositionChanged
                $scope.updatePitchersBatters();
-               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { inningPosition: $scope.commonData.selectedGame.inningPosition, pitcher: $scope.commonData.selectedGame.pitcher, batter: $scope.commonData.selectedGame.batter } });
+               let data = { inningPosition: $scope.commonData.selectedGame.inningPosition, pitcher: $scope.commonData.selectedGame.pitcher, batter: $scope.commonData.selectedGame.batter }
+               addToGameLog(data);
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
                
            }
 
            $scope.homeScoreChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { score: { home: $scope.commonData.selectedGame.score.home }} });               
+               let data = { score: { home: $scope.commonData.selectedGame.score.home } };
+               addToGameLog(data);
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange",  data: data});               
            }
 
            $scope.audioFilePlay = function (audioFile) {
@@ -488,19 +524,27 @@
            }
 
            $scope.guestScoreChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { score: { guest: $scope.commonData.selectedGame.score.guest } } });
+               let data = { score: { guest: $scope.commonData.selectedGame.score.guest } };
+               addToGameLog(data);
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.outsChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { outs: $scope.commonData.selectedGame.outs } });
+               let data = { outs: $scope.commonData.selectedGame.outs };
+               addToGameLog(data);
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.ballsChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { balls: $scope.commonData.selectedGame.balls } });
+               let data = { balls: $scope.commonData.selectedGame.balls };
+               addToGameLog(data);
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.strikesChange = function () {
-               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: { strikes: $scope.commonData.selectedGame.strikes } });
+               let data = { strikes: $scope.commonData.selectedGame.strikes };
+               addToGameLog(data);
+               radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
            }
 
            $scope.refreshTeams = function () {
@@ -633,14 +677,14 @@
                        $scope.commonData.selectedGame.home.team.roster = [];
                    }
                    for (var i = 0; i < 10; i++) {
-                       $scope.commonData.selectedGame.home.team.roster.push($scope.commonData.emptyPlayer)
+                       $scope.commonData.selectedGame.home.team.roster.push(angular.copy($scope.commonData.emptyPlayer))
                    }
 
                    if ($scope.commonData.selectedGame.home.lineup === undefined) {
                        $scope.commonData.selectedGame.home.lineup = [];
                    }
                    for (var i = 0; i < 10; i++) {
-                       $scope.commonData.selectedGame.home.lineup.push($scope.commonData.emptyLineup)
+                       $scope.commonData.selectedGame.home.lineup.push(angular.copy($scope.commonData.emptyLineup))
                    }
                    $scope.commonData.isHomeTeamEdit = true;
                } else {
@@ -669,14 +713,14 @@
                        $scope.commonData.selectedGame.guest.team.roster = [];
                    }
                    for (var i = 0; i < 10; i++) {
-                       $scope.commonData.selectedGame.guest.team.roster.push($scope.commonData.emptyPlayer)
+                       $scope.commonData.selectedGame.guest.team.roster.push(angular.copy($scope.commonData.emptyPlayer) )
                    }
 
                    if ($scope.commonData.selectedGame.guest.lineup === undefined) {
                        $scope.commonData.selectedGame.guest.lineup = [];
                    }
                    for (var i = 0; i < 10; i++) {
-                       $scope.commonData.selectedGame.guest.lineup.push($scope.commonData.emptyLineup)
+                       $scope.commonData.selectedGame.guest.lineup.push(angular.copy($scope.commonData.emptyLineup) )
                    }
 
                    $scope.commonData.isGuestTeamEdit = true;
@@ -705,11 +749,11 @@
            }
 
            $scope.guestTeamLinupAdd = function () {
-               $scope.commonData.selectedGame.guest.lineup.push($scope.commonData.emptyLineup)
+               $scope.commonData.selectedGame.guest.lineup.push(angular.copy($scope.commonData.emptyLineup) )
            }
 
            $scope.homeTeamLinupAdd = function () {
-               $scope.commonData.selectedGame.home.lineup.push($scope.commonData.emptyLineup)
+               $scope.commonData.selectedGame.home.lineup.push(angular.copy($scope.commonData.emptyLineup) )
            }
 
 
@@ -967,6 +1011,13 @@
                 console.debug(data);
                 $scope.commonData.radarSpeedData = data;
                 var datacopy = angular.copy(data);
+                if ($scope.commonData.isGameScore === true) {
+                    //addGameRadarData(datacopy)
+                    if ($scope.commonData.selectedGame.radarSpeedData === undefined) {
+                        $scope.commonData.selectedGame.radarSpeedData = [];
+                    }
+                    $scope.commonData.selectedGame.radarSpeedData.push(datacopy);
+                }
                 //if (data.liveSpeed > 0 || data.peakSpeed > 0) {
                 //$scope.commonData.radarSpeedDataHistory.push(datacopy);
                 //$scope.commonData.radarSpeedDataHistory.splice(0, 0, datacopy);
