@@ -186,7 +186,7 @@ try {
         logger.log("info", 'socket.io browser Connection');
 
         socket.on('stream', function (message) {
-            logger.log("debug", 'stream:' + message.cmd + ', client id:' + socket.id);
+            logger.log("info", 'stream:' + message.cmd + ', client id:' + socket.id);
             switch (message.cmd) {
                 case "startRemote":
                     ffmpegOverlay.streamStart();
@@ -203,13 +203,16 @@ try {
     socket.on('connect', function () {
         logger.log("debug",'Socket Connected');
     });
-    socket.on('radarSpeed', function (data) {
+    socket.on('radarSpeed', function (message) {
+       
+        commonData.currentRadarSpeedData = message;
         updateOverlayText();
         logger.log("debug", "radarSpeed", message);
     });
 
-    socket.on("stream", function (data) {
-        switch (data.cmd) {
+    socket.on("stream", function (message) {
+        logger.log("info", 'stream:' + message.cmd + ', client id:' + socket.id);
+        switch (message.cmd) {
             case "startRemote":
                 ffmpegOverlay.streamStart();
                 break;

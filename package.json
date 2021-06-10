@@ -1,6 +1,6 @@
 {
   "name": "RadarGunMonitor",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "private": false,
   "license": "Apache-2.0",
   "keywords": [
@@ -24,10 +24,10 @@
     "type": "git",
     "url": "https://github.com/Andrewiski/RadarGunMonitor.git"
   },
-  "description": "Digital Example BeagleBone based Radar Gun ",
+  "description": "Digital Example Jetson Nano based Radar Gun ",
   "main": "app.js",
   "engines": {
-    "node": ">= 10.0.0"
+    "node": ">= 12.0.0"
   },
   "author": {
     "name": "adevries",
@@ -55,7 +55,7 @@
     "gstreamer-superficial": "^1.6.0",
     "i2c-bus": "5.2.0",
     "jquery": "^3.3.1",
-    "mathjs": "^5.8.0",
+    "mathjs": ">=7.5.1",
     "moment": "^2.29.1",
     "mongodb": "^3.6.6",
     "morgan": "^1.9.0",

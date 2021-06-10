@@ -21,7 +21,7 @@ DEBUG=app,radar,batteryMonitor,ffmpegOverlay,youtubeEncoderClient</Environment>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>83aac9f6-1094-40fc-8ce9-2ca0fe8ccbac</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>app.js</StartupFile>
+    <StartupFile>youtubeEncoderClient.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -167,6 +167,7 @@ DEBUG=app,radar,batteryMonitor,ffmpegOverlay,youtubeEncoderClient</Environment>
     <Content Include="ffmpeg\doc\nut.html" />
     <Content Include="ffmpeg\doc\platform.html" />
     <Content Include="ffmpeg\doc\style.min.css" />
+    <Content Include="modules\ffmpegVideoCapture.js" />
     <Content Include="modules\logger.js" />
     <Content Include="modules\remoteDBServer.js" />
     <Content Include="modules\ffplay.js" />

@@ -1,2 +1,2 @@
-   P: #13 Dylan Zemitans  PV: 00.0 MPH    O: 2 B: 0 S: 0
-   B: #10  Gialey         EV: 00.0 MPH    I: 2 top
+   Vicksburg:  9   P: #3  Waffle          PV: 75.1 MPH    O: 0 B: 0 S: 0
+      Olivet:  5   B: #7 Jimmy Cutshaw    EV: 69.8 MPH    I: 7 bottom

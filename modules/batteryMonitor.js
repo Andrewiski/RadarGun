@@ -106,14 +106,18 @@ var BatteryMonitor = function (options) {
             debug('Running on Raspberry Pi!');
             self.platform = "raspberry";
         } else {
-            self.platform = "beaglebone";
-            var BeagleBone = require('beaglebone-io');
-            b = new BeagleBone();
-
-            b.on('ready', function () {
-                this.pinMode(objOptions.analogPin, this.MODES.ANALOG);
-                this.analogRead(objOptions.analogPin, processBatteryVoltage);
-            });
+            try {
+                
+                var BeagleBone = require('beaglebone-io');
+                b = new BeagleBone();
+                self.platform = "beaglebone";
+                b.on('ready', function () {
+                    this.pinMode(objOptions.analogPin, this.MODES.ANALOG);
+                    this.analogRead(objOptions.analogPin, processBatteryVoltage);
+                });
+            } catch (ex) {
+                debug('Not running on Beagle Bone!');
+            }
         }
 
 
