@@ -85,6 +85,9 @@
                Service.socket.emit('radarEmulatorCommand', { cmd: cmd, data: data });
            };
 
+           Service.sendResetRadarSettings = function () {
+               Service.socket.emit('resetRadarSettings', {cmd: "resetRadarSettings"});
+           }
            Service.sendServerCommand = function (cmd, data) {
                Service.socket.emit(cmd, data );
            };

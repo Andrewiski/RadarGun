@@ -769,73 +769,74 @@
                }
                switch (message.cmd) {
                    case "gameChanged":
-
-                       if (message.data.inning !== undefined) {
-                           $scope.commonData.game.inning = message.data.inning;
-                       }
-                       if (message.data.inningPosition !== undefined) {
-                           $scope.commonData.game.inningPosition = message.data.inningPosition;
-                       }
-
-                       if (message.data.score !== undefined) {
-                           if ($scope.commonData.game.score === undefined) {
-                               $scope.commonData.game.score = {};
+                       if (message.data) {
+                           if (message.data.inning !== undefined) {
+                               $scope.commonData.game.inning = message.data.inning;
                            }
-                           if (message.data.score.guest !== undefined) {
-                               $scope.commonData.game.score.guest = message.data.score.guest;
-                           }
-                           if (message.data.score.home !== undefined) {
-                               $scope.commonData.game.score.home = message.data.score.home;
+                           if (message.data.inningPosition !== undefined) {
+                               $scope.commonData.game.inningPosition = message.data.inningPosition;
                            }
 
-                       }
+                           if (message.data.score !== undefined) {
+                               if ($scope.commonData.game.score === undefined) {
+                                   $scope.commonData.game.score = {};
+                               }
+                               if (message.data.score.guest !== undefined) {
+                                   $scope.commonData.game.score.guest = message.data.score.guest;
+                               }
+                               if (message.data.score.home !== undefined) {
+                                   $scope.commonData.game.score.home = message.data.score.home;
+                               }
 
-                       if (message.data.outs !== undefined) {
-                           $scope.commonData.game.outs = message.data.outs;
-                       }
-                       if (message.data.strikes !== undefined) {
-                           $scope.commonData.game.strikes = message.data.strikes;
-                       }
-                       if (message.data.balls !== undefined) {
-                           $scope.commonData.game.balls = message.data.balls;
-                       }
-                       if (message.data.pitcher !== undefined) {
-                           $scope.commonData.game.pitcher = message.data.pitcher;
-                       }
-                       if (message.data.batter !== undefined) {
-                           $scope.commonData.game.batter = message.data.batter;
-                       }
-
-                       if (message.data.guest !== undefined) {
-                           if ($scope.commonData.game.guest === undefined) {
-                               $scope.commonData.game.guest = {};
-                           }
-                           if (message.data.guest.team !== undefined) {
-                               $scope.commonData.game.guest.team = message.data.guest.team;
-                           }
-                           if (message.data.guest.lineup !== undefined) {
-                               $scope.commonData.game.guest.lineup = message.data.guest.lineup;
-                           }
-                           if (message.data.guest.batterIndex !== undefined) {
-                               $scope.commonData.game.guest.batterIndex = message.data.guest.batterIndex;
                            }
 
-                       }
+                           if (message.data.outs !== undefined) {
+                               $scope.commonData.game.outs = message.data.outs;
+                           }
+                           if (message.data.strikes !== undefined) {
+                               $scope.commonData.game.strikes = message.data.strikes;
+                           }
+                           if (message.data.balls !== undefined) {
+                               $scope.commonData.game.balls = message.data.balls;
+                           }
+                           if (message.data.pitcher !== undefined) {
+                               $scope.commonData.game.pitcher = message.data.pitcher;
+                           }
+                           if (message.data.batter !== undefined) {
+                               $scope.commonData.game.batter = message.data.batter;
+                           }
 
-                       if (message.data.home !== undefined) {
-                           if ($scope.commonData.game.home === undefined) {
-                               $scope.commonData.game.home = {};
-                           }
-                           if (message.data.home.team !== undefined) {
-                               $scope.commonData.game.home.team = message.data.home.team;
-                           }
-                           if (message.data.home.lineup !== undefined) {
-                               $scope.commonData.game.home.lineup = message.data.home.lineup;
-                           }
-                           if (message.data.home.batterIndex !== undefined) {
-                               $scope.commonData.game.home.batterIndex = message.data.home.batterIndex;
+                           if (message.data.guest !== undefined) {
+                               if ($scope.commonData.game.guest === undefined) {
+                                   $scope.commonData.game.guest = {};
+                               }
+                               if (message.data.guest.team !== undefined) {
+                                   $scope.commonData.game.guest.team = message.data.guest.team;
+                               }
+                               if (message.data.guest.lineup !== undefined) {
+                                   $scope.commonData.game.guest.lineup = message.data.guest.lineup;
+                               }
+                               if (message.data.guest.batterIndex !== undefined) {
+                                   $scope.commonData.game.guest.batterIndex = message.data.guest.batterIndex;
+                               }
+
                            }
 
+                           if (message.data.home !== undefined) {
+                               if ($scope.commonData.game.home === undefined) {
+                                   $scope.commonData.game.home = {};
+                               }
+                               if (message.data.home.team !== undefined) {
+                                   $scope.commonData.game.home.team = message.data.home.team;
+                               }
+                               if (message.data.home.lineup !== undefined) {
+                                   $scope.commonData.game.home.lineup = message.data.home.lineup;
+                               }
+                               if (message.data.home.batterIndex !== undefined) {
+                                   $scope.commonData.game.home.batterIndex = message.data.home.batterIndex;
+                               }
+
+                           }
                        }
 
                        break;
@@ -1059,7 +1060,9 @@
                 $scope.commonData.isradarCommandPending = false;
             }
 
-
+           $scope.resetRadarSettings = function () {
+               radarMonitor.sendResetRadarSettings();
+           }
            
 
             $rootScope.$on('radarMonitor:gpsPosition', function (event, data) {

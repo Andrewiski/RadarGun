@@ -465,6 +465,12 @@ io.on('connection', function(socket) {
 
     });
 
+    socket.on("resetRadarSettings", function (message) {
+        logger.log("debug", 'resetRadarSettings:' + ', message:' + message + ', client id:' + socket.id);
+        radarStalker2.resetRadarSettings();
+
+    })
+
     socket.on("gameChange", function (message) {
         logger.log("debug",'gameChange:' + ', message:' + message + ', client id:' + socket.id);
         if (commonData.game === null) {
