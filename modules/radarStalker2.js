@@ -743,7 +743,7 @@ var RadarStalker2 = function (options){
             autoOpen:false}); 
         
     }
-    const radarPacketParser = radarSerialPort.pipe(new RadarPacketParser({ bufferSize: 512 }));
+    const radarPacketParser = radarSerialPort.pipe(new RadarPacketParser({ bufferSize: 1024 }));
     radarPacketParser.on('data', radarSerialPortDataHandler);
     //set things in motion by opening the serial port and starting the keepalive timer
     radarSerialPort.open(function (err) {
