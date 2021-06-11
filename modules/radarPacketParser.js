@@ -31,7 +31,7 @@ class RadarPacketParser extends Transform {
             //We Are going to blow are max buffer size as something has gone wrong so discard saved buffer and start over
             console.log('RadarPacketParser over our bufferSize discarding partial packet buffer. bufferSize = ' + this.bufferSize + " position = " + this.position + " chunk.length = " + chunk.length);
 
-            console.log(chunk.toString('hex') + "\n\n")
+            debug(chunk.toString('hex') + "\n\n")
             this.position = 0;
             cb();
             return;

@@ -329,7 +329,7 @@ var RadarStalker2 = function (options){
 
         for (var key in objOptions.radarConfig) {
             var radarConfigProperty = objOptions.radarConfig[key];
-            if (radarConfigProperty.def !== null && radarConfigProperty.readOnly !== true && key !== "TransmiterControl" ) {
+            if (radarConfigProperty.def !== null && (radarConfigProperty.mandatory === true || radarConfigProperty.readOnly !== true) && key !== "TransmiterControl" ) {
                 
                 self.radarConfigCommand({
                     data: {
@@ -616,7 +616,7 @@ var RadarStalker2 = function (options){
                 if (commonData.currentRadarSpeedData.inMaxSpeed < speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.inMaxSpeed = speedData.liveSpeed;
                 }
-                if (commonData.currentRadarSpeedData.inMinSpeed == 0 || commonData.currentRadarSpeedData.inMinSpeed > speedData.liveSpeed) {
+                if (commonData.currentRadarSpeedData.inMinSpeed === 0 || commonData.currentRadarSpeedData.inMinSpeed > speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.inMinSpeed = speedData.liveSpeed;
                 }
             } else if (speedData.liveSpeedDirection === "out") {
@@ -625,7 +625,7 @@ var RadarStalker2 = function (options){
                 if (commonData.currentRadarSpeedData.outMaxSpeed < speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.outMaxSpeed = speedData.liveSpeed;
                 }
-                if (commonData.currentRadarSpeedData.outMinSpeed == 0 || commonData.currentRadarSpeedData.outMinSpeed > speedData.liveSpeed) {
+                if (commonData.currentRadarSpeedData.outMinSpeed === 0 || commonData.currentRadarSpeedData.outMinSpeed > speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.outMinSpeed = speedData.liveSpeed;
                 }
             }
@@ -640,7 +640,7 @@ var RadarStalker2 = function (options){
                 if (commonData.currentRadarSpeedData.inMaxSpeed < speedData.liveSpeed2) {
                     commonData.currentRadarSpeedData.inMaxSpeed = speedData.liveSpeed2;
                 }
-                if (commonData.currentRadarSpeedData.inMinSpeed == 0 || commonData.currentRadarSpeedData.inMinSpeed > speedData.liveSpeed2) {
+                if (commonData.currentRadarSpeedData.inMinSpeed === 0 || commonData.currentRadarSpeedData.inMinSpeed > speedData.liveSpeed2) {
                     commonData.currentRadarSpeedData.inMinSpeed = speedData.liveSpeed2;
                 }
             } else if (speedData.liveSpeed2Direction === "out") {
@@ -648,7 +648,7 @@ var RadarStalker2 = function (options){
                 if (commonData.currentRadarSpeedData.outMaxSpeed < speedData.liveSpeed2) {
                     commonData.currentRadarSpeedData.outMaxSpeed = speedData.liveSpeed2;
                 }
-                if (commonData.currentRadarSpeedData.outMinSpeed == 0 || commonData.currentRadarSpeedData.outMinSpeed > speedData.liveSpeed2) {
+                if (commonData.currentRadarSpeedData.outMinSpeed === 0 || commonData.currentRadarSpeedData.outMinSpeed > speedData.liveSpeed2) {
                     commonData.currentRadarSpeedData.outMinSpeed = speedData.liveSpeed2;
                 }
             }
@@ -715,7 +715,7 @@ var RadarStalker2 = function (options){
         } else {
             self.emit('radarTimeout', { lastSpeedDataTimestamp: commonData.lastSpeedDataTimestamp });
             radarSerialPort.write(getRadarPacket(81, 0, new Buffer.alloc(1)), function (err) {
-                if (err == undefined) {
+                if (err === undefined) {
                     debug('request Radar Software Version Keep Alive');
                 } else {
                     debug('Serial Port Write Error Software Version Keep Alive' + err);
