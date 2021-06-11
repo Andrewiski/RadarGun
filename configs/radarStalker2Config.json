@@ -1,6 +1,6 @@
 ﻿{
   "emulator": false,
-  "portName": "/dev/ttyO2",
+  "portName": "/dev/ttyTHS1",
   "packetParserBufferSize": 1024,
   "win32": {
     "portName": "COM3",
@@ -44,7 +44,7 @@
     }
   },
   "radarConfig": {
-   
+
     "TargetDirection": {
       "id": 2,
       "value": null,
@@ -259,4 +259,4 @@
     }
   }
 
-  }
+}
