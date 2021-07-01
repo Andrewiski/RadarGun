@@ -39,6 +39,9 @@ var defaultOptions = {
 
 var objOptions = extend({}, defaultOptions, configFileSettings);
 var app = express();
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: false }));
+
 // all environments
 
 var radarStalker2 = new RadarStalker2({});
@@ -104,8 +107,7 @@ if (process.platform === 'win32') {
 }
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
 app.use(cookieParser());
 
 var routes = express.Router();
@@ -407,6 +409,17 @@ var audioFileStop = function () {
 }
 
 var io = require('socket.io')(server);
+
+
+var sendToSocketClients(cmd, message, includeArduino){
+    if (io) {
+
+    }
+}
+
+
+
+
 io.on('connection', function(socket) {
     debug('socket.io client Connection');
     socket.on('radarConfigCommand', function(data) {
@@ -654,13 +667,13 @@ io.on('connection', function(socket) {
 
     if (socket.client.request.headers["origin"] !== "ArduinoSocketIo") {
         //send the current Config to the new client Connections
-        io.emit('radarConfig', radarStalker2.getRadarConfig());
-        io.emit('softwareConfig', radarStalker2.getSoftwareConfig());
-        io.emit('radarSpeedDataHistory', radarStalker2.getradarSpeedDataHistory());
-        io.emit('gameChanged', {cmd:"gameChanged", data:commonData.game});
+        socket.emit('radarConfig', radarStalker2.getRadarConfig());
+        socket.emit('softwareConfig', radarStalker2.getSoftwareConfig());
+        socket.emit('radarSpeedDataHistory', radarStalker2.getradarSpeedDataHistory());
+        socket.emit('gameChanged', {cmd:"gameChanged", data:commonData.game});
     }
     //send the current Battery Voltage
-    io.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
+    socket.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
     //console.log("gpsState", gpsMonitor.getGpsState())
 
     

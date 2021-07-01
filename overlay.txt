@@ -1,2 +1,2 @@
-   Vicksburg: 16   P: #10  Gialey         PV: 65.4 MPH    O: 1 B: 0 S: 0
-Three Rivers:  1   B: #22 Colin Klinger   EV: 74.3 MPH    I: 3 bottom
+   Vicksburg:  9   P: #3  Waffle          PV: 75.1 MPH    B: 0 S: 0
+      Olivet:  5   B: #7 Jimmy Cutshaw    EV: 69.8 MPH    I: 7 bottom

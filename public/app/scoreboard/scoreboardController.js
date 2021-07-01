@@ -569,6 +569,18 @@
                //$scope.$apply();
            }
 
+
+           $scope.guestLineupDeletePlayer = function (index, player) {
+
+               $scope.commonData.selectedGame.guest.lineup.splice(index, 1);
+
+           }
+
+           $scope.guestTeamDeletePlayer = function (index, player) {
+               $scope.commonData.selectedGame.guest.team.roster.splice(index, 1);
+               //$scope.$apply();
+           }
+
            $scope.homeTeamAddPlayer = function () {
 
                $scope.commonData.selectedGame.home.team.roster.push(angular.copy($scope.commonData.emptyPlayer))
@@ -605,6 +617,13 @@
                    if (lineup[i].fieldingPosition === "1" || lineup[i].fieldingPosition === 1) {
                        pitcher = lineup[i];
                        break;
+                   } else {
+                       if (lineup[i].fieldingPosition === "11" || lineup[i].fieldingPosition === 11) {
+                           if (lineup[i].dhFieldingPosition === "1" || lineup[i].dhFieldingPosition === 1) {
+                               pitcher = lineup[i].dhPlayer;
+                               break;
+                           }
+                       }
                    }
                    
                }

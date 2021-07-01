@@ -369,6 +369,7 @@
             </div>
         </div>
         <div class="row">
+        <div class="row">
             <br />
         </div>
         <div>
@@ -471,10 +472,24 @@
                                                     <div class="form-control-sm">
                                                         <lable class="form-control" ng-bind="index + 1" />
                                                     </div>
+                                                    <div class="form-control-sm" ng-show="commonData.selectedGame.home.lineup[index].fieldingPosition === '11'">
+                                                        <label class="form-control">DH/{{getPlayerPositionLongName(commonData.selectedGame.home.lineup[index].dhFieldingPosition)}}</label>
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div class="form-control-sm">
                                                         <ui-select ng-model="commonData.selectedGame.home.lineup[index].player" theme="bootstrap">
+                                                            <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
+                                                            <ui-select-choices repeat="item in commonData.selectedGame.home.team.roster | filter: $select.search | uniquePlayer : index : commonData.selectedGame.home.lineup : 'player'">
+                                                                #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
+                                                                <span ng-bind-html="item.firstName | highlight: $select.search"></span>
+                                                                <span ng-bind-html="item.lastName | highlight: $select.search"></span>
+                                                            </ui-select-choices>
+                                                        </ui-select>
+                                                    </div>
+                                                    <div class="form-control-sm" ng-show="commonData.selectedGame.home.lineup[index].fieldingPosition === '11'">
+
+                                                        <ui-select ng-model="commonData.selectedGame.home.lineup[index].dhPlayer" theme="bootstrap">
                                                             <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
                                                             <ui-select-choices repeat="item in commonData.selectedGame.home.team.roster | filter: $select.search | uniquePlayer : index : commonData.selectedGame.home.lineup : 'player'">
                                                                 #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
@@ -488,6 +503,11 @@
                                                     <div class="form-control-sm">
 
                                                         <select class="form-control" ng-model="commonData.selectedGame.home.lineup[index].fieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.home.lineup">
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-control-sm" ng-show="commonData.selectedGame.home.lineup[index].fieldingPosition === '11'">
+                                                        <!--<lable class="form-control" ng-bind="player.fielding" />-->
+                                                        <select class="form-control" ng-model="commonData.selectedGame.home.lineup[index].dhFieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.home.lineup">
                                                         </select>
                                                     </div>
                                                 </td>
@@ -536,10 +556,25 @@
                                                     <div class="form-control-sm">
                                                         <lable class="form-control" ng-bind="index + 1" />
                                                     </div>
+                                                    <div class="form-control-sm" ng-show="commonData.selectedGame.guest.lineup[index].fieldingPosition === '11'">
+                                                        <label class="form-control">DH/{{getPlayerPositionLongName(commonData.selectedGame.guest.lineup[index].dhFieldingPosition)}}</label>
+                                                    </div>
+                                                    
                                                 </td>
                                                 <td>
                                                     <div class="form-control-sm">
                                                         <ui-select ng-model="commonData.selectedGame.guest.lineup[index].player" theme="bootstrap">
+                                                            <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
+                                                            <ui-select-choices repeat="item in commonData.selectedGame.guest.team.roster | filter: $select.search | uniquePlayer : index : commonData.selectedGame.guest.lineup : 'player'">
+                                                                #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
+                                                                <span ng-bind-html="item.firstName | highlight: $select.search"></span>
+                                                                <span ng-bind-html="item.lastName | highlight: $select.search"></span>
+                                                            </ui-select-choices>
+                                                        </ui-select>
+                                                    </div>
+                                                    <div class="form-control-sm" ng-show="commonData.selectedGame.guest.lineup[index].fieldingPosition === '11'">
+                                                        
+                                                        <ui-select ng-model="commonData.selectedGame.guest.lineup[index].dhPlayer" theme="bootstrap">
                                                             <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
                                                             <ui-select-choices repeat="item in commonData.selectedGame.guest.team.roster | filter: $select.search | uniquePlayer : index : commonData.selectedGame.guest.lineup : 'player'">
                                                                 #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
@@ -553,6 +588,11 @@
                                                     <div class="form-control-sm">
                                                         <!--<lable class="form-control" ng-bind="player.fielding" />-->
                                                         <select class="form-control" ng-model="commonData.selectedGame.guest.lineup[index].fieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.guest.lineup">
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-control-sm" ng-show="commonData.selectedGame.guest.lineup[index].fieldingPosition === '11'">
+                                                        <!--<lable class="form-control" ng-bind="player.fielding" />-->
+                                                        <select class="form-control" ng-model="commonData.selectedGame.guest.lineup[index].dhFieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.guest.lineup">
                                                         </select>
                                                     </div>
                                                 </td>
