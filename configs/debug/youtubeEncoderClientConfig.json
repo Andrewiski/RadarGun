@@ -1,11 +1,13 @@
 {
-  "host": "http://10.100.6.36:12336",
+  "webserverPort": 12336,
+  "host": "http://10.100.6.137:12336",
+  "logLevel": "debug",
   "ffmpegOverlayConfig": {
     "input": "rtsp://10.100.32.95:7447/t2N7OTZ2n8ScSTtu",
     "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/7w0t-zhy3-0wzw-9kw8-b1md",
     "logLevel": "debug",
     "inputOptions": [ "-y", "-hwaccel cuda", "-rtsp_transport tcp", "-stimeout 30000000" ],
-    "outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-r 24", "-preset llhq", "-rc vbr_hq",  "-f flv" ],
+    "outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-r 24", "-preset llhq", "-rc vbr_hq", "-f flv" ],
     "capture": false,
     "overlayFileName": "overlay.txt",
     "videoFilters": {

@@ -9,7 +9,7 @@
     <SccProvider>SAK</SccProvider>
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
-    <Environment>localDebug=false
+    <Environment>localDebug=true
 DEBUG=app,radar,batteryMonitor,ffmpegOverlay,youtubeEncoderClient</Environment>
     <LaunchUrl>http://localhost:12336</LaunchUrl>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
@@ -167,6 +167,7 @@ DEBUG=app,radar,batteryMonitor,ffmpegOverlay,youtubeEncoderClient</Environment>
     <Content Include="ffmpeg\doc\nut.html" />
     <Content Include="ffmpeg\doc\platform.html" />
     <Content Include="ffmpeg\doc\style.min.css" />
+    <Content Include="modules\ffmpegVideoCapture.js" />
     <Content Include="modules\logger.js" />
     <Content Include="modules\remoteDBServer.js" />
     <Content Include="modules\ffplay.js" />
@@ -174,6 +175,7 @@ DEBUG=app,radar,batteryMonitor,ffmpegOverlay,youtubeEncoderClient</Environment>
       <SubType>Code</SubType>
     </Content>
     <Content Include="mongodb\createDatabase.script" />
+    <Content Include="public\youtubeEncoderClient.htm" />
     <Content Include="testsDak5000.js" />
     <Content Include="youtubeEncoderClient.js">
       <SubType>Code</SubType>

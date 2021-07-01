@@ -4,18 +4,36 @@ const path = require('path');
 const extend = require('extend');
 const winston = require('winston');
 require('winston-daily-rotate-file');
-
+const Debug = require('debug');
 var Logger = function (options) {
     var self = this;
     var defaultOptions = {
         logLevel: "info",
-        logName: "application",
+        appName: "application",
         logEventHandler: null,
-        logFolder: "log"
+        logFolder: "log",
+        logToFile: false,
+        expressLogLevel:"info"
+        
     }
     var objOptions = extend({}, defaultOptions, options);
     self.objOptions = objOptions;
-   
+
+
+    'So if '
+
+    var debug = null;
+
+    let shouldLogViaConsole = false;
+    // if Environment Debug is set at all only use Debug else use Console
+    if (process.env.debug !== undefined || process.env.debug !== "") {
+        shouldLogViaConsole = false;
+        debug = Debug(objOptions.appName);
+    } else {
+        shouldLogViaConsole = true;
+    }
+
+    
 
     let winstonstreamerLogLevel = objOptions.logLevel;
     switch (options.logLevel) {
@@ -34,20 +52,22 @@ var Logger = function (options) {
             break;
     }
 
-    const logFile = winston.createLogger({
-        level: winstonstreamerLogLevel,
-        exitOnError: false,
-        transports: [
-            //new winston.transports.Console(),
-            new (winston.transports.DailyRotateFile)({
-                filename: path.join(objOptions.logFolder, '%DATE%-' + objOptions.logName + '.log'),
-                datePattern: 'YYYY-MM-DD-HH',
-                zippedArchive: true,
-                maxSize: '20m',
-                maxFiles: '14d'
-            })
-        ]
-    });
+    if (objOptions.logToFile === true) {
+        const logFile = winston.createLogger({
+            level: winstonstreamerLogLevel,
+            exitOnError: false,
+            transports: [
+                //new winston.transports.Console(),
+                new (winston.transports.DailyRotateFile)({
+                    filename: path.join(objOptions.logFolder, '%DATE%-' + objOptions.appName + '.log'),
+                    datePattern: 'YYYY-MM-DD-HH',
+                    zippedArchive: true,
+                    maxSize: '20m',
+                    maxFiles: '14d'
+                })
+            ]
+        });
+    }
 
     var isObject = function (a) {
         return (!!a) && (a.constructor === Object);
@@ -129,31 +149,45 @@ var Logger = function (options) {
                 else {
                     args.push(JSON.parse(JSON.stringify(arguments[i])))
                 }
-                
+
             }
             if (args.length > 1) {
                 args.shift(); //remove the loglevel from the array
             }
             let logData = { timestamp: new Date(), logLevel: logLevel, args: args };
-            if (shouldLog(logLevel, objOptions.logLevel) === true) {
 
-                let winstonLogLevel = logLevel;
-                switch (logLevel) {
-                    case "panic":
-                    case "fatal":
-                        winstonLogLevel = "error";
-                        break;
-                    case "warning":
-                        winstonLogLevel = "warn";
-                        break;
-                    case "verbose":
-                        winstonLogLevel = "debug";
-                        break;
-                    case "trace":
-                        winstonLogLevel = "silly";
-                        break;
+            //Log to Debug
+            if (shouldLog(logLevel, objOptions.logLevel) === true) {
+                if (shouldLogViaConsole === true) {
+                    debug(logLevel, objPrint(args));
+                } else {
+                    console.log(objOptions.appName, logLevel, objPrint(args));
                 }
-                logFile.log({ timestamp: new Date(), level: winstonLogLevel, message: args });
+
+
+                //Log to File
+                if (objOptions.logToFile === true) {
+
+                    let winstonLogLevel = logLevel;
+                    switch (logLevel) {
+                        case "panic":
+                        case "fatal":
+                            winstonLogLevel = "error";
+                            break;
+                        case "warning":
+                            winstonLogLevel = "warn";
+                            break;
+                        case "verbose":
+                            winstonLogLevel = "debug";
+                            break;
+                        case "trace":
+                            winstonLogLevel = "silly";
+                            break;
+                    }
+                    logFile.log({ timestamp: new Date(), level: winstonLogLevel, message: args });
+
+
+                }
 
                 try {
                     if (objOptions.logEventHandler) {
@@ -162,17 +196,29 @@ var Logger = function (options) {
                 } catch (ex) {
                     console.log("error", "logger.js", "An Error Occured calling logEventHandler", ex);
                 }
-            }
 
+            }
         } catch (ex) {
             console.log("error", "logger.js",  'Error on log', ex);
         }
     };
+
+    var express = function (req, res, next) {
+
+        let method = req.method;
+        let url = req.url;
+        let status = res.statusCode;
+        let logData = `${method}:${url} ${status}`;
+        log(objOptions.expressLogLevel, logData);
+        next();
+    }
+
 
     self.log = log;
     self.isObject = isObject;
     self.isArray = isArray;
     self.arrayPrint = arrayPrint
     self.objPrint = objPrint;
+    self.express = express;
 };
 module.exports = Logger;

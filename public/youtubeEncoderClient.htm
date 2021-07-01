@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <title>Stalker Radar Baseball</title>
+    <base href="/">
+
+    <!--<link href="stylesheets/bootstrap.min.css" rel="stylesheet" />
+    <link href="stylesheets/bootstrap-theme.min.css" rel="stylesheet" />-->
+    <link href="/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/javascript/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+    <link href="/javascript/angular-ui-bootstrap/ui-bootstrap-csp.css" rel="stylesheet" />
+    <link href="/javascript/fontawesome/css/font-awesome.min.css" rel="stylesheet" />
+
+    <!--<link href="/javascript/dragtable/dragtable.css" rel="stylesheet" />
+    <link href="/javascript/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />-->
+
+    <link href="/stylesheets/style.css" rel="stylesheet" />
+
+    
+    <script src="/javascript/jquery/jquery.min.js"></script>
+    <script src="/javascript/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/javascript/bootstrap-notify/bootstrap-notify.min.js"></script>
+    
+
+    <script src="/javascript/moment/moment.min.js"></script>
+
+    <!--<script src="/javascript/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="/javascript/dragtable/jquery.dragtable.js"></script>-->
+    <!--Served up by the socket.io service directly as part of the IO service process-->
+    <script src="/socket.io/socket.io.js"></script>
+
+    
+    <script type="text/javascript">
+
+        
+
+        $(function () {
+            var socket = io.connect();
+
+            var streamStartRemote = function (evt) {
+                //Tell server the inningChanged
+                socket.emit("stream", { cmd: "startRemote" });
+            }
+
+            var streamStopRemote = function (evt) {
+                //Tell server the inningChanged
+                socket.emit("stream", { cmd: "stopRemote" });
+            }
+
+            $(".streamStartRemote").on("click", streamStartRemote);
+
+            $(".streamStopRemote").on("click", streamStopRemote);
+
+        })
+
+    </script>
+   
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div id="errormsg"></div>
+        <form name="youtubeEncoder" id="radarmonitor" class="sb">
+            <div class="header">youTubeEncoder - Digital Example, LLC Copyright &copy; 2013-2021</div>
+            <div>
+                <div class="btn-group" role="group" aria-label="Buttons">
+                    <button class="btn btn-primary streamStartRemote">Start Remote Stream</button>
+                    <button class="btn btn-primary streamStopRemote">Stop Remote Stream</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

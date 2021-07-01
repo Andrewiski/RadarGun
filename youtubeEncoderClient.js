@@ -1,22 +1,38 @@
 
+let appName = "youtubeEncoderClient";
+var express = require('express');
 var extend = require('extend');
 var nconf = require('nconf');
-var debug = require('debug')('youtubeEncoderClient');
+var http = require('http');
+var path = require('path');
+var favicon = require('serve-favicon');
+var cookieParser = require('cookie-parser');
 var FfmpegOverlay = require("./modules/ffmpegOverlay.js");
+var Logger = require("./modules/logger.js")
 try {
     var defaultOptions = {
         //loaded from the config file
-        host: "http://127.0.0.1:12336"
+        host: "http://127.0.0.1:12336",
+        logLevel: "debug"
     };
+    
     if (process.env.localDebug === 'true') {
-        console.log("localDebug Mode Enabled")
+        console.log("localDebug Mode Enabled youtubeEncoderClientConfig");
         nconf.file('./configs/debug/youtubeEncoderClientConfig.json');
+        
     } else {
         nconf.file('./configs/youtubeEncoderClientConfig.json');
     }
     var configFileSettings = nconf.get();
     var objOptions = extend({}, defaultOptions, configFileSettings);
-    console.log("Host: " + objOptions.host)
+    console.log("Host: " + objOptions.host);
+
+    var logger = new Logger({
+        logLevel: objOptions.logLevel,
+        logName: appName,
+        logEventHandler: null,
+        logFolder: "log"
+    })
     var commonData = {
         game: null,
         currentRadarSpeedData: null
@@ -24,7 +40,7 @@ try {
     }
 
     var ffmpegOverlay = new FfmpegOverlay(objOptions.ffmpegOverlayConfig);
-
+    ffmpegOverlay.updateOverlayText("");
     var updateOverlayText = function () {
         try {
             var OverlayText = ""
@@ -68,7 +84,7 @@ try {
             if (commonData.game) {
 
 
-                if (commonData.game.outs) {
+                if (commonData.game.outs !== undefined && commonData.game.balls !== null) {
                     OverlayText += " O: " + commonData.game.outs.toString();
                 }
 
@@ -127,36 +143,76 @@ try {
                     OverlayText += " I: " + commonData.game.inning.toString() + " " + commonData.game.inningPosition;
                 }
             }
-
-
-
-
             ffmpegOverlay.updateOverlayText(OverlayText);
+            logger.log("debug", "updateOverlayText", OverlayText);
         } catch (ex) {
-            debug("error", "error updating Overlay text", ex);
+            logger.log("error", "error updating Overlay text", ex);
             try {
                 ffmpegOverlay.updateOverlayText("");
             } catch (ex2) {
-                debug("error", "error blanking Overlay text", ex2)
+                logger.log("error", "error blanking Overlay text", ex2)
             }
         }
     }
 
-    var socket = require('socket.io-client')(objOptions.host);
-    socket.on('connect', function () {
-        console.log('Socket Connected');
-    });
-    socket.on('radarSpeed', function (data) {
-        if (commonData.game) {
-            data.pitcher = commonData.game.pitcher;
-            data.batter = commonData.game.batter;
-        }
-        commonData.currentRadarSpeedData = data;
-        updateOverlayText();
+
+
+    var app = express();
+    app.set('port', objOptions.webserverPort);
+    app.use(favicon(__dirname + '/public/favicon.ico'));
+    app.use(logger.express);
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: false }));
+    app.use(cookieParser());
+    app.use('/javascript/fontawesome', express.static(path.join(__dirname, 'node_modules', 'font-awesome')));
+    app.use('/javascript/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
+    app.use('/javascript/jquery', express.static(path.join(__dirname, 'node_modules', 'jquery', 'dist')));
+    app.use('/javascript/moment', express.static(path.join(__dirname, 'node_modules', 'moment', 'min')));
+    var routes = express.Router();
+    /* GET home page. */
+    routes.get('/', function (req, res) {
+        res.sendFile(path.join(__dirname, 'public/youtubeEncoderClient.htm'));
     });
 
-    socket.on("stream", function (data) {
-        switch (data.cmd) {
+    app.use('/', routes);
+
+
+    var server = http.createServer(app).listen(app.get('port'), function () {
+        logger.log("info", 'Express server listening on port ' + app.get('port'));
+    });
+
+    var io = require('socket.io')(server);
+    io.on('connection', function (socket) {
+        logger.log("info", 'socket.io browser Connection');
+
+        socket.on('stream', function (message) {
+            logger.log("info", 'stream:' + message.cmd + ', client id:' + socket.id);
+            switch (message.cmd) {
+                case "startRemote":
+                    ffmpegOverlay.streamStart();
+                    break;
+                case "stopRemote":
+                    ffmpegOverlay.streamStop();
+                    break;
+            }
+
+        });
+    });
+
+    var socket = require('socket.io-client')(objOptions.host);
+    socket.on('connect', function () {
+        logger.log("debug",'Socket Connected');
+    });
+    socket.on('radarSpeed', function (message) {
+       
+        commonData.currentRadarSpeedData = message;
+        updateOverlayText();
+        logger.log("debug", "radarSpeed", message);
+    });
+
+    socket.on("stream", function (message) {
+        logger.log("info", 'stream:' + message.cmd + ', client id:' + socket.id);
+        switch (message.cmd) {
             case "startRemote":
                 ffmpegOverlay.streamStart();
                 break;
@@ -168,171 +224,184 @@ try {
     })
     
 
-    socket.on("gameChange", function (message) {
-        debug('gameChange:' + ', message:' + message + ', client id:' + socket.id);
-        if (commonData.game === null) {
-            commonData.game = {};
-        }
-        switch (message.cmd) {
-            case "scoreGame":
-                commonData.game = message.data.game;
-                break;
-            case "gameChange":
-                if (message.data.inning !== undefined) {
-                    commonData.game.inning = message.data.inning;
+    socket.on("gameChanged", function (message) {
+        try {
+        logger.log("debug",'gameChanged', message, 'client id:' + socket.id);
+           
+            if (message && message.data) {
+                if (commonData.game === null) {
+                    commonData.game = {};
                 }
-                if (message.data.inningPosition !== undefined) {
-                    commonData.game.inningPosition = message.data.inningPosition;
+                switch (message.cmd) {
+                    case "scoreGame":
+                        commonData.game = message.data;
+                        updateOverlayText();
+                        break;
+                    case "gameChanged":
+                        if (message.data.inning !== undefined) {
+                            commonData.game.inning = message.data.inning;
+                        }
+                        if (message.data.inningPosition !== undefined) {
+                            commonData.game.inningPosition = message.data.inningPosition;
+                        }
+
+                        if (message.data.score !== undefined) {
+                            if (commonData.game.score === undefined) {
+                                commonData.game.score = {};
+                            }
+                            if (message.data.score.guest !== undefined) {
+                                commonData.game.score.guest = message.data.score.guest;
+                            }
+                            if (message.data.score.home !== undefined) {
+                                commonData.game.score.home = message.data.score.home;
+                            }
+
+                        }
+
+
+                        if (message.data.guest !== undefined) {
+                            if (commonData.game.guest === undefined) {
+                                commonData.game.guest = {};
+                            }
+                            if (message.data.guest.team !== undefined) {
+                                commonData.game.guest.team = message.data.guest.team;
+                            }
+                            if (message.data.guest.lineup !== undefined) {
+                                commonData.game.guest.lineup = message.data.guest.lineup;
+                            }
+                            if (message.data.guest.batterIndex !== undefined) {
+                                commonData.game.guest.batterIndex = message.data.guest.batterIndex;
+                            }
+
+                        }
+
+                        if (message.data.home !== undefined) {
+                            if (commonData.game.home === undefined) {
+                                commonData.game.home = {};
+                            }
+                            if (message.data.home.team !== undefined) {
+                                commonData.game.home.team = message.data.home.team;
+                            }
+                            if (message.data.home.lineup !== undefined) {
+                                commonData.game.home.lineup = message.data.home.lineup;
+                            }
+                            if (message.data.home.batterIndex !== undefined) {
+                                commonData.game.home.batterIndex = message.data.home.batterIndex;
+                            }
+
+                        }
+
+
+                        if (message.data.outs !== undefined) {
+                            commonData.game.outs = message.data.outs;
+                        }
+                        if (message.data.strikes !== undefined) {
+                            commonData.game.strikes = message.data.strikes;
+                        }
+                        if (message.data.balls !== undefined) {
+                            commonData.game.balls = message.data.balls;
+                        }
+                        if (message.data.pitcher !== undefined) {
+                            commonData.game.pitcher = message.data.pitcher;
+                        }
+                        if (message.data.batter !== undefined) {
+                            commonData.game.batter = message.data.batter;
+                        }
+
+
+                        updateOverlayText();
+                        break;
+
+
+                    //case "inningChange":
+                    //    commonData.game.inning = message.data.inning;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "inningChanged", data: { inning: commonData.game.inning } });      //use io to send it to everyone
+                    //    updateOverlayText();
+                    //    break;
+                    //case "inningPositionChange":
+                    //    commonData.game.inningPosition = message.data.inningPosition;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "inningPositionChanged", data: { inningPosition: commonData.game.inningPosition } });      //use io to send it to everyone
+                    //    updateOverlayText();
+                    //    break;
+                    //case "homeScoreChange":
+                    //    if (commonData.game.score === undefined) {
+                    //        commonData.game.score = {};
+                    //    }
+                    //    commonData.game.score.home = message.data.score.home;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "homeScoreChanged", data: { score: { home: commonData.game.score.home } } });      //use io to send it to everyone
+                    //    updateOverlayText();
+                    //    break;
+                    //case "guestScoreChange":
+                    //    if (commonData.game.score === undefined) {
+                    //        commonData.game.score = {};
+                    //    }
+                    //    commonData.game.score.guest = message.data.score.guest;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "guestScoreChanged", data: { score: { guest: commonData.game.score.guest } } });      //use io to send it to everyone
+                    //    updateOverlayText();
+                    //    break;
+                    //case "outsChange":
+                    //    commonData.game.outs = message.data.outs;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "outsChanged", data: { outs: commonData.game.outs } });      //use io to send it to everyone
+                    //    updateOverlayText();
+                    //    break;
+                    //case "strikesChange":
+                    //    commonData.game.strikes = message.data.strikes;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "strikesChanged", data: { strikes: commonData.game.strikes } });      //use io to send it to everyone
+                    //    updateOverlayText();
+                    //    break;
+                    //case "ballsChange":
+                    //    commonData.game.balls = message.data.balls;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "ballsChanged", data: { balls: commonData.game.balls } });      //use io to send it to everyone
+                    //    updateOverlayText();
+                    //    break;
+                    //case "pitcherChange":
+                    //    commonData.game.pitcher = message.data.pitcher;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "pitcherChanged", data: { pitcher: commonData.game.pitcher } });      //use io to send it to everyone
+                    //    //radarStalker2.pitcher({ data: data.pitcher, socket: socket });
+                    //    updateOverlayText();
+                    //    break;
+                    //case "batterChange":
+                    //    commonData.game.batter = message.data.batter;
+                    //    commonData.gameIsDirty = true;
+                    //    io.emit("gameChanged", { cmd: "batterChanged", data: { batter: commonData.game.batter } });      //use io to send it to everyone
+                    //    //radarStalker2.batter({ data: data.batter, socket: socket });
+                    //    updateOverlayText();
+                    //    break;
+
                 }
-
-                if (message.data.score !== undefined) {
-                    if (commonData.game.score === undefined) {
-                        commonData.game.score = {};
-                    }
-                    if (message.data.score.guest !== undefined) {
-                        commonData.game.score.guest = message.data.score.guest;
-                    }
-                    if (message.data.score.home !== undefined) {
-                        commonData.game.score.home = message.data.score.home;
-                    }
-
-                }
-
-
-                if (message.data.guest !== undefined) {
-                    if (commonData.game.guest === undefined) {
-                        commonData.game.guest = {};
-                    }
-                    if (message.data.guest.team !== undefined) {
-                        commonData.game.guest.team = message.data.guest.team;
-                    }
-                    if (message.data.guest.lineup !== undefined) {
-                        commonData.game.guest.lineup = message.data.guest.lineup;
-                    }
-                    if (message.data.guest.batterIndex !== undefined) {
-                        commonData.game.guest.batterIndex = message.data.guest.batterIndex;
-                    }
-
-                }
-
-                if (message.data.home !== undefined) {
-                    if (commonData.game.home === undefined) {
-                        commonData.game.home = {};
-                    }
-                    if (message.data.home.team !== undefined) {
-                        commonData.game.home.team = message.data.home.team;
-                    }
-                    if (message.data.home.lineup !== undefined) {
-                        commonData.game.home.lineup = message.data.home.lineup;
-                    }
-                    if (message.data.home.batterIndex !== undefined) {
-                        commonData.game.home.batterIndex = message.data.home.batterIndex;
-                    }
-
-                }
-
-
-                if (message.data.outs !== undefined) {
-                    commonData.game.outs = message.data.outs;
-                }
-                if (message.data.strikes !== undefined) {
-                    commonData.game.strikes = message.data.strikes;
-                }
-                if (message.data.balls !== undefined) {
-                    commonData.game.balls = message.data.balls;
-                }
-                if (message.data.pitcher !== undefined) {
-                    commonData.game.pitcher = message.data.pitcher;
-                }
-                if (message.data.batter !== undefined) {
-                    commonData.game.batter = message.data.batter;
-                }
-                
-                
-                updateOverlayText();
-                break;
-
-
-            //case "inningChange":
-            //    commonData.game.inning = message.data.inning;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "inningChanged", data: { inning: commonData.game.inning } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "inningPositionChange":
-            //    commonData.game.inningPosition = message.data.inningPosition;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "inningPositionChanged", data: { inningPosition: commonData.game.inningPosition } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "homeScoreChange":
-            //    if (commonData.game.score === undefined) {
-            //        commonData.game.score = {};
-            //    }
-            //    commonData.game.score.home = message.data.score.home;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "homeScoreChanged", data: { score: { home: commonData.game.score.home } } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "guestScoreChange":
-            //    if (commonData.game.score === undefined) {
-            //        commonData.game.score = {};
-            //    }
-            //    commonData.game.score.guest = message.data.score.guest;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "guestScoreChanged", data: { score: { guest: commonData.game.score.guest } } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "outsChange":
-            //    commonData.game.outs = message.data.outs;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "outsChanged", data: { outs: commonData.game.outs } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "strikesChange":
-            //    commonData.game.strikes = message.data.strikes;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "strikesChanged", data: { strikes: commonData.game.strikes } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "ballsChange":
-            //    commonData.game.balls = message.data.balls;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "ballsChanged", data: { balls: commonData.game.balls } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "pitcherChange":
-            //    commonData.game.pitcher = message.data.pitcher;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "pitcherChanged", data: { pitcher: commonData.game.pitcher } });      //use io to send it to everyone
-            //    //radarStalker2.pitcher({ data: data.pitcher, socket: socket });
-            //    updateOverlayText();
-            //    break;
-            //case "batterChange":
-            //    commonData.game.batter = message.data.batter;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "batterChanged", data: { batter: commonData.game.batter } });      //use io to send it to everyone
-            //    //radarStalker2.batter({ data: data.batter, socket: socket });
-            //    updateOverlayText();
-            //    break;
-
-        }
-
+            } else {
+                ffmpegOverlay.updateOverlayText("");
+            }
         //updateOverlayText();
-
+        } catch (ex) {
+            logger.log("error", "error gameChanged", ex);
+            try {
+                ffmpegOverlay.updateOverlayText("");
+            } catch (ex2) {
+                logger.log("error", "error blanking Overlay text", ex2)
+            }
+        }
     })
 
-    socket.on('batteryVoltage', function (data) {
-        console.log('Socket batteryVoltage Event', data);
-    });
-    socket.on('radarConfig', function (data) {
-        console.log('Socket radarConfig Event', data);
-    });
-    socket.on('radarCommand', function (data) {
-        console.log('Socket radarCommand Event', data);
-    });
+    //socket.on('batteryVoltage', function (data) {
+    //    console.log('Socket batteryVoltage Event', data);
+    //});
+    //socket.on('radarConfig', function (data) {
+    //    console.log('Socket radarConfig Event', data);
+    //});
+    //socket.on('radarCommand', function (data) {
+    //    console.log('Socket radarCommand Event', data);
+    //});
     socket.on('disconnect', function () {
-        console.log('Socket Disconnected');
+        logger.log("debug",'Socket Disconnected');
     });
 } catch (e) {
     console.log(e);

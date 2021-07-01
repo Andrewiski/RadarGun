@@ -56,8 +56,9 @@ var GpsMonitor = function (options) {
         } else {
             gpsSerialPortName = objOptions.portName;
             //var b = require('bonescript');
-            isBeagleBone == true;
+            
             if (gpsSerialPortName) {
+                isBeagleBone === true;
                 //gpsSerialPort = b.serialOpen(gpsSerialPortName, {
                 //    baudrate: objOptions.baudrate,
                 //    parser: SerialPort.parsers.readline('\r\n') //SerialPort.parsers.readline('\n')
@@ -85,7 +86,7 @@ var GpsMonitor = function (options) {
     gps.on('data', function (data) {
         //debug(data, gps.state);
         
-        if (isBeagleBone && commonData.needToUpdateHostDateTime == true && !data.time) {
+        if (isBeagleBone && commonData.needToUpdateHostDateTime === true && !data.time) {
 
             exec('date -s "' + data.time.toString() + '"', function (error, stdout, stderr) {
                 if (error) {
@@ -100,7 +101,7 @@ var GpsMonitor = function (options) {
             });
         }
 
-        if (this.needGpsUpdate(data) == true) {
+        if (this.needGpsUpdate(data) === true) {
             debug("Gps " + data.time.toString());
             self.emit('gpsHostTime', { msg: "Set host time to " + data.time.toString(), data: data });
         }
@@ -130,7 +131,7 @@ var GpsMonitor = function (options) {
     }
 
     this.getGpsState = function () {
-        if (isEnabled == true) {
+        if (isEnabled === true) {
             return gps.state;
         }
     }
