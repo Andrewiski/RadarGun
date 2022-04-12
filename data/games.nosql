@@ -1,0 +1,18 @@
+{"id":"00000000-0000-0000-0000-000000000000","name":"New Game","shortName":"","startDate":null,"endDate":null,"inning":1,"inningPosition":"top","outs":0,"balls":0,"strikes":0,"score":{"home":0,"guest":0},"home":{"battingIndex":0,"lineup":[],"team":null},"guest":{"battingIndex":0,"lineup":[],"team":null},"status":1,"log":[]}
+{"id":"cc7035ba-7250-4605-b164-62368e55d7cf","name":"Vicksburg Bulldogs Varsity vs Mattawan Varsity","startDate":"2021-04-18T02:27:58.315Z","endDate":null,"status":1}
+{"id":"51cb8e05-4b70-4d1c-8825-01b14aeca98a","name":"Vicksburg Bulldogs Varsity vs Dowagiac Chieftains Varsity","startDate":"2021-04-27T15:39:48.008Z","endDate":null,"status":1}
+{"id":"31a83186-003c-4c86-8ba5-7489fafd7338","name":"Vicksburg JV vs Sturgis JV","startDate":"2021-05-04T18:45:37.460Z","endDate":null,"status":1}
+{"id":"983469b3-e00b-471e-af73-9b7a0c1a99b4","name":"Vicksburg JV vs Otsego","startDate":"2021-05-07T19:58:08.408Z","endDate":null,"status":1}
+{"id":"65cc30b8-c86d-40bd-b346-522a07f5ef75","name":"65cc30b8-c86d-40bd-b346-522a07f5ef75","startDate":"2021-05-11T19:47:39.490Z","endDate":null,"status":1}
+{"id":"a5817f9b-ae9c-47cd-9e9d-07841571746f","name":"Vicksburg Bulldogs Varsity vs Plainwell","startDate":"2021-05-14T19:31:23.125Z","endDate":null,"status":1}
+{"id":"67e91ee0-ac4c-427c-9b38-598e694adeae","name":"Vicksburg Bulldogs Varsity vs Plainwell","startDate":"2021-05-14T21:47:37.883Z","endDate":null,"status":1}
+{"id":"4d30fe84-b858-4106-b0f3-3ae18662f605","name":"Vicksburg Bulldogs Varsity vs Allegan Varsity","startDate":"2021-05-15T17:47:01.176Z","endDate":null,"status":1}
+{"id":"fc49606c-e8d0-4c79-b801-8413141811b1","name":"Vicksburg Bulldogs Varsity vs Centerville","startDate":"2021-05-19T20:03:03.379Z","endDate":null,"status":1}
+{"id":"83ccb00a-5a6b-47d2-8590-586c47a5d908","name":"Vicksburg Bulldogs Varsity vs Three Rivers","startDate":"2021-05-21T19:32:25.426Z","endDate":null,"status":1}
+{"id":"63aa84bd-b6c9-4dff-832e-aaad1e80fbc4","name":"Vicksburg Bulldogs Varsity vs Three Rivers Varsity","startDate":"2021-05-21T22:02:00.535Z","endDate":null,"status":1}
+{"id":"f7549441-d7e9-4b3d-84e9-92a2bf73ce0b","name":"Vicksburg JV vs Schoolcraft JV","startDate":"2021-05-25T19:52:15.355Z","endDate":null,"status":1}
+{"id":"d70aa02b-87f9-4ec4-8a7b-52e6e36515eb","name":"Vicksburg JV vs Schoolcraft JV","startDate":"2021-05-25T21:27:00.882Z","endDate":null,"status":1}
+{"id":"97f70a9e-c0ad-4d9c-af27-40f843b634f2","name":"Vicksburg Bulldogs Varsity vs Watervliet Varsity","startDate":"2021-05-26T20:13:42.575Z","endDate":null,"status":1}
+{"id":"5de45959-0b31-4ded-a881-fcd3149c56ff","name":"Trintin vs Vicksburg Bulldogs Varsity","startDate":"2021-05-29T14:52:20.287Z","endDate":null,"status":1}
+{"id":"07554a02-9125-4e10-845c-aa80dbb77192","name":"Vicksburg Bulldogs Varsity vs Olivet Varsity","startDate":"2021-06-01T19:29:59.094Z","endDate":null,"status":1}
+{"id":"1a664516-cd53-4205-87e4-5327e49e665c","name":"Vicksburg Bulldogs Varsity vs Olivet Varsity","startDate":"2021-06-01T21:43:20.331Z","endDate":null,"status":1}

@@ -18,7 +18,12 @@ var RadarStalker2 = function (options){
         //loaded from the config file
         emulator:false
     };
-    nconf.file('./configs/radarStalker2Config.json');
+
+    if (process.env.localDebug === 'true') {
+        nconf.file('./configs/debug/radarStalker2Config.json');
+    } else {
+        nconf.file('./configs/radarStalker2Config.json');
+    }
     var configFileSettings = nconf.get();
     var objOptions = extend({}, defaultOptions, configFileSettings, options);
 
@@ -152,7 +157,7 @@ var RadarStalker2 = function (options){
             socketid = "radar"
         }
         debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
-        if (objOptions.emulator == true) {
+        if (objOptions.emulator === true) {
             radarSerialPort.radarEmulatorCommand(options);
         }
     }
@@ -168,7 +173,7 @@ var RadarStalker2 = function (options){
         debug('softwareConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
         
         var softwareConfigProperty = objOptions.softwareConfig[data.cmd];
-        if (softwareConfigProperty == undefined) {
+        if (softwareConfigProperty === undefined) {
             debug('softwareConfigCommand: Error Config Property Not Found' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
         } else
         {
@@ -176,7 +181,7 @@ var RadarStalker2 = function (options){
             switch (softwareConfigProperty.datatype) {
                 case 'int':
                     var numvalue = parseInt(data.data);
-                    if (!isNaN(numvalue) == true) {
+                    if (!isNaN(numvalue) === true) {
                         softwareConfigProperty.value = numvalue;
                     }
                     break;
@@ -188,6 +193,30 @@ var RadarStalker2 = function (options){
             self.emit('softwareConfigProperty', data);
         }
     };
+
+    this.resetRadarSettings = function () {
+        debug('resetRadarSettings called');
+        //First Turn of the Transmitter so it stops sending us speed data to parse
+        self.radarConfigCommand({
+            data: {
+                cmd: "TransmiterControl",
+                data: 0
+            }
+        })
+
+        for (var key in objOptions.radarConfig) {
+            var radarConfigProperty = objOptions.radarConfig[key];
+            if (radarConfigProperty.def !== null && (radarConfigProperty.mandatory === true || radarConfigProperty.readOnly !== true) && key !== "TransmiterControl" ) {
+                
+                self.radarConfigCommand({
+                    data: {
+                        cmd: key,
+                        data: radarConfigProperty.def
+                    }
+                })
+            }
+        }
+    }
 
     this.radarConfigCommand = function (options) {
         var data = options.data;
@@ -225,7 +254,7 @@ var RadarStalker2 = function (options){
             switch (radarConfigProperty.datatype) {
                 case 'int':
                     var numvalue = parseInt(data.data);
-                    if (!isNaN(numvalue) == true) {
+                    if (!isNaN(numvalue) === true) {
                         if (numvalue < 256) {
                             myConfigVal = new Buffer.alloc(1);
                             myConfigVal.writeUInt8(numvalue, 0);
@@ -247,7 +276,7 @@ var RadarStalker2 = function (options){
             }
             mybuff = getRadarPacket(radarConfigProperty.id, 128, myConfigVal);
             radarSerialPort.write(mybuff, function (err) {
-                if (err == undefined) {
+                if (err === undefined) {
                     radarSerialPort.drain(function () {
                         data.success = true;
                         data.error = '';
@@ -297,7 +326,7 @@ var RadarStalker2 = function (options){
     var configRequestPending = false;
 
     var ProcessRadarDataPacket_Config = function (data) {
-        if (data.readUInt8(1) == 1) { // make sure this packet is for us We are always ID 1
+        if (data.readUInt8(1) === 1) { // make sure this packet is for us We are always ID 1
             //We assume only RS232 Radar is Attached as that is the only one that support BE protocol
             var PayloadSource = data.readUInt8(2);
             var PayloadLength = data.readUInt16LE(4);
@@ -311,17 +340,17 @@ var RadarStalker2 = function (options){
             var ConfigPropertyName = undefined;
             var ConfigProperty = undefined;
             for (var key in objOptions.radarConfig) {
-                if (objOptions.radarConfig[key].id == PacketConfigID) {
+                if (objOptions.radarConfig[key].id === PacketConfigID) {
                     ConfigPropertyName = key;
                     ConfigProperty = objOptions.radarConfig[key];
                     break;
                 }
             }
-            if (ConfigProperty != undefined) {
+            if (ConfigProperty !== undefined) {
                 var value;
                 switch (ConfigProperty.datatype) {
                     case 'int':
-                        if (PayloadLength == 3) {
+                        if (PayloadLength === 3) {
                             value = data.readUInt8(8);
                         } else {
                             value = data.readUInt16LE(8);
@@ -342,7 +371,7 @@ var RadarStalker2 = function (options){
                     updateRadarConfigProperty = true;
                     debug("radarConfigProperty received ", ConfigPropertyName, value)
                 }
-                if (updateRadarConfigProperty == true) {
+                if (updateRadarConfigProperty === true) {
                     //raise the event to app.js so it can emit it via socket.io to the browser
                     var cdp = { Property: ConfigPropertyName, data: value };
                     self.emit('radarConfigProperty', cdp);
@@ -365,7 +394,7 @@ var RadarStalker2 = function (options){
 
     var ProcessRadarDataPacket_BESpeed = function (data) {
         var UnitConfig = data.readUInt8(1);
-        UnitConfig = { resolution: (8 == (8 & UnitConfig)), peakSpeed: (2 == (2 & UnitConfig)), forkMode: (1 == (1 & UnitConfig)) };
+        UnitConfig = { resolution: (8 === (8 & UnitConfig)), peakSpeed: (2 === (2 & UnitConfig)), forkMode: (1 === (1 & UnitConfig)) };
         var speedData = {
             liveSpeed: 0,
             liveSpeedDirection:'',
@@ -393,25 +422,25 @@ var RadarStalker2 = function (options){
                 console.log('Invalid Length');
             }
             var UnitSpeedBlockStatusByte = data.readUInt8(8 + Offset);
-            var UnitSpeedBlockStatus = { primaryDirection: ((2 == (2 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), secondaryDirection: ((4 == (4 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), transmiterStatus: ((1 == (1 & UnitSpeedBlockStatusByte)) ? 'on' : 'off') }
+            var UnitSpeedBlockStatus = { primaryDirection: ((2 === (2 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), secondaryDirection: ((4 === (4 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), transmiterStatus: ((1 === (1 & UnitSpeedBlockStatusByte)) ? 'on' : 'off') }
             var Speed = data.toString("ascii", 9 + Offset, 12 + Offset);  //data[9 + Offset] + data[10 + Offset] + data[11 + Offset];
             var Tenths = data.toString("ascii", 12 + Offset, 13 + Offset);
-            if (Tenths != ' ') {
+            if (Tenths !== ' ') {
                 Speed = Speed + '.' + Tenths; //data[12 + Offset];
             }
             var Speed2 = data.toString("ascii", 13 + Offset, 16 + Offset); // data[13 + Offset] + data[14 + Offset] + data[15 + Offset] + '.' + data[16 + Offset];
             var Tenths2 = data.toString("ascii", 16 + Offset, 17 + Offset);
-            if (Tenths2 != ' ') {
+            if (Tenths2 !== ' ') {
                 Speed2 = Speed2 + '.' + Tenths2; //data[16 + Offset];
             }
             switch (data.readUInt8(7 + Offset)) {
                 case 52: //'4': //Live Speed Block
                     speedData.liveSpeedDirection = UnitSpeedBlockStatus.primaryDirection;
                     speedData.liveSpeed2Direction = UnitSpeedBlockStatus.secondaryDirection;
-                    if (Speed.trim() != '') {
+                    if (Speed.trim() !== '') {
                         speedData.liveSpeed = parseFloat(Speed);
                     }
-                    if (Speed2.trim() != '') {
+                    if (Speed2.trim() !== '') {
                         speedData.liveSpeed2 = parseFloat(Speed2);
                     }
                     Offset = Offset + 15;
@@ -419,10 +448,10 @@ var RadarStalker2 = function (options){
                 case 53: // '5': //Peak Speed Block
                     speedData.peakSpeedDirection = UnitSpeedBlockStatus.primaryDirection;
                     speedData.peakSpeed2Direction = UnitSpeedBlockStatus.secondaryDirection;
-                    if (Speed.trim() != '') {
+                    if (Speed.trim() !== '') {
                         speedData.peakSpeed = parseFloat(Speed);
                     }
-                    if (Speed2.trim() != '') {
+                    if (Speed2.trim() !== '') {
                         speedData.peakSpeed2 = parseFloat(Speed2);
                     }
                     Offset = Offset + 15;
@@ -430,10 +459,10 @@ var RadarStalker2 = function (options){
                 case 54: // '6': //Hit Speed Block
                     speedData.hitSpeedDirection = UnitSpeedBlockStatus.primaryDirection;
                     speedData.hitSpeed2Direction = UnitSpeedBlockStatus.secondaryDirection;
-                    if (Speed.trim() != '') {
+                    if (Speed.trim() !== '') {
                         speedData.hitSpeed = parseFloat(Speed);
                     }
-                    if (Speed2.trim() != '') {
+                    if (Speed2.trim() !== '') {
                         speedData.hitSpeed2 = parseFloat(Speed2);
                     }
                     Offset = Offset + 15;
@@ -454,49 +483,49 @@ var RadarStalker2 = function (options){
         //}
         
         if (speedData.liveSpeed >= objOptions.radarConfig.LowSpeedThreshold.value) {
-            if (commonData.currentRadarSpeedData.firstDirection == null) {
+            if (commonData.currentRadarSpeedData.firstDirection === null) {
                 commonData.currentRadarSpeedData.firstDirection = speedData.liveSpeedDirection;
                 commonData.currentRadarSpeedData.firstTime = new Date().getTime();
             }
-            if (speedData.liveSpeedDirection == "in") {
+            if (speedData.liveSpeedDirection === "in") {
                 //commonData.currentRadarSpeedData.inSpeeds.push(speedData.liveSpeed)
                 
                 if (commonData.currentRadarSpeedData.inMaxSpeed < speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.inMaxSpeed = speedData.liveSpeed;
                 }
-                if (commonData.currentRadarSpeedData.inMinSpeed == 0 || commonData.currentRadarSpeedData.inMinSpeed > speedData.liveSpeed) {
+                if (commonData.currentRadarSpeedData.inMinSpeed === 0 || commonData.currentRadarSpeedData.inMinSpeed > speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.inMinSpeed = speedData.liveSpeed;
                 }
-            } else if (speedData.liveSpeedDirection == "out") {
+            } else if (speedData.liveSpeedDirection === "out") {
                 
                 //commonData.currentRadarSpeedData.outSpeeds.push(speedData.liveSpeed)
                 if (commonData.currentRadarSpeedData.outMaxSpeed < speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.outMaxSpeed = speedData.liveSpeed;
                 }
-                if (commonData.currentRadarSpeedData.outMinSpeed == 0 || commonData.currentRadarSpeedData.outMinSpeed > speedData.liveSpeed) {
+                if (commonData.currentRadarSpeedData.outMinSpeed === 0 || commonData.currentRadarSpeedData.outMinSpeed > speedData.liveSpeed) {
                     commonData.currentRadarSpeedData.outMinSpeed = speedData.liveSpeed;
                 }
             }
         }
         if (speedData.liveSpeed2 >= objOptions.radarConfig.LowSpeedThreshold.value) {
-            if (commonData.currentRadarSpeedData.firstDirection == "") {
+            if (commonData.currentRadarSpeedData.firstDirection === "") {
                 commonData.currentRadarSpeedData.firstDirection = speedData.liveSpeed2Direction;
                 commonData.currentRadarSpeedData.firstTime = new Date().getTime();
             }
-            if (speedData.liveSpeed2Direction == "in") {
+            if (speedData.liveSpeed2Direction === "in") {
                 //commonData.currentRadarSpeedData.inSpeeds.push(speedData.liveSpeed2)
                 if (commonData.currentRadarSpeedData.inMaxSpeed < speedData.liveSpeed2) {
                     commonData.currentRadarSpeedData.inMaxSpeed = speedData.liveSpeed2;
                 }
-                if (commonData.currentRadarSpeedData.inMinSpeed == 0 || commonData.currentRadarSpeedData.inMinSpeed > speedData.liveSpeed2) {
+                if (commonData.currentRadarSpeedData.inMinSpeed === 0 || commonData.currentRadarSpeedData.inMinSpeed > speedData.liveSpeed2) {
                     commonData.currentRadarSpeedData.inMinSpeed = speedData.liveSpeed2;
                 }
-            } else if (speedData.liveSpeed2Direction == "out") {
+            } else if (speedData.liveSpeed2Direction === "out") {
                 //commonData.currentRadarSpeedData.outSpeeds.push(speedData.liveSpeed2)
                 if (commonData.currentRadarSpeedData.outMaxSpeed < speedData.liveSpeed2) {
                     commonData.currentRadarSpeedData.outMaxSpeed = speedData.liveSpeed2;
                 }
-                if (commonData.currentRadarSpeedData.outMinSpeed == 0 || commonData.currentRadarSpeedData.outMinSpeed > speedData.liveSpeed2) {
+                if (commonData.currentRadarSpeedData.outMinSpeed === 0 || commonData.currentRadarSpeedData.outMinSpeed > speedData.liveSpeed2) {
                     commonData.currentRadarSpeedData.outMinSpeed = speedData.liveSpeed2;
                 }
             }
@@ -518,9 +547,9 @@ var RadarStalker2 = function (options){
                 pitchCounter++;
                 //extend(commonData.currentRadarSpeedData, speedData);
                 commonData.currentRadarSpeedData.time = new Date();
-                commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
-                commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
-                commonData.currentRadarSpeedData.pitchCount = pitchCounter;
+                //commonData.currentRadarSpeedData.pitcherPlayerID = radarSpeedRelatedData.PitcherPlayerID,
+                //commonData.currentRadarSpeedData.batterPlayerID = radarSpeedRelatedData.BatterPlayerID,
+                //commonData.currentRadarSpeedData.pitchCount = pitchCounter;
                 commonData.lastSpeedDataTimestamp = new Date();
                 commonData.radarSpeedDataHistory.unshift(extend({}, commonData.currentRadarSpeedData));
                 if (commonData.radarSpeedDataHistory.length > objOptions.softwareConfig.radarSpeedHistoryCount) {
@@ -563,7 +592,7 @@ var RadarStalker2 = function (options){
         } else {
             self.emit('radarTimeout', { lastSpeedDataTimestamp: commonData.lastSpeedDataTimestamp });
             radarSerialPort.write(getRadarPacket(81, 0, new Buffer.alloc(1)), function (err) {
-                if (err == undefined) {
+                if (err === undefined) {
                     debug('request Radar Software Version Keep Alive');
                 } else {
                     debug('Serial Port Write Error Software Version Keep Alive' + err);
@@ -575,7 +604,7 @@ var RadarStalker2 = function (options){
     };
 
     var radarSerialPort = null;
-    if (objOptions.emulator == true) {
+    if (objOptions.emulator === true) {
         debug('starting radarStalker2 emulator on Fake Port ' + radarSerialPortName);
         
         radarSerialPort = new RadarEmulator(radarSerialPortName, {
@@ -591,7 +620,7 @@ var RadarStalker2 = function (options){
             autoOpen:false}); 
         
     }
-    const radarPacketParser = radarSerialPort.pipe(new RadarPacketParser({ bufferSize: 512 }));
+    const radarPacketParser = radarSerialPort.pipe(new RadarPacketParser({ bufferSize: objOptions.packetParserBufferSize }));
     radarPacketParser.on('data', radarSerialPortDataHandler);
     //set things in motion by opening the serial port and starting the keepalive timer
     radarSerialPort.open(function (err) {

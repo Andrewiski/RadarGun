@@ -10,19 +10,20 @@ var nconf = require('nconf');
 var fs = require("fs");
 var NoSQL = require('nosql');
 const uuidv4 = require('uuid/v4');
+var path = require('path');
 var RadarDatabase = function (options) {
     var self = this;
     var defaultOptions = {
         deviceId: "",
-        teamFile: "./data/teams.nosql",
-        playerFile: "./data/player.nosql",
-        radarDataFile: "./data/radarData.nosql"
+        teamsFile: "./data/teams.nosql",
+        gamesFile: "./data/games.nosql",
+        gamesFolder: "./data/games"
     }
     nconf.file('./configs/radarDatabaseConfig.json');
     var configFileSettings = nconf.get();
     var objOptions = extend({}, defaultOptions, configFileSettings, options);
 
-    if (objOptions.deviceId == undefined || objOptions.deviceId == '') {
+    if (objOptions.deviceId === undefined || objOptions.deviceId === '') {
         objOptions.deviceId = uuidv4();
         try {
             configFileSettings.deviceId = objOptions.deviceId;
@@ -33,8 +34,8 @@ var RadarDatabase = function (options) {
         }
     }
 
-    var teamDbExists = fs.existsSync(objOptions.teamFile);
-    var playerDbExists = fs.existsSync(objOptions.playerFile);
+    var teamsDbExists = fs.existsSync(objOptions.teamsFile);
+    var gamesDbExists = fs.existsSync(objOptions.gamesFile);
     
     
     // EventEmitters inherit a single event listener, see it in action
@@ -44,14 +45,14 @@ var RadarDatabase = function (options) {
 
     
     // db === Database instance <https://docs.totaljs.com/latest/en.html#api~Database>
-    var teamDb = NoSQL.load(objOptions.teamFile);
-    var playerDb = NoSQL.load(objOptions.playerFile);
+    var teamsDb = NoSQL.load(objOptions.teamsFile);
+    var gamesDb = NoSQL.load(objOptions.gamesFile);
     //var radarDataDb = NoSQL.load(objOptions.radarDataFile);
 
 
 
     this.team_getAll = function (callback) {
-        teamDb.find().where("status",1).make(function (builder) {
+        teamsDb.find().where("status",1).make(function (builder) {
             builder.callback(function (err, response) {
                 debug('team_getAll ', response);
                 callback(err, response);
@@ -64,18 +65,18 @@ var RadarDatabase = function (options) {
         if (!team.id) {
             team.id = uuidv4();
         }
-        teamDb.update(team, team).make(function (builder) {
-            //builder.between('age', 20, 30);
-            builder.callback(function (err, count) {
+        teamsDb.update(team, team).make(function (filter) {
+            filter.where('id', team.id);
+            filter.callback(function (err, count, doc) {
                 debug('team_upsert ', count);
-                callback(err, count);
+                callback(err, count, doc);
             });
         });                                            
     }
 
     this.team_delete = function (team, callback) {
         if (team.teamId) {
-            teamDb.modify({ status: 0 }, false).where('id', team.id).make(function (builder) {
+            teamsDb.modify({ status: 0 }, false).where('id', team.id).make(function (builder) {
                 //builder.between('age', 20, 30);
                 builder.callback(function (err, count) {
                     debug('team_delete ', count);
@@ -97,65 +98,120 @@ var RadarDatabase = function (options) {
         */
     }
 
-    this.player_upsert = function (player, callback) {
-        if (!player.id) {
-            player.id = uuidv4();
-        }
-        playerDb.update(player, player).make(function (builder) {
-            builder.callback(function (err, count) {
-                debug('player_upsert ', count);
-                callback(err, count);
-            });
-        });  
-    }
-    this.player_getAll = function (callback) {
-        playerDb.find().where("status", 1).make(function (builder) {
+
+    this.game_getAll = function (callback) {
+        gamesDb.find().where("status", 1).make(function (builder) {
             builder.callback(function (err, response) {
-                debug('player_getAll ', response);
+                debug('game_getAll ', response);
                 callback(err, response);
             });
         });
+
     }
-    this.player_delete = function (player, callback) {
-        if (player.playerId) {
-            playerDb.modify({ status: 0 }, false).where('id', player.playerId).make(function (builder) {
+
+    this.game_get = function (gameId, callback) {
+
+        let gameFile = path.join(objOptions.gamesFolder, gameId, "game.nosql");
+        
+        if (fs.existsSync(gameFile)) {
+            let gameDb = NoSQL.load(gameFile);
+            gameDb.one().where("id", gameId).make(function (builder) {
+                builder.callback(function (err, response) {
+                    debug('game_get ', response);
+                    callback(err, response);
+                });
+            });
+        }
+
+    }
+
+
+    this.game_upsert = function (game, callback) {
+        if (!game.id) {
+            game.id = uuidv4();
+        }
+
+       
+
+        if (fs.existsSync(objOptions.gamesFolder) === false) {
+            fs.mkdirSync(objOptions.gamesFolder);
+        }
+
+        if (fs.existsSync(path.join(objOptions.gamesFolder, game.id)) === false) {
+            fs.mkdirSync(path.join(objOptions.gamesFolder, game.id));
+        }
+
+        let gameFile = path.join(objOptions.gamesFolder, game.id, "game.nosql");
+        
+
+        let gameDb = NoSQL.load(gameFile);
+
+        gameDb.update(game, game).make(function (filter) {
+            filter.where('id', game.id);
+            filter.callback(function (err, count) {
+                debug('game_upsert ', count);
+                let gameName = "";
+                if (game.home && game.home.team && game.home.team.name) {
+                    gameName += game.home.team.name + " vs ";
+                }
+                if (game.guest && game.guest.team && game.guest.team.name) {
+                    gameName += game.guest.team.name;
+                }
+                if (gameName === "") {
+                    gameName = game.id;
+                }
+                let gamesData = { id: game.id, name: gameName, startDate: game.startDate, endDate: game.endDate, status: game.status }
+                gamesDb.update(gamesData, gamesData).make(function (filter) {
+                    filter.where('id', gamesData.id);
+                    filter.callback(function (err, count) {
+                        debug('games_upsert ', count);
+                        callback(err, count);
+                    });
+                });
+            });
+        });
+
+        
+    }
+
+    this.game_delete = function (game, callback) {
+        if (game.id) {
+            teamsDb.modify({ status: 0 }, false).where('id', game.id).make(function (builder) {
                 //builder.between('age', 20, 30);
                 builder.callback(function (err, count) {
-                    debug('player_delete ', count);
+                    debug('game_delete ', count);
                     callback(err, count);
                 });
             });
         } else {
-            debug('player_delete no playerid');
+            debug('game_delete no gameid');
         }
+
+        /*
+          nosql.remove().make(function(builder) {
+              // builder.first(); --> removes only one document
+              builder.where('age', '<', 15);
+              builder.callback(function(err, count) {
+                  console.log('removed documents:', count);
+              });
+          });
+        */
     }
 
-    if (playerDbExists == false) {
-        self.player_upsert({
-            id: "00000000-0000-0000-0000-000000000000",
-            firstName: "Anonymous",
-            lastName: "Player",
-            status: 1
-        },
+   
+
+    if (gamesDbExists === false) {
+        self.game_upsert(
+            { "id": "00000000-0000-0000-0000-000000000000", "name": "New Game", "shortName": "", "startDate": null, "endDate": null, "inning": 1, "inningPosition": "top", "outs": 0, "balls": 0, "strikes": 0, "score": { "home": 0, "guest": 0 }, "home": { "lineup": [], "team": null }, "guest": { "lineup": [], "team": null }, "status": 1, "log": [] }    
+        ,
         function (err, callback) {
-            debug("Anonymous Player Inserted");
+            debug("Anonymous Game Inserted");
         });
     }
-    if (teamDbExists == false) {
-        self.team_upsert({
-            id: "00000000-0000-0000-0000-000000000000",
-            status: 1,
-            name: "Anonymous Team",
-            players: [
-                {
-                    id: "00000000-0000-0000-0000-000000000000",
-                    firstName: "Anonymous",
-                    lastName: "Player"
-                }
-            ]
-        },
+    if (teamsDbExists === false) {
+        self.team_upsert({ "id": "00000000-0000-0000-0000-000000000000", "status": 1, "name": "New Team", "roster": [{ "firstName": "", "lastName": "", "jerseyNumber": "" }] },
         function (err, callback) {
-            debug("Anonymous Player Inserted");
+            debug("Anonymous Game Inserted");
         });
     }
 }

@@ -8,13 +8,18 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <title>Stalker Radar Baseball</title>
     <base href="/">
-    <link href="/stylesheets/style.css" rel="stylesheet" />
+
     <!--<link href="stylesheets/bootstrap.min.css" rel="stylesheet" />
     <link href="stylesheets/bootstrap-theme.min.css" rel="stylesheet" />-->
     <link href="/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/javascript/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+    <link href="/javascript/angular-ui-bootstrap/ui-bootstrap-csp.css" rel="stylesheet" />
     <link href="/javascript/fontawesome/css/font-awesome.min.css" rel="stylesheet" />
 
+    <!--<link href="/javascript/dragtable/dragtable.css" rel="stylesheet" />
+    <link href="/javascript/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />-->
+
+    <link href="/stylesheets/style.css" rel="stylesheet" />
 
     <script type="text/javascript">
 
@@ -45,6 +50,8 @@
         }
     </script>
     <script src="/javascript/jquery/jquery.min.js"></script>
+    <!--<script src="/javascript/bootstrap/js/bootstrap.min.js"></script>-->
+    <!--<script src="/javascript/bootstrap-notify/bootstrap-notify.min.js"></script>-->
     <script src="/javascript/angular/angular.js"></script>
     <script src="/javascript/angular-route/angular-route.min.js"></script>
     <script src="/javascript/angular-animate/angular-animate.min.js"></script>
@@ -58,12 +65,18 @@
     <link href="/javascript/angular-ui-select/select.min.css" rel="stylesheet" />
     <link href="/javascript/angular-ui-switch/angular-ui-switch.min.css" rel="stylesheet" />
     <script src="/javascript/angular-ui-switch/angular-ui-switch.min.js"></script>
+
+    <script src="/javascript/moment/moment.min.js"></script>
+
+    <!--<script src="/javascript/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="/javascript/dragtable/jquery.dragtable.js"></script>-->
     <!--Served up by the socket.io service directly as part of the IO service process-->
     <script src="/socket.io/socket.io.js"></script>
 
     <!-- App Files -->
     <script src="/app/app.js"></script>
     <script src="/app/filters.js"></script>
+    <script src="/app/mw-confirm-click.js"></script>
     <script src="/app/scoreboard/scoreboardController.js"></script>
     <script src="/app/scoreboard/scoreboardDirective.js"></script>
     <script src="/app/scoreboard/scoreboardViewController.js"></script>
@@ -109,7 +122,7 @@
     <div class="container-fluid">
         <div id="errormsg"></div>
         <form name="radarmonitor" id="radarmonitor" class="sb">
-            <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2018</div>
+            <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2021</div>
             <div data-ng-cloak class="barsandmain">
                 <div class="main">
                     <div data-ui-view>                    
@@ -118,5 +131,6 @@
             </div>
         </form>
     </div>
+    
 </body>
 </html>

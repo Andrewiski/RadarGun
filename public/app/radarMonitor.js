@@ -28,12 +28,12 @@
            });
 
            Service.socket.on('ping', function (message) {
-               console.log('radarMonitorService ping', message);
+               //console.log('radarMonitorService ping', message);
                $rootScope.$emit("radarMonitor:ping", message);
            });
 
            Service.socket.on('pong', function (message) {
-               console.log('radarMonitorService pong', );
+               //console.log('radarMonitorService pong', );
                $rootScope.$emit("radarMonitor:ping", message);
            });
 
@@ -84,7 +84,40 @@
            Service.sendRadarEmulatorCommand = function (cmd, data) {
                Service.socket.emit('radarEmulatorCommand', { cmd: cmd, data: data });
            };
+
+           Service.sendResetRadarSettings = function () {
+               Service.socket.emit('resetRadarSettings', {cmd: "resetRadarSettings"});
+           }
+           Service.sendServerCommand = function (cmd, data) {
+               Service.socket.emit(cmd, data );
+           };
+
+           Service.socket.on('gameChanged', function (message) {
+               console.log('radarMonitorService received gameChanged', message);
+               $rootScope.$emit("gameChanged", message);
+           });
+
            
+           /** Generate a guid / uuid  --  682db637-0f31-4847-9cdf-25ba9613a75c
+            */
+           Service.uuid = function uuid() {
+               var chars = '0123456789abcdef'.split('');
+
+               var uuid = [], rnd = Math.random, r;
+               uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+               uuid[14] = '4'; // version 4
+
+               for (var i = 0; i < 36; i++) {
+                   if (!uuid[i]) {
+                       r = 0 | rnd() * 16;
+
+                       uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
+                   }
+               }
+
+               return uuid.join('');
+           }
+
             return Service;
         }]);
 })();

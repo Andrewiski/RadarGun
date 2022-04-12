@@ -1,11 +1,18 @@
 # DataFile
+data/games
 data/teams.nosql
-data/player.nosql
-data/radarData.nosq"
+data/games.nosql
+data/audioFiles
+
+RadarGunMonitor.njsproj.FileListAbsolute.txt 
+RadarGunMonitor.njsprojAssemblyReference.cache
+
+package-lock.jsone
 
 obj
 bin
 
+Microsoft.NodejsTools.Webrole.dll
 package-lock.json
 
 # Logs

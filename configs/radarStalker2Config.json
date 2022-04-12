@@ -1,10 +1,10 @@
 ﻿{
   "emulator": false,
-  "portName": "/dev/ttyO2",
+  "portName": "/dev/ttyTHS1",
   "packetParserBufferSize": 1024,
   "win32": {
-    "portName": "COM4",
-    "emulator": true
+    "portName": "COM3",
+    "emulator": false
   },
   "baudrate": 115200,
 
@@ -44,11 +44,11 @@
     }
   },
   "radarConfig": {
-   
+
     "TargetDirection": {
       "id": 2,
       "value": null,
-      "def": 1,
+      "def": 2,
       "datatype": "int",
       "notes": "0 Outbound, 1 InBound, 2 Both"
     },
@@ -62,7 +62,7 @@
     "LowSpeedThreshold": {
       "id": 7,
       "value": 50,
-      "def": 50,
+      "def": 30,
       "datatype": "int",
       "notes": "0 - 900 MPH"
     },
@@ -83,7 +83,7 @@
     "PeakSpeedEnable": {
       "id": 13,
       "value": null,
-      "def": 1,
+      "def": 0,
       "datatype": "int",
       "notes": "0 Disabled, 1 Enabled"
     },
@@ -118,7 +118,7 @@
     "UnitResolution": {
       "id": 21,
       "value": null,
-      "def": 0,
+      "def": 1,
       "datatype": "int",
       "notes": "0 Ones, 1 Tenths"
     },
@@ -141,14 +141,15 @@
       "id": 30,
       "value": null,
       "def": 3,
-      "readOnly": true,
       "datatype": "int",
+      "mandatory": true,
+      "readOnly": true,
       "notes": "0 None, 1 A, 2 b, 3 bE, 4 S, 5 EE, 6 A1, 7 COL"
     },
     "MessagePeriod": {
       "id": 31,
       "value": null,
-      "def": 250,
+      "def": 0,
       "datatype": "int",
       "notes": "0 - 10000  10Sec delay"
     },
@@ -207,7 +208,7 @@
     "AutoClearDelay": {
       "id": 88,
       "value": null,
-      "def": 2,
+      "def": 0,
       "datatype": "int",
       "notes": "0 -10 sec, 11 20 sec, 12 30 sec, 13 Off"
     },
@@ -215,6 +216,7 @@
       "id": 101,
       "value": null,
       "def": 0,
+      "mandatory": true,
       "readOnly": true,
       "datatype": "int",
       "notes": "0 CR, 1 CRLF, 2 Unit CR, 3 Unit CRLF"
@@ -222,7 +224,7 @@
     "PeakMessageType": {
       "id": 102,
       "value": null,
-      "def": 0,
+      "def": 1,
       "datatype": "int",
       "notes": "0 Continuous, 1 Single"
     },
@@ -243,7 +245,7 @@
     "HitSpeedEnable": {
       "id": 105,
       "value": null,
-      "def": 1,
+      "def": 0,
       "datatype": "int",
       "notes": "0 Disabled, 1 Enabled"
     },
@@ -257,4 +259,4 @@
     }
   }
 
-  }
+}

@@ -49,7 +49,16 @@ var BatteryMonitor = function (options) {
             var x = { value: (objOptions.fakeBatteryVoltage * .107142857) / 1.800 };
             processBatteryVoltage(x);
         } else {
-            b.analogRead(objOptions.analogPin, processBatteryVoltage);
+            if (self.platform === "beaglebone") {
+                if (b) {
+                    b.analogRead(objOptions.analogPin, processBatteryVoltage);
+                }
+            } else {
+                //at Some point I will turn a board with a adc over i2c and we will read voltage that way.
+                var x = { value: 99.99 };
+                processBatteryVoltage(x);
+
+            }
         }
 
 
@@ -90,15 +99,32 @@ var BatteryMonitor = function (options) {
 
     var b = undefined;
     if (process.platform !== 'win32') {
+        const isPi = require('./platformDetect.js');
         //b = require('bonescript');
-        var BeagleBone = require('beaglebone-io');
-        var b = new BeagleBone();
 
-        b.on('ready', function () {
-            this.pinMode(objOptions.analogPin, this.MODES.ANALOG);
-            this.analogRead(objOptions.analogPin, processBatteryVoltage);
-        });
+        if (isPi()) {
+            debug('Running on Raspberry Pi!');
+            self.platform = "raspberry";
+        } else {
+            try {
+                
+                var BeagleBone = require('beaglebone-io');
+                b = new BeagleBone();
+                self.platform = "beaglebone";
+                b.on('ready', function () {
+                    this.pinMode(objOptions.analogPin, this.MODES.ANALOG);
+                    this.analogRead(objOptions.analogPin, processBatteryVoltage);
+                });
+            } catch (ex) {
+                debug('Not running on Beagle Bone!');
+            }
+        }
+
+
+        
     } else {
+        self.platform = 'win32';
+        
         recursiveTimerStart(); //Only need this in windows to fake it ne Beaglebone-io does this for us
     }
 }
