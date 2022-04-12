@@ -4,7 +4,7 @@
   "packetParserBufferSize": 1024,
   "win32": {
     "portName": "COM4",
-    "emulator": false
+    "emulator": true
   },
   "baudrate": 115200,
 
