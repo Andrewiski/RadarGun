@@ -376,7 +376,7 @@ var FfmpegOverlay = function (options) {
         }
         commonData.streamStats.status = "connected"; 
         self.emit('streamStats', commonData.streamStats);
-        writeToLog("debug", "Source Video URL", objOptions.rtspUrl)
+        writeToLog("debug", "Source Video URL", objOptions.input)
 
         command = ffmpeg({ source: objOptions.input });
 

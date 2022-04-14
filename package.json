@@ -52,7 +52,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "font-awesome": "^4.6.3",
     "gps": "^0.5.3",
-    "gstreamer-superficial": "^1.6.0",
+    "gstreamer-superficial": "^1.7.4",
     "i2c-bus": "5.2.0",
     "jquery": "^3.3.1",
     "mathjs": ">=7.5.1",

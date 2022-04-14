@@ -1,9 +1,11 @@
 {
   "webserverPort": 12336,
-  "host": "http://10.100.32.95:12336",
+  "host": "http://10.100.32.231:12336",
   "ffmpegOverlayConfig": {
-    "input": "rtsp://10.100.32.95:7447/t2N7OTZ2n8ScSTtu",
-    "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/7w0t-zhy3-0wzw-9kw8-b1md",
+    "input": "rtsps://10.100.1.1:7441/f724nSZ9iebgPS9e?enableSrtp",
+    "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/a5fv-d7rc-7jsa-v7g4-2c70",
+    "rtmpUrlTest": "rtmp://a.rtmp.youtube.com/live2/a5fv-d7rc-7jsa-v7g4-2c70",
+    "rtmpUrlLive": "rtmp://a.rtmp.youtube.com/live2/e7pv-4pbr-ew6e-5vk5-bjx6",
     "logLevel": "debug",
     "inputOptions": [ "-y", "-hwaccel cuda", "-rtsp_transport tcp", "-stimeout 30000000" ],
     "outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-r 24", "-preset llhq", "-rc vbr_hq", "-f flv" ],
