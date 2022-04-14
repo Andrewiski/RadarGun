@@ -166,6 +166,14 @@ var RadarEmulator = function (fakePortName, options) {
         if (callback) { callback.call(this, null) };
         
     };
+    var parserEventEmiter = null;
+    this.pipe = function (parserMethod) {
+        debug('pipe');
+        parserEventEmiter = parserMethod;
+        //util.inherits(parserEventEmiter, EventEmitter);
+        return parserEventEmiter;
+
+    }
 
     this.radarEmulatorCommand = function (options) {
         var data = options.data;
@@ -393,8 +401,10 @@ var RadarEmulator = function (fakePortName, options) {
             pipedPacketParser.write(data);
         } else {
             self.emit('data', data);  
+            if (parserEventEmiter) {
+                parserEventEmiter.push(data, 'ascii');
+            }
         }
-        
     }
     var recursiveTimerStartFakeRadar = function () {
         //console.log("Radar Emulator Timer Execute!");
