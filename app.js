@@ -417,7 +417,8 @@ var audioFileStop = function () {
 var io = require('socket.io')(server);
 
 
-var sendToSocketClients = function(cmd, message, includeArduino){
+
+var sendToSocketClients = function (cmd, message, includeArduino){
     if (io) {
 
     }
