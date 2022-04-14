@@ -110,7 +110,7 @@ if (process.platform === 'win32') {
     //});
 }
 app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
+//app.use(logger('dev'));
 
 //app.use(logger.express);
 //app.use(express.json());
@@ -417,7 +417,7 @@ var audioFileStop = function () {
 var io = require('socket.io')(server);
 
 
-var sendToSocketClients(cmd, message, includeArduino){
+var sendToSocketClients = function (cmd, message, includeArduino){
     if (io) {
 
     }

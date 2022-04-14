@@ -1,2 +1,2 @@
-   Vicksburg: 16   P: #10  Gialey         PV: 65.4 MPH    O: 1 B: 0 S: 0
-Three Rivers:  1   B: #22 Colin Klinger   EV: 74.3 MPH    I: 3 bottom
+   P: #17 Jon Cleasby     PV: 57.1 MPH    O: 2 B: 0 S: 0
+   B: #8 Jackson Bowles   EV: 00.0 MPH    I: 1 bottom
