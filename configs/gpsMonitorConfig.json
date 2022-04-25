@@ -1,9 +1,0 @@
-﻿{
-  "updateHostDateTime": true,
-  "portName": "",
-  "win32": {
-    "portName": "", 
-    "baudrate": 9600
-  },
-  "baudrate": 9600
-}

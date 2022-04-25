@@ -1,7 +1,0 @@
-﻿{
-  "fakeBatteryVoltage": 12.001,
-  "fakeBatteryDecreaseValue": 0.001,
-  "analogPin": "",
-  "timerInterval": 60000,
-  "maxHistoryCount": 500
-}
