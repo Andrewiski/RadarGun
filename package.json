@@ -1,6 +1,6 @@
 {
-  "name": "RadarGunMonitor",
-  "version": "0.0.5",
+  "name": "radargunmonitor",
+  "version": "0.0.6",
   "private": false,
   "license": "Apache-2.0",
   "keywords": [
@@ -27,13 +27,15 @@
   "description": "Digital Example Jetson Nano based Radar Gun ",
   "main": "app.js",
   "engines": {
-    "node": ">= 12.0.0"
+    "node": ">= 16.0.0"
   },
   "author": {
     "name": "adevries",
     "email": "adevries@digitalexample.com"
   },
   "dependencies": {
+    "@andrewiski/confighandler": "^1.0.1",
+    "@andrewiski/logutilhelper": "^1.0.17",
     "@uirouter/angularjs": "^1.0.25",
     "angular": "^1.8",
     "angular-animate": "^1.7.9",
@@ -46,31 +48,29 @@
     "angular-ui-utils": "^0.1.1",
     "bootstrap": "^3.3.7",
     "cookie-parser": "^1.4.0",
-    "debug": "^4.3.1",
+    "debug": "^4.3.3",
     "express": "^4.17.1",
-    "extend": "^3.0.0",
+    "extend": "^3.0.2",
     "fluent-ffmpeg": "^2.1.2",
     "font-awesome": "^4.6.3",
     "gps": "^0.5.3",
-    "gstreamer-superficial": "^1.7.4",
-    "i2c-bus": "5.2.0",
-    "jquery": "^3.3.1",
+    "i2c-bus": "5.2.2",
+    "jquery": "^3.6.0",
     "mathjs": ">=7.5.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.3",
     "mongodb": "^3.6.6",
     "morgan": "^1.9.0",
-    "nconf": "0.10.0",
     "node-promise": "^0.5.14",
     "nosql": "^6.1.0",
-    "serialport": "^9.0.7",
+    "serialport": "^10.4.0",
     "serve-favicon": "^2.4.5",
-    "socket.io": "^2.3.0",
-    "socket.io-client": "^2.3.0",
+    "socket.io": "^4.4.1",
+    "socket.io-client": "^4.4.1",
     "stylus": "^0.54.7",
     "ui-select": "^0.19.8",
-    "uuid": "^3.4.0",
+    "uuid": "^8.3.2",
     "verror": "1.6.x",
-    "winston": "^3.3.3",
-    "winston-daily-rotate-file": "^4.5.5"
+    "winston": "^3.5",
+    "winston-daily-rotate-file": "^4.6.0"
   }
 }

@@ -1,0 +1,105 @@
+{
+  "webserverPort": 12336,
+  "useNoSql": true,
+  "logDirectory": "logs",
+  "maxMemoryLogLength": 200,
+  "radarStalker2": {
+    "emulator": true,
+    "portName": ""
+  },
+  "remoteMongoDbServer": {
+    "mongoDbServerUrl": "",
+    "mongoDbDatabaseName": "",
+  },
+  "batteryMonitor": {
+    "analogPin": ""
+  },
+  "gpsMonitor": {
+    "updateHostDateTime": false,
+    "portName": "",
+    "baudrate": 9600
+  },
+  "dataDisplay": {
+    "ledDisplays": null,
+    "lcdDisplays": null,
+    "displayLocation": {
+      "inMaxSpeed": {
+        "type": "ledDisplays",
+        "index": 0,
+        "enabled": false
+      },
+      "inMinSpeed": {
+        "type": "ledDisplays",
+        "index": 2,
+        "enabled": false
+      },
+      "outMaxSpeed": {
+        "type": "ledDisplays",
+        "index": 1,
+        "enabled": false
+      },
+      "outMinSpeed": {
+        "type": "ledDisplays",
+        "index": 3,
+        "enabled": false
+      },
+      "speedHistory": {
+        "type": "lcdDisplays",
+        "index": 0,
+        "enabled": false
+      }
+    }
+  },
+  "radarDatabaseConfig": {
+    "deviceId": "",
+    "dataFolder": "./data"
+  },
+  "ffmpegOverlay": {
+    "input": "",
+    "rtmpUrl": "",
+    "logLevel": "debug",
+    "inputOptions": [
+      "-rtsp_transport tcp",
+      "-stimeout 30000000"
+    ],
+    "outputOptions": [
+      "-pix_fmt +",
+      "-c:v libx264",
+      "-preset:very fast",
+      "-c:a aac",
+      "-f flv"
+    ],
+    "capture": false,
+    "overlayFileName": "overlay.txt",
+    "videoFilters": {
+      "filter": "drawtext",
+      "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
+    }
+  },
+  "youtubeEncoderClient": {
+    "webserverPort": 12336,
+    "host": ""
+  },
+  "appLogLevels": {
+    "radarMonitor": {
+      "app": "info",
+      "browser": "warning",
+      "socketio": "warning"
+    },
+    "radarStalker2": {
+      "app": "info"
+    },
+    "ffmpegOverlay": {
+      "app": "info"
+    },
+    "radarDatabase": {
+      "app": "info"
+    },
+    "radarEmulator": {
+      "app": "info"
+    },
+    "radarPacketParser": {
+      "app": "info"
+    }
+  }
+}

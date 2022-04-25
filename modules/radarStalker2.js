@@ -2,35 +2,276 @@
 //This Module will open uart and connect to a stalker Pro II radar sensor using a serial port
 //it then raises events based on events
 //The Best Config I have found is 115200 baud Peak and Hit turned off, with direction set to both now we look at inbound as pitch and outbound as hit.
-var util = require('util');
-var extend = require('extend');
-var EventEmitter = require('events').EventEmitter;
-var debug = require('debug')('radar');
-var nconf = require('nconf');
-//var SerialPort = require("serialport").SerialPort;
-// version 4 syntax 
-var SerialPort = require("serialport");
-var RadarEmulator = require("./radarEmulator.js");
-var RadarPacketParser = require("./radarPacketParser.js");
-var RadarStalker2 = function (options){
+const appLogName = "radarStalker2";
+const util = require('util');
+const extend = require('extend');
+const EventEmitter = require('events').EventEmitter;
+const { SerialPort } = require('serialport')
+const RadarEmulator = require("./radarEmulator.js");
+const RadarPacketParser = require("./radarPacketParser.js");
+const RadarStalker2 = function (options, logUtilHelper){
     var self = this;
     var defaultOptions = {
-        //loaded from the config file
-        emulator:false
+        "emulator": true,
+        "portName": "/dev/ttyS0",
+        "packetParserBufferSize": 1024,
+        "baudrate": 115200,
+        "softwareConfig": {
+          "logRawRadarPackets": false,
+          "radarSpeedTimeOutMinutes": 30,
+          "radarSpeedHistoryCount": 20,
+          "zeroCounterLimit": 15,
+          "LiveGameMode": {
+            "id": -1,
+            "value": true,
+            "def": true,
+            "datatype": "bool",
+            "notes": "true LiveGame Mode On, false Live Game Mode Off"
+          },
+          "LiveGameDirection": {
+            "id": -1,
+            "value": "in",
+            "def": "in",
+            "datatype": "string",
+            "notes": "in Radar Behind Catcher, out Live Game Mode Off"
+          },
+          "ThrowDownMode": {
+            "id": -1,
+            "value": true,
+            "def": true,
+            "datatype": "bool",
+            "notes": "true Throw Down Mode On, false Throw Down Mode Off"
+          },
+          "ThrowDownMinSpeed": {
+            "id": -1,
+            "value": true,
+            "def": true,
+            "datatype": "int",
+            "notes": "Min Throw Down Speed, Min Throw Down Speed Off"
+          }
+        },
+        "radarConfig": {
+          "TargetDirection": {
+            "id": 2,
+            "value": null,
+            "def": 2,
+            "datatype": "int",
+            "notes": "0 Outbound, 1 InBound, 2 Both"
+          },
+          "Range": {
+            "id": 4,
+            "value": null,
+            "def": 7,
+            "datatype": "int",
+            "notes": "0(min) - 7(max)"
+          },
+          "LowSpeedThreshold": {
+            "id": 7,
+            "value": 50,
+            "def": 30,
+            "datatype": "int",
+            "notes": "0 - 900 MPH"
+          },
+          "HighSpeedThreshold": {
+            "id": 11,
+            "value": 100,
+            "def": 150,
+            "datatype": "int",
+            "notes": "0 - 900 MPH"
+          },
+          "AlarmApeedThreshold": {
+            "id": 12,
+            "value": null,
+            "def": 1500,
+            "datatype": "int",
+            "notes": "0 - 1500 MPH Aux Pin Function"
+          },
+          "PeakSpeedEnable": {
+            "id": 13,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 Disabled, 1 Enabled"
+          },
+          "AuxPinConfiguration": {
+            "id": 16,
+            "value": null,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 = Radar Trigger, 1 = Off, 2 = SpeedAlarm, 3 = Doppler without Squeulch, 4 = Doopler with Sqeulch"
+          },
+          "CosignAngle1": {
+            "id": 18,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0-45 one degree increments"
+          },
+          "CosignAngle2": {
+            "id": 19,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0-45 one degree increments"
+          },
+          "Units": {
+            "id": 20,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 MPH, 1 km/h, 2 knots, 3 feet/sec, 4 meters/sec"
+          },
+          "UnitResolution": {
+            "id": 21,
+            "value": null,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Ones, 1 Tenths"
+          },
+          "LeadingZeroCharacter": {
+            "id": 23,
+            "value": null,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Zero, 1 Space, 2 None"
+          },
+          "SerialPortBaudRate": {
+            "id": 29,
+            "value": null,
+            "def": null,
+            "readOnly": true,
+            "datatype": "string",
+            "notes": "0 300, 1 600, 2 1200, 3 2400, 4 4800, 5 9600, 6 19200, 7 38400, 8 57600, 9 115200"
+          },
+          "MessageFormat": {
+            "id": 30,
+            "value": null,
+            "def": 3,
+            "datatype": "int",
+            "mandatory": true,
+            "readOnly": true,
+            "notes": "0 None, 1 A, 2 b, 3 bE, 4 S, 5 EE, 6 A1, 7 COL"
+          },
+          "MessagePeriod": {
+            "id": 31,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 - 10000  10Sec delay"
+          },
+          "ProductID": {
+            "id": 37,
+            "value": null,
+            "def": null,
+            "readOnly": true,
+            "datatype": "string",
+            "notes": "Read Only Product ID In Ascii"
+          },
+          "TransmiterControl": {
+            "id": 42,
+            "value": null,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 = Hold, 1 = Transmit"
+          },
+          "LiveTargetLock": {
+            "id": 43,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 = Release, 1 = Lock"
+          },
+          "ForkMode": {
+            "id": 47,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 Off, 1 On"
+          },
+          "RadarTriggerMode": {
+            "id": 60,
+            "value": null,
+            "def": 2,
+            "datatype": "int",
+            "notes": "Aux Pin Function 0 Continuous, 1 Start - Stop, 2 Lock"
+          },
+          "ProductType": {
+            "id": 79,
+            "value": null,
+            "def": null,
+            "readOnly": true,
+            "datatype": "hex",
+            "notes": "3 Byte Code for Model"
+          },
+          "SoftwareVersion": {
+            "id": 81,
+            "value": null,
+            "def": null,
+            "readOnly": true,
+            "datatype": "string",
+            "notes": "Ascii String for Software Version"
+          },
+          "AutoClearDelay": {
+            "id": 88,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 -10 sec, 11 20 sec, 12 30 sec, 13 Off"
+          },
+          "MessageTermination": {
+            "id": 101,
+            "value": null,
+            "def": 0,
+            "mandatory": true,
+            "readOnly": true,
+            "datatype": "int",
+            "notes": "0 CR, 1 CRLF, 2 Unit CR, 3 Unit CRLF"
+          },
+          "PeakMessageType": {
+            "id": 102,
+            "value": null,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Continuous, 1 Single"
+          },
+          "TargetType": {
+            "id": 103,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 Baseball, 1 Carnival, 2 Car, 3 Tennis"
+          },
+          "FormatASpeed": {
+            "id": 104,
+            "value": null,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Last/Live, 1 Peak, 2 Hit"
+          },
+          "HitSpeedEnable": {
+            "id": 105,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 Disabled, 1 Enabled"
+          },
+          "SpeedSensorAddress": {
+            "id": 116,
+            "value": null,
+            "def": 2,
+            "readOnly": true,
+            "datatype": "int",
+            "notes": "2 RS-2323 is fixed at 2, RS-485 2 - 254"
+          }
+        }
     };
 
-    if (process.env.localDebug === 'true') {
-        nconf.file('./configs/debug/radarStalker2Config.json');
-    } else {
-        nconf.file('./configs/radarStalker2Config.json');
-    }
-    var configFileSettings = nconf.get();
-    var objOptions = extend({}, defaultOptions, configFileSettings, options);
+    var objOptions = extend({}, defaultOptions,  options);
 
 
     // EventEmitters inherit a single event listener, see it in action
     this.on('newListener', function (listener) {
-        debug('radarStalker2 Event Listener: ' + listener);
+        logUtilHelper.log(appLogName, "app", "debug", 'radarStalker2 Event Listener: ' + listener);
     });
     
     var emptySpeedData = {
@@ -62,19 +303,8 @@ var RadarStalker2 = function (options){
     
     //use Global so we can access our instance of Serial Port from RadarCommandFiles
 
-    var radarSerialPortName = '';
+    var radarSerialPortName = objOptions.portName;
     
-    
-
-    if (process.platform === 'win32') {
-
-        radarSerialPortName = objOptions.win32.portName;
-        objOptions.emulator = objOptions.win32.emulator; 
-
-    } else {
-        //
-        radarSerialPortName = objOptions.portName;
-    }
 
 
     var radarSpeedRelatedData = { GameID: 0, VisitorTeamID: 0, HomeTeamID: 0, PitcherPlayerID: 0, HitterPlayerID: 0 };
@@ -100,7 +330,7 @@ var RadarStalker2 = function (options){
                     
                         break;
                     default:
-                        debug("Invalid Packet Type detected " + data.readUInt8(0));
+                        logUtilHelper.log(appLogName, "app", "error", "Invalid Packet Type detected " + data.readUInt8(0));
                         break;
                 }
           
@@ -114,15 +344,15 @@ var RadarStalker2 = function (options){
                     var radarConfigProperty = objOptions.radarConfig[key];
                     if (radarConfigProperty.value === undefined || radarConfigProperty.value === null ){ 
                         foundone = true;
-                        mybuff = getRadarPacket(radarConfigProperty.id, 0, new Buffer([0])); // new Buffer.alloc(1));
+                        mybuff = getRadarPacket(radarConfigProperty.id, 0, new Buffer.alloc(1));  //04/24/2022 new Buffer([0])); // new Buffer.alloc(1));
                         radarSerialPort.write(mybuff, function(err) {
                             if (err === undefined){
                                 configRequestPending = true;
-                                debug('request Radar Config ' + key);
+                                logUtilHelper.log(appLogName, "app", "debug", 'request Radar Config ' + key);
                             }else{
                                 data.success = false;
                                 data.error = err;
-                                debug('Serial Port Write Error ' + err);
+                                logUtilHelper.log(appLogName, "app", "error", 'Serial Port Write Error ' + err);
                             }
                         });
                         break;
@@ -150,13 +380,13 @@ var RadarStalker2 = function (options){
     this.radarEmulatorCommand = function (options) {
         var data = options.data;
         var socket = options.socket;
-        var socketid
+        var socketid;
         if (socket) {
             socketid = socket.id;
         } else {
             socketid = "radar"
         }
-        debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+        logUtilHelper.log(appLogName, "app", "debug", 'radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
         if (objOptions.emulator === true) {
             radarSerialPort.radarEmulatorCommand(options);
         }
@@ -170,11 +400,11 @@ var RadarStalker2 = function (options){
         } else {
             socketid = "radar";
         }
-        debug('softwareConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+        logUtilHelper.log(appLogName, "app", "debug", 'softwareConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
         
         var softwareConfigProperty = objOptions.softwareConfig[data.cmd];
         if (softwareConfigProperty === undefined) {
-            debug('softwareConfigCommand: Error Config Property Not Found' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+            logUtilHelper.log(appLogName, "app", "error", 'softwareConfigCommand: Error Config Property Not Found' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
         } else
         {
             var myConfigVal;
@@ -186,7 +416,7 @@ var RadarStalker2 = function (options){
                     }
                     break;
                 case 'string':
-                    //debug('Error So far no Config accepts String as setable value not implemented');
+                    //logUtilHelper.log(appLogName, "app", "error", 'Error So far no Config accepts String as setable value not implemented');
                     softwareConfigProperty.value = data.data;
                     break;
             }
@@ -195,7 +425,7 @@ var RadarStalker2 = function (options){
     };
 
     this.resetRadarSettings = function () {
-        debug('resetRadarSettings called');
+        logUtilHelper.log(appLogName, "app", "debug",'resetRadarSettings called');
         //First Turn of the Transmitter so it stops sending us speed data to parse
         self.radarConfigCommand({
             data: {
@@ -227,7 +457,7 @@ var RadarStalker2 = function (options){
         } else {
             socketid = "radar";
         }
-        debug('radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+        logUtilHelper.log(appLogName, "app", "debug", 'radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
 
         //if this is a radarpower command reset the lastspeedtimestamp
         if (data.cmd === "TransmiterControl" && data.data === 1) {
@@ -244,10 +474,11 @@ var RadarStalker2 = function (options){
             //if its -1 this is not a radar Unit command but software config command
             radarConfigProperty.value = data.data;
             try{
-                nconf.save();
-                debug('Settings Saved');
+                //nconf.save();
+                self.emit('configSave', radarConfigProperty);
+                logUtilHelper.log(appLogName, "app", "debug", 'Settings Saved');
             } catch (ex) {
-                debug('setting save Error:' + ex);
+                logUtilHelper.log(appLogName, "app", "error", 'setting save Error:' + ex);
             }
         } else {
             var myConfigVal;
@@ -266,11 +497,11 @@ var RadarStalker2 = function (options){
                     break;
 
                 case 'hex':
-                    //debug('Error So far no Config accepts hex as setable value not implemented');
+                    //logUtilHelper.log(appLogName, "app", "debug", 'Error So far no Config accepts hex as setable value not implemented');
                     myConfigVal = Buffer.from(data.data, 'hex');
                     break;
                 case 'string':
-                    //debug('Error So far no Config accepts String as setable value not implemented');
+                    //logUtilHelper.log(appLogName, "app", "debug", 'Error So far no Config accepts String as setable value not implemented');
                     myConfigVal = Buffer.from(data.data);
                     break;
             }
@@ -285,7 +516,7 @@ var RadarStalker2 = function (options){
                 } else {
                     data.success = false;
                     data.error = err;
-                    debug('Serial Port Write Error ' + err);
+                    logUtilHelper.log(appLogName, "app", "error", 'Serial Port Write Error ' + err);
                 }
             });
         }
@@ -364,12 +595,12 @@ var RadarStalker2 = function (options){
                         value = data.toString("ascii", 8, PayloadLength + 6);
                         break;
                     default:
-                        debug('Error no datatype set for ' + ConfigPropertyName);
+                        logUtilHelper.log(appLogName, "app", "error", 'Error no datatype set for ' + ConfigPropertyName);
                 }
                 if (ConfigProperty.value !== value) {
                     ConfigProperty.value = value;
                     updateRadarConfigProperty = true;
-                    debug("radarConfigProperty received ", ConfigPropertyName, value)
+                    logUtilHelper.log(appLogName, "app", "debug", "radarConfigProperty received ", ConfigPropertyName, value)
                 }
                 if (updateRadarConfigProperty === true) {
                     //raise the event to app.js so it can emit it via socket.io to the browser
@@ -378,10 +609,10 @@ var RadarStalker2 = function (options){
                 }
                 configRequestPending = false;
             } else {
-                debug('Invalid Config ID ' + PacketConfigID);
+                logUtilHelper.log(appLogName, "app", "error", 'Invalid Config ID ' + PacketConfigID);
             }
         } else {
-            debug("Packet is Not For Us its For Device Address " + data.readUInt8(1));
+            logUtilHelper.log(appLogName, "app", "error", "Packet is Not For Us its For Device Address " + data.readUInt8(1));
         }
 
     }
@@ -419,7 +650,7 @@ var RadarStalker2 = function (options){
         for (var i = 0; i < NumberOfSpeedBlocks; i++) {
             //Next 15 bytes is the speedBlock
             if (data.length <= 8 + Offset) {
-                console.log('Invalid Length');
+                logUtilHelper.log(appLogName, "app", "warning", 'Invalid Length');
             }
             var UnitSpeedBlockStatusByte = data.readUInt8(8 + Offset);
             var UnitSpeedBlockStatus = { primaryDirection: ((2 === (2 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), secondaryDirection: ((4 === (4 & UnitSpeedBlockStatusByte)) ? 'in' : 'out'), transmiterStatus: ((1 === (1 & UnitSpeedBlockStatusByte)) ? 'on' : 'off') }
@@ -468,19 +699,15 @@ var RadarStalker2 = function (options){
                     Offset = Offset + 15;
                     break;
                 default:
-                    debug('Invalid Speed Block Id');
+                    logUtilHelper.log(appLogName, "app", "error", 'Invalid Speed Block Id');
                     break;
             }
         }
        
         if (speedData.liveSpeed > objOptions.radarConfig.LowSpeedThreshold.value || speedData.peakSpeed > objOptions.radarConfig.LowSpeedThreshold.value) {
-            debug("Speed Data live:" + speedData.liveSpeed + " " + speedData.liveSpeedDirection + " live2:" + speedData.liveSpeed2 + " " + speedData.liveSpeed2Direction);
+            logUtilHelper.log(appLogName, "app", "debug", "Speed Data live:" + speedData.liveSpeed + " " + speedData.liveSpeedDirection + " live2:" + speedData.liveSpeed2 + " " + speedData.liveSpeed2Direction);
         } 
-        //debug('data received ' + speedData.liveSpeed);
-        // If PeakSpeed is Enabled then we can group packets with the exact same PeakSpeed as a baseball can't speed up only slow down.
-        //if (speedData.liveSpeed > 0 || speedData.peakSpeed > 0 || speedData.liveSpeed2 > 0 || speedData.hitSpeed > 0 || speedData.hitSpeed2 > 0) {
-          //  debug("Andy Remove me p:" + speedData.peakSpeed + " " + speedData.peakSpeedDirection + " l:" + speedData.liveSpeed + " " + speedData.liveSpeedDirection + " h:" + speedData.hitSpeed + " " + speedData.hitSpeedDirection + " p2:" + speedData.peakSpeed2 + " " + speedData.peakSpeed2Direction + " l2:" + speedData.liveSpeed2 + " " + speedData.liveSpeed2Direction + " h2:" + speedData.hitSpeed2 + " " + speedData.hitSpeed2Direction);
-        //}
+        
         
         if (speedData.liveSpeed >= objOptions.radarConfig.LowSpeedThreshold.value) {
             if (commonData.currentRadarSpeedData.firstDirection === null) {
@@ -561,17 +788,10 @@ var RadarStalker2 = function (options){
             }
         } 
         
-        //if ( ((speedData.LiveSpeed > radarConfig.LowSpeedThreshold && speedData.PeakSpeed > radarConfig.LowSpeedThreshold) && (speedData.LiveSpeed != LastValidRadarSpeedData.LiveSpeed && speedData.PeakSpeed != LastValidRadarSpeedData.PeakSpeed && speedData.HitSpeed != LastValidRadarSpeedData.HitSpeed) ) || (LastValidRadarSpeedData.LiveSpeed > 0 && speedData.LiveSpeed == 0 && zeroCounter == zeroCounterLimit)){
-        //    LastValidRadarSpeedData = speedData;
-        //    debug('data sent to clients');
-        //    if (DbInited){
-        //        radarSpeedDataStmt.run(speedData.time, radarSpeedRelatedData.GameID, radarSpeedRelatedData.PitcherPlayerID, radarSpeedRelatedData.HitterPlayerID, speedData.LiveSpeedDirection, speedData.LiveSpeed, speedData.LiveSpeed2Direction, speedData.LiveSpeed2, speedData.PeakSpeedDirection,  speedData.PeakSpeed, speedData.PeakSpeedDirection2, speedData.PeakSpeed2, speedData.HitSpeedDirection, speedData.HitSpeed, speedData.HitSpeedDirection2, speedData.HitSpeed2);
-        //    }
-        //    io.emit('radarSpeed', speedData);
-        //}
+        
     };
     var recursiveTimerStart = function () {
-        debug("Keep alive Timer Execute!");
+        logUtilHelper.log(appLogName, "app", "debug", "Keep alive Timer Execute!");
         configRequestPending = false;
         
 
@@ -593,9 +813,9 @@ var RadarStalker2 = function (options){
             self.emit('radarTimeout', { lastSpeedDataTimestamp: commonData.lastSpeedDataTimestamp });
             radarSerialPort.write(getRadarPacket(81, 0, new Buffer.alloc(1)), function (err) {
                 if (err === undefined) {
-                    debug('request Radar Software Version Keep Alive');
+                    logUtilHelper.log(appLogName, "app", "debug", 'request Radar Software Version Keep Alive');
                 } else {
-                    debug('Serial Port Write Error Software Version Keep Alive' + err);
+                    logUtilHelper.log(appLogName, "app", "error", 'Serial Port Write Error Software Version Keep Alive' + err);
                 }
             });
         }
@@ -605,27 +825,27 @@ var RadarStalker2 = function (options){
 
     var radarSerialPort = null;
     if (objOptions.emulator === true) {
-        debug('starting radarStalker2 emulator on Fake Port ' + radarSerialPortName);
+        logUtilHelper.log(appLogName, "app", "info", 'starting radarStalker2 emulator on Fake Port ' + radarSerialPortName);
         
         radarSerialPort = new RadarEmulator(radarSerialPortName, {
             baudrate: objOptions.baudrate,
             autoOpen: false
-        });
+        }, logUtilHelper);
         
     } else {
-        debug('starting radarStalker2 on serial port ' + radarSerialPortName);
+        logUtilHelper.log(appLogName, "app", "info", 'starting radarStalker2 on serial port ' + radarSerialPortName);
         //version 4 syntax
-        radarSerialPort = new SerialPort(radarSerialPortName, {
+        radarSerialPort = new SerialPort({path: radarSerialPortName,
             baudRate: objOptions.baudrate,
             autoOpen:false}); 
         
     }
-    const radarPacketParser = radarSerialPort.pipe(new RadarPacketParser({ bufferSize: objOptions.packetParserBufferSize }));
+    const radarPacketParser = radarSerialPort.pipe(new RadarPacketParser({ bufferSize: objOptions.packetParserBufferSize }, logUtilHelper));
     radarPacketParser.on('data', radarSerialPortDataHandler);
     //set things in motion by opening the serial port and starting the keepalive timer
     radarSerialPort.open(function (err) {
         if (err) {
-            debug('open Error' + err);
+            logUtilHelper.log(appLogName, "app", "error", 'open Error' + err);
         }
         //Set things in motion by starting the recursiveTimer so we ask Software Version
         recursiveTimerStart();

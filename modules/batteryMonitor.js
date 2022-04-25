@@ -1,32 +1,27 @@
-﻿//radarStalker2.js
-//This Module will open uart and connect to a stalker Pro II radar sensor using a serial port
-//it then raises events based on events
-
+﻿//rbatteryMonitor.js
+const appLogName = "batteryMonitor"
 var util = require('util');
 var extend = require('extend');
 var EventEmitter = require('events').EventEmitter;
-var debug = require('debug')('batteryMonitor');
-var nconf = require('nconf');
-var BatteryMonitor = function (options) {
+var BatteryMonitor = function (options, logUtilHelper) {
     var self = this;
     var defaultOptions = {
         "fakeBatteryVoltage": 14.001,
         "fakeBatteryVoltageMin": 10.001,
         "fakeBatteryDecreaseValue": 0.001,
-        "analogPin": "P9_33",
+        "analogPin": "",
         "timerInterval": 60000,
         "maxHistoryCount": 500,
         "changeMinHistory": .2,
         "changeMinEmit": .1
     }
-    nconf.file('./configs/batteryMonitorConfig.json');
-    var configFileSettings = nconf.get();
-    var objOptions = extend({}, defaultOptions, configFileSettings, options);
+    
+    var objOptions = extend({}, defaultOptions,  options);
 
 
     // EventEmitters inherit a single event listener, see it in action
     this.on('newListener', function (listener) {
-        debug('batteryMonitor Event Listener: ' + listener);
+        logUtilHelper.log(appLogName, "app", 'batteryMonitor Event Listener: ' + listener);
     });
 
     var commonData = {
@@ -40,7 +35,7 @@ var BatteryMonitor = function (options) {
 
     var readBatteryVoltage = function () {
 
-        if (process.platform === 'win32') {
+        if (objOptions.analogPin === '') {
             //if we are windows they we are debug so no way to read voltage so fake it
 
             if (objOptions.fakeBatteryVoltage > objOptions.fakeBatteryVoltageMin) {
@@ -66,7 +61,7 @@ var BatteryMonitor = function (options) {
 
     var processBatteryVoltage = function (x) {
         var BatteryVoltage = ((x.value * 1.800) / (.107142857));
-        debug('Battery Voltage ' + BatteryVoltage);
+        logUtilHelper.log(appLogName, "app", 'Battery Voltage ' + BatteryVoltage);
         var difference = commonData.lastBatteryVoltage.batteryVoltage - BatteryVoltage;
         if (difference < 0) {
             //if negitive make it a positive value
@@ -92,7 +87,7 @@ var BatteryMonitor = function (options) {
     }
 
     var recursiveTimerStart = function () {
-        debug("Timer Execute!");
+        logUtilHelper.log(appLogName, "app", "Timer Execute!");
         readBatteryVoltage();
         setTimeout(recursiveTimerStart, objOptions.timerInterval);
     };
@@ -103,18 +98,19 @@ var BatteryMonitor = function (options) {
         //b = require('bonescript');
 
         if (isPi()) {
-            debug('Running on Raspberry Pi!');
+            logUtilHelper.log(appLogName, "app", 'Running on Raspberry Pi!');
             self.platform = "raspberry";
         } else {
             try {
-                
-                var BeagleBone = require('beaglebone-io');
-                b = new BeagleBone();
-                self.platform = "beaglebone";
-                b.on('ready', function () {
-                    this.pinMode(objOptions.analogPin, this.MODES.ANALOG);
-                    this.analogRead(objOptions.analogPin, processBatteryVoltage);
-                });
+                if (objOptions.analogPin !== ""){
+                    var BeagleBone = require('beaglebone-io');
+                    b = new BeagleBone();
+                    self.platform = "beaglebone";
+                    b.on('ready', function () {
+                        this.pinMode(objOptions.analogPin, this.MODES.ANALOG);
+                        this.analogRead(objOptions.analogPin, processBatteryVoltage);
+                    });
+                }
             } catch (ex) {
                 debug('Not running on Beagle Bone!');
             }

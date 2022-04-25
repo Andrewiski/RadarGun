@@ -1,12 +1,8 @@
 'use strict';
-
-
-
 const debug = require('debug')('testWalkupFFplay');
 const path = require('path');
 const fs = require('fs');
 const extend = require('extend');
-
 
 var defaultOptions = {
     "filePath": path.join(__dirname, 'data', "kickstartmyheart.mp3")

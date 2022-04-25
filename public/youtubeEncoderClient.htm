@@ -9,8 +9,7 @@
     <title>Stalker Radar Baseball</title>
     <base href="/">
 
-    <!--<link href="stylesheets/bootstrap.min.css" rel="stylesheet" />
-    <link href="stylesheets/bootstrap-theme.min.css" rel="stylesheet" />-->
+   
     <link href="/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/javascript/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
     <link href="/javascript/angular-ui-bootstrap/ui-bootstrap-csp.css" rel="stylesheet" />
@@ -42,19 +41,75 @@
         $(function () {
             var socket = io.connect();
 
+
+
+           socket.on('connection', function (message) {
+                console.log('socket.io connection', message);
+                $(".browserConnected").removeClass("text-danger").addClass("text-success");
+            });
+           socket.on('connect_error', function (message) {
+                console.log('socket.io connect_error', message);
+                $(".browserConnected").removeClass("text-success").addClass("text-danger");
+            });
+
+           socket.on('connect_timeout', function (message) {
+                console.log('socket.io connect_timeout');
+                $(".browserConnected").removeClass("text-success").addClass("text-danger");
+            });
+
+           socket.on('reconnecting', function (message) {
+                console.log('socket.io reconnecting', message);
+                $(".browserConnected").removeClass("text-success").addClass("text-danger");
+            });
+           socket.on('reconnect', function (message) {
+                console.log('socket.io reconnect', message);
+                $(".browserConnected").removeClass("text-danger").addClass("text-success");
+            });
+
+           socket.on('ping', function (message) {
+                //console.log('socket.io ping sent to server', message);
+                console.log('socket.io ping sent to server');
+            });
+           socket.on('pong', function (message) {
+                console.log('socket.io pong received from server', message);
+                $(".browserConnected").removeClass("text-danger").addClass("text-success");
+            });
+
+           socket.on('RadarMonitorRemoteServerStatus', function (message) {
+                updateRadarMonitorRemoteServerStatus(message);
+            });
+
+
+            var updateRadarMonitorRemoteServerStatus = function (radarMonitorServerConnectedStatus) {
+                
+                if (radarMonitorServerConnectedStatus.status === "connected") {
+                    $(".radarMonitorServerConnected").removeClass("text-danger").addClass("text-success");
+                } else {
+                    $(".radarMonitorServerConnected").removeClass("text-success").addClass("text-danger");
+                }
+                
+            };
             var streamStartRemote = function (evt) {
-                //Tell server the inningChanged
-                socket.emit("stream", { cmd: "startRemote" });
+                //Tell server the start the rmtp feed
+                socket.emit("browserCommand", { cmd: "startRemote" });
             }
 
             var streamStopRemote = function (evt) {
-                //Tell server the inningChanged
-                socket.emit("stream", { cmd: "stopRemote" });
+                //Tell server the stop the rmtp feed
+                socket.emit("browserCommand", { cmd: "stopRemote" });
             }
 
+            socket.on("")
+            var connectRadarMonitorServerUrl = function(evt){
+                //Tell server to connect to the radar Monitor Server
+                var radarMonitorServerUrl = $("#radarMonitorServerUrl").val();
+                socket.emit("browserCommand", { cmd: "connectRadarMonitorServerUrl", data: {radarMonitorServerUrl:radarMonitorServerUrl} });
+            }
             $(".streamStartRemote").on("click", streamStartRemote);
 
             $(".streamStopRemote").on("click", streamStopRemote);
+
+            $(".connectRadarMonitorServerUrl").on("click", connectRadarMonitorServerUrl);
 
         })
 
@@ -66,7 +121,17 @@
     <div class="container-fluid">
         <div id="errormsg"></div>
         <form name="youtubeEncoder" id="radarmonitor" class="sb">
-            <div class="header">youTubeEncoder - Digital Example, LLC Copyright &copy; 2013-2021</div>
+            <div class="header">YouTube Encoder - Digital Example, LLC Copyright &copy; 2013-2022 <span class="h2"><i class="fa fa-rss browserConnected text-success" title="Browser To Server"></i> <i class="fa fa-cloud radarMonitorServerConnected" title="Radar Monitor Server Connected"></i></span></div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="hostUrl">Radar Monitor Server Url</label>
+                        <input class="form-control" type="text" id="radarMonitorServerUrl">
+                        <button class="btn btn-primary connectRadarMonitorServerUrl">Connect</button>
+                    </div>
+
+                </div>
+            </div>
             <div>
                 <div class="btn-group" role="group" aria-label="Buttons">
                     <button class="btn btn-primary streamStartRemote">Start Remote Stream</button>

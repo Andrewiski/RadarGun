@@ -1,9 +1,6 @@
 ﻿//mcp9808.Js
 //This Module will connect to the i2c MCP9808 Temp Controller and read the tempature
 
-
-
-
 var util = require('util');
 var extend = require('extend');
 var EventEmitter = require('events').EventEmitter;

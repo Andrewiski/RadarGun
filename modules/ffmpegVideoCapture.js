@@ -1,14 +1,14 @@
 'use strict';
+const appLogName = "ffmpegVideoCapture";
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-const debug = require('debug')('ffmpegVideoCapture');
+//const debug = require('debug')('ffmpegVideoCapture');
 const path = require('path');
-const nconf = require('nconf');
 const extend = require('extend');
-var ffmpeg = require('fluent-ffmpeg');
+const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const { Stream } = require("stream");
-var FfmpegOverlay = function (options) {
+var FfmpegOverlay = function (options, logUtilHelper) {
 
     var self = this;
     var defaultOptions = {

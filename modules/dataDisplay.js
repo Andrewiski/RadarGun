@@ -1,15 +1,15 @@
 ﻿//dataDisplay.js
 //This Module will manage displaying speedData to lcd and led displays directly connected to the beaglebone
 //
-
+var appLogName = 'dataDisplay';
 var util = require('util');
 var extend = require('extend');
 var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('dataDisplay');
-var nconf = require('nconf');
+
 var AdafruitLedBackpack = require('./AdafruitLedBackpack.js');;
 
-var dataDisplay = function (options) {
+var dataDisplay = function (options, logUtilHelper) {
     var self = this;
     
     var defaultOptions = {
@@ -62,9 +62,8 @@ var dataDisplay = function (options) {
     }
 
 
-    nconf.file('./configs/dataDisplayConfig.json');
-    var configFileSettings = nconf.get();
-    var objOptions = extend({}, defaultOptions, configFileSettings);
+
+    var objOptions = extend({}, defaultOptions,options);
 
     var commonData = { ledDisplays: [], lcdDisplays: [] };
 

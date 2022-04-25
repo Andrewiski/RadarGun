@@ -1,5 +1,5 @@
+const appLogName = "radarPacketParser";
 const { Transform } = require('stream');
-var debug = require('debug')('radarPacketParser');
 /**
  * Emit data every number of bytes
  * @extends Transform
@@ -14,13 +14,13 @@ const parser = port.pipe(new RadarPacketParser({length: 8}))
 parser.on('data', console.log) // will have 8 bytes per data event
  */
 class RadarPacketParser extends Transform {
-    constructor(options = {}) {
+    constructor(options = {}, logUtilHelper ) {
         super(options);
 
         if (options.bufferSize === undefined || options.bufferSize === 0 ) {
             throw new TypeError('"bufferSize" has a 0 or undefined length');
         }
-        
+        this.logUtilHelper = logUtilHelper
         this.bufferSize = options.bufferSize;
         this.position = 0;
         this.buffer = Buffer.alloc(this.bufferSize);
@@ -29,9 +29,9 @@ class RadarPacketParser extends Transform {
     _transform(chunk, encoding, cb) {        
         if (this.position + chunk.length > this.bufferSize) {
             //We Are going to blow are max buffer size as something has gone wrong so discard saved buffer and start over
-            console.log('RadarPacketParser over our bufferSize discarding partial packet buffer. bufferSize = ' + this.bufferSize + " position = " + this.position + " chunk.length = " + chunk.length);
+            this.logUtilHelper.log(appLogName, "app", "warning", 'RadarPacketParser over our bufferSize discarding partial packet buffer. bufferSize = ' + this.bufferSize + " position = " + this.position + " chunk.length = " + chunk.length);
 
-            debug(chunk.toString('hex') + "\n\n")
+            //console.log(appLogName, "app", "trace", chunk.toString('hex') + "\n\n")
             this.position = 0;
             cb();
             return;
@@ -72,7 +72,7 @@ class RadarPacketParser extends Transform {
                                 speedPacketLength = 53; // (7 + (15 * 2) + 1)
                                 break;
                             default:
-                                debug("Invalid Byte detected in Speed Stream Packet " + this.buffer.readUInt8(i) + " at position " + (i + 6));
+                                logUtilHelper.log(appLogName, "app", "warning", "Invalid Byte detected in Speed Stream Packet " + this.buffer.readUInt8(i) + " at position " + (i + 6));
                                 break;
                         }
                         if (speedPacketLength > 0) {
@@ -99,7 +99,7 @@ class RadarPacketParser extends Transform {
                         //Proboly should check for a max packet length here in case we get a bad length 
 
                         if (configPacketLength > 128) {
-                            debug('Invalid Config Data Packet Length ' + configPacketLength);
+                            logUtilHelper.log(appLogName, "app", "warning", 'Invalid Config Data Packet Length ' + configPacketLength);
                             break;
                         }
 
@@ -117,7 +117,7 @@ class RadarPacketParser extends Transform {
                     }
                     break;
                 default:
-                    debug("Invalid Byte detected " + this.buffer.readUInt8(i) + " at position " + i);
+                    logUtilHelper.log(appLogName, "app", "warning", "Invalid Byte detected " + this.buffer.readUInt8(i) + " at position " + i);
                     break;
             }
             if (needmoredata === true) {

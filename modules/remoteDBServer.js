@@ -1,5 +1,6 @@
 "use strict";
-const debug = require('debug')('remoteDBServer');
+const appLogName = "remoteMongoDBServer";
+//const debug = require('debug')('remoteDBServer');
 const extend = require('extend');
 const Defer = require('node-promise').defer;
 const Logger = require("./logger.js");
@@ -8,62 +9,14 @@ var moment = require('moment');
 const assert = require('assert');
 
 
-var remoteDBServer = function (options) {
+var remoteMongoDBServer = function (options, logUtilHelper) {
     var self = this;
     var defaultOptions = {
         mongoDbServerUrl: "",
         mongoDbDatabaseName:""
     };
     var objOptions = extend({}, defaultOptions, options);
-    self.objOptions = objOptions;
-    self.appLogger = null;
-    self.cache = {};
-    var appLogHandler = function (logData) {
-        //add to the top of the
-        privateData.logs.push(logData);
-
-        if (privateData.logs.length > objOptions.maxLogLength) {
-            privateData.logs.shift();
-        }
-        var debugArgs = [];
-        //debugArgs.push(logData.timestamp);
-        debugArgs.push(logData.logLevel);
-        for (let i = 0; i < logData.args.length; i++) {
-            debugArgs.push(logData.args[i]);
-        }
-        debug(appLogger.arrayPrint(debugArgs));
-    }
-    if (objOptions.enableLog) {
-        self.appLogger = new Logger({
-            logLevel: objOptions.logLevel,
-            logName: "deapirequesthandler",
-            logEventHandler: appLogHandler,
-            logFolder: objOptions.logDirectory
-        })
-    }
-
-    var writeToLog = function (loglevel) {
-
-        if (self.appLogger) {
-            self.appLogger(arguments);
-        } else {
-            let args = []
-            for (let i = 0; i < arguments.length; i++) {
-                if (arguments[i] === undefined) {
-                    args.push("undefined");
-                } else if (arguments[i] === null) {
-                    args.push("null");
-                }
-                else {
-                    args.push(JSON.parse(JSON.stringify(arguments[i])))
-                }
-
-            }
-            debug(args);
-        }
-    };
-
-
+    self.options = objOptions;
     var BindRoutes = function (routes) {
         
         try {
@@ -77,6 +30,7 @@ var remoteDBServer = function (options) {
             
 
         } catch (ex) {
+            logUtilHelper.log(appLogName, "app", "error", "BindRoutes", ex);
             res.status(500).json({ "msg": "An Error Occured!", "error": ex });
         }
         
@@ -110,11 +64,13 @@ var remoteDBServer = function (options) {
                         return null;
                     }
                 } catch (ex) {
+                    logUtilHelper.log(appLogName, "app", "error", "getGames", ex);
                     res.status(500).json({ "msg": "An Error Occured!", "error": ex });
                     client.close();
                 }
             });
         } catch (ex) {
+            logUtilHelper.log(appLogName, "app", "error", "getGames", ex);
             res.status(500).json({ "msg": "An Error Occured!", "error": ex });
         }
 
@@ -131,6 +87,7 @@ var remoteDBServer = function (options) {
             )
                
         } catch (ex) {
+            logUtilHelper.log(appLogName, "app", "error", "getGame", ex);
             res.status(500).json({ "msg": "An Error Occured!", "error": ex });
         }
 
@@ -139,8 +96,10 @@ var remoteDBServer = function (options) {
 
     var putGameByGameId = function (req, res) {
         try {
+            logUtilHelper.log(appLogName, "app", "debug", "putGameByGameId", result);
             res.json(game);
         } catch (ex) {
+            logUtilHelper.log(appLogName, "app", "error", "putGameByGameId", ex);
             res.status(500).json({ "msg": "An Error Occured!", "error": ex });
         }
     }
@@ -160,20 +119,25 @@ var remoteDBServer = function (options) {
                         collection.findOne(findQuery)
                             .then(
                                 function (doc) {
+                                    logUtilHelper.log(appLogName, "app", "debug", "findGameByGameId", doc);
                                     deferred.resolve(doc);
                                 },
                                 function (err) {
+                                    logUtilHelper.log(appLogName, "app", "error", "findGameByGameId", err);
                                     deferred.reject({ "msg": "An Error Occured!", "error": err });
                                 },
                             );
                     } else {
+                        logUtilHelper.log(appLogName, "app", "error", "findGameByGameId", "Collection Not Found!", err);
                         deferred.reject({ "msg": "Collection Not Found!", "error": err });
                     }
                 } catch (ex) {
+                    logUtilHelper.log(appLogName, "app", "error", "findGameByGameId", ex);
                     deferred.reject({ "msg": "An Error Occured!", "error": ex });
                 }
             });
         } catch (ex) {
+            logUtilHelper.log(appLogName, "app", "error", "findGameByGameId", ex);
             deferred.reject({ "msg": "An Error Occured!", "error": ex });
         }
         return deferred.promise;
@@ -194,20 +158,25 @@ var remoteDBServer = function (options) {
                         collection.updateOne(findQuery, options.game, {upsert:true})
                             .then(
                                 function (result) {
+                                    logUtilHelper.log(appLogName, "app", "debug", "putGameByGameId", result);
                                     deferred.resolve(options.game);
                                 },
                                 function (err) {
+                                    logUtilHelper.log(appLogName, "app", "error", "putGameByGameId", err);
                                     deferred.reject({ "msg": "An Error Occured!", "error": err });
                                 },
                             );
                     } else {
+                        logUtilHelper.log(appLogName, "app", "error", "putGameByGameId", err);
                         deferred.reject({ "msg": "Collection Not Found!", "error": err });
                     }
                 } catch (ex) {
+                    logUtilHelper.log(appLogName, "app", "error", "putGameByGameId", ex);
                     deferred.reject({ "msg": "An Error Occured!", "error": ex });
                 }
             });
         } catch (ex) {
+            logUtilHelper.log(appLogName, "app", "error", "putGameByGameId", ex);
             deferred.reject({ "msg": "An Error Occured!", "error": ex });
         }
         return deferred.promise;

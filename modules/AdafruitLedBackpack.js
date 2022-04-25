@@ -1,16 +1,10 @@
 ﻿//adafruitLedBackpack.Js
 //This Module will connect to the i2c ht16k33 led Backpack and allow setting of the display
-
-
-
-
 var util = require('util');
 var extend = require('extend');
 var EventEmitter = require('events').EventEmitter;
-//var bonescript = require('octalbonescript');
 var i2c;
 var debug = require('debug')('adafruitLedBackpack');
-
 var adafruitLedBackpack = function () {
     var self = this;
     var defaultOptions = {

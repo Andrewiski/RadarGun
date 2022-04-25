@@ -3,7 +3,7 @@
     "configurations": [
         
         {
-            "env": {"localDebug":"true", "DEBUG": "app,radar,batteryMonitor,ffmpegOverlay,youtubeEncoderClient"},
+            "env": {"configDirectory": "./config/private/debug" , "localDebug":"true", "DEBUG": "radarMonitor,radarStalker2,batteryMonitor,ffmpegOverlay,youtubeEncoderClient"},
             "command": "npm start",
             "name": "LocalDebug Run npm start",
             "request": "launch",
@@ -11,27 +11,12 @@
         },
 
         {
-            "env": {"DEBUG": "app"},
-            "command": "npm start",
-            "name": "Run npm start",
-            "request": "launch",
-            "type": "node-terminal"
-        },
-        
-        {
-            "env": {"DEBUG": "youtubeEncoderClient"},
+            "env": {"configDirectory": "./config/private/youtubeEncoder", "localDebug":"true", "DEBUG": "youtubeEncoderClient"},
             "command": "node youtubeEncoderClient.js",
             "name": "Run node youtubeEncoderClient.js",
             "request": "launch",
             "type": "node-terminal"
-        },
-
-        {
-            "env": {"localDebug":"true", "DEBUG": "youtubeEncoderClient"},
-            "command": "node youtubeEncoderClient.js",
-            "name": "Local Debug Run node youtubeEncoderClient.js",
-            "request": "launch",
-            "type": "node-terminal"
         }
+        
     ]
 }

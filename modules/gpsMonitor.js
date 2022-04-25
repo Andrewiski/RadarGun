@@ -1,78 +1,56 @@
 ﻿//GpsMonitor.js
 //This Module will open uart and connect to a nmea gps sensor using a serial port
 //it then raises events based on events
+const appLogName = "gpsMonitor";
+const util = require('util');
+const extend = require('extend');
+const EventEmitter = require('events').EventEmitter;
 
-var util = require('util');
-var extend = require('extend');
-var EventEmitter = require('events').EventEmitter;
-var debug = require('debug')('gpsMonitor');
-var nconf = require('nconf');
+//var debug = require('debug')('gpsMonitor');
 var exec = require('child_process').exec;
-var SerialPort = require("serialport");
-const Readline = require('@serialport/parser-readline')
+const { SerialPort } = require('serialport')
+const { Readline } = require('@serialport/parser-readline')
 
-var GpsMonitor = function (options) {
+
+var GpsMonitor = function (options, logUtilHelper) {
     var self = this;
     var defaultOptions = {
-        //loaded from the config file
+        "updateHostDateTime": false,
+        "portName": "",
+        "baudrate": 9600
     };
-    nconf.file('./configs/gpsMonitorConfig.json');
-    var configFileSettings = nconf.get();
-    var objOptions = extend({}, defaultOptions, configFileSettings, options);
-
-
+    
+    var objOptions = extend({}, defaultOptions, options);
     // EventEmitters inherit a single event listener, see it in action
     this.on('newListener', function (listener) {
-        debug('gpsMonitor Event Listener: ' + listener);
+        logUtilHelper.log(appLogName, "app", "debug", 'gpsMonitor Event Listener: ' + listener);
     });
 
     var commonData = {
         needToUpdateHostDateTime: objOptions.updateHostDateTime
     }
     var isBeagleBone = false
-    //var boneScript;
+    
     var isEnabled = false;
 
-       //v4 syntax
-    //var serialPort = require("serialport")
-    //var SerialPort = serialPort.SerialPort
-    //use Global so we can access our instance of Serial Port from RadarCommandFiles
-
+    
     var gpsSerialPortName = '';
 
     var gpsSerialPort;
     try{
         if (process.platform === 'win32') {
-            gpsSerialPortName = objOptions.win32.portName;
-            if (gpsSerialPortName) {
-                gpsSerialPort = new SerialPort(gpsSerialPortName, {
-                    baudRate: objOptions.win32.baudrate,
-                    //parser: SerialPort.parsers.readline('\r\n'),
-                    autoOpen: false
-                }); // this is the openImmediately flag [default is true]
-                isEnabled = true;
-            } 
-            //
+            isBeagleBone === false; 
         } else {
-            gpsSerialPortName = objOptions.portName;
-            //var b = require('bonescript');
-            
-            if (gpsSerialPortName) {
-                isBeagleBone === true;
-                //gpsSerialPort = b.serialOpen(gpsSerialPortName, {
-                //    baudrate: objOptions.baudrate,
-                //    parser: SerialPort.parsers.readline('\r\n') //SerialPort.parsers.readline('\n')
-                //}, function () {
-                //    debug('bonescript serial device activated');
-                //});
-                gpsSerialPort = new SerialPort(gpsSerialPortName, {
-                    baudRate: objOptions.baudrate,
-                    //parser: SerialPort.parsers.readline('\r\n'),
-                    autoOpen:false
-                }); // this is the openImmediately flag [default is true]
-                isEnabled = true;
-            }
-
+            isBeagleBone === true;
+        }
+        gpsSerialPortName = objOptions.portName;
+        if (gpsSerialPortName) {
+            gpsSerialPort = new SerialPort({path: gpsSerialPortName,
+                baudRate: objOptions.baudrate,
+                //parser: SerialPort.parsers.readline('\r\n'),
+                autoOpen: false
+            }); // this is the openImmediately flag [default is true]
+            isEnabled = true;
         }
         
     } catch (ex) {
@@ -80,7 +58,7 @@ var GpsMonitor = function (options) {
     }
 
 
-    debug('started gpsMonitor on port ' + gpsSerialPortName);
+    logUtilHelper.log(appLogName, "app", "debug", 'started gpsMonitor on port ' + gpsSerialPortName);
     var GPS = require('gps');
     var gps = new GPS();
     gps.on('data', function (data) {
@@ -91,18 +69,18 @@ var GpsMonitor = function (options) {
             exec('date -s "' + data.time.toString() + '"', function (error, stdout, stderr) {
                 if (error) {
                     //throw error
-                    debug("error setting host time to " + data.time.toString(), error);
+                    logUtilHelper.log(appLogName, "app", "debug", "error setting host time to " + data.time.toString(), error);
                 } else {
                     // Clock should be set now
                     commonData.needToUpdateHostDateTime == true
-                    debug("Set host time to " + data.time.toString());
+                    logUtilHelper.log(appLogName, "app", "debug", "Set host time to " + data.time.toString());
                     self.emit('gpsHostTime', { msg: "Set host time to " + data.time.toString(), data: data });
                 }
             });
         }
 
         if (this.needGpsUpdate(data) === true) {
-            debug("Gps " + data.time.toString());
+            logUtilHelper.log(appLogName, "app", "debug", "Gps " + data.time.toString());
             self.emit('gpsHostTime', { msg: "Set host time to " + data.time.toString(), data: data });
         }
 
@@ -125,7 +103,7 @@ var GpsMonitor = function (options) {
         //gpsSerialPort.on('data', handleGpsSerialData);
         gpsSerialPort.open(function (err) {
             if (err) {
-                debug('open Error' + err);
+                logUtilHelper.log(appLogName, "app", "debug", 'open Error' + err);
             }
         });
     }

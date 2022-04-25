@@ -49,7 +49,7 @@
    If you want to add a call, just write a function that 
    returns a promise and add it to the when call below
  ############################################################*/
-    $(document).ready(function () {
+    $(function () {
         try {
             //Now manually bootstrap angular
             //window.name = "NG_ENABLE_DEBUG_INFO!";

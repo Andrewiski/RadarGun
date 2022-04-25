@@ -1,123 +1,43 @@
 'use strict';
-var util = require('util');
-var EventEmitter = require('events').EventEmitter;
-const debug = require('debug')('ffmpegOverlay');
+const appLogName = "ffmpegOverlay";
+const util = require('util');
+const EventEmitter = require('events').EventEmitter;
 const path = require('path');
-const nconf = require('nconf');
 const extend = require('extend');
-var ffmpeg = require('fluent-ffmpeg');
+const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const { Stream } = require("stream");
-var FfmpegOverlay = function (options) {
+var FfmpegOverlay = function (options, logUtilHelper) {
+
+    if(logUtilHelper === null){
+        throw new Error("logUtilHelper Can't be Null");
+    }
 
     var self = this;
-    var defaultOptions = {
-        "input": "video='Integrated Camera':audio='Microphone (Realtek High Definition Audio)'",  // "rtsp://10.199.0.2:7447/t2N7OTZ2n8ScSTtu",
-        "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/7w0t-zhy3-0wzw-9kw8-b1md",
-        "logLevel": "debug",
-        //"videoCodec": "h264_nvenc",  // libx264
-        "inputOptions": ["-f dshow", "-stimeout 30000000"], // ["-rtsp_transport tcp","-stimeout 30000000"]
-        "outputOptions": ["-pix_fmt +", "-keyint_min 4", "-c:v h264_nvenc", "-c:a aac", "-f flv"],    //["-x264-params keyint=4:scenecut=0", "-pix_fmt +", "-keyint_min 4", "-c:v libx264","-c:a aac"]
-        "capture":true
+    var defaultOptions = 
+    {
+        "input": "",
+        "rtmpUrl": "",
+        "inputOptions": [ "-rtsp_transport tcp", "-stimeout 30000000" ],
+        "outputOptions": [ "-pix_fmt +", "-c:v libx264", "-preset:very fast", "-c:a aac", "-f flv" ],
+        "capture": false,
+        "overlayFileName": "overlay.txt",
+        "videoFilters": {
+          "filter": "drawtext",
+          "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
+        } 
+    // {
+    //     "input": "video='Integrated Camera':audio='Microphone (Realtek High Definition Audio)'",
+    //     "rtmpUrl": "",
+    //     "logLevel": "info",
+    //     //"videoCodec": "h264_nvenc",  // libx264
+    //     "inputOptions": ["-f dshow", "-stimeout 30000000"], // ["-rtsp_transport tcp","-stimeout 30000000"]
+    //     "outputOptions": ["-pix_fmt +", "-keyint_min 4", "-c:v h264_nvenc", "-c:a aac", "-f flv"],    //["-x264-params keyint=4:scenecut=0", "-pix_fmt +", "-keyint_min 4", "-c:v libx264","-c:a aac"]
+    //     "capture":true
+    // }
     }
-
-    //
-    if (process.env.localDebug === 'true') {
-        nconf.file('./configs/debug/ffmpegConfig.json');
-    } else {
-        nconf.file('./configs/ffmpegConfig.json');
-    }
-
-
-    var configFileSettings = nconf.get();
-
-
-    var objOptions = extend({}, defaultOptions, configFileSettings, options);
-
-    var isObject = function (a) {
-        return (!!a) && (a.constructor === Object);
-    };
-
-    var isArray = function (a) {
-        return (!!a) && (a.constructor === Array);
-    };
-
-    var CircularChunkArray = [];
-
-    var arrayPrint = function (obj) {
-        var retval = '';
-        var i;
-        for (i = 0; i < obj.length; i++) {
-            if (retval.length > 0) {
-                retval = retval + ', ';
-            }
-            retval = retval + objPrint(obj[i]);
-        }
-
-        return retval;
-    };
-
-    var objPrint = function (obj) {
-        if (obj === null) {
-            return 'null';
-        } else if (obj === undefined) {
-            return 'undefined';
-        } else if (isArray(obj)) {
-            return arrayPrint(obj);
-        } else if (isObject(obj)) {
-            return JSON.stringify(obj);
-        } else {
-            return obj.toString();
-        }
-    };
-
-    var logLevels = {
-        'quiet': -8, //Show nothing at all; be silent.
-        'panic': 0, //Only show fatal errors which could lead the process to crash, such as an assertion failure.This is not currently used for anything.
-        'fatal': 8, //Only show fatal errors.These are errors after which the process absolutely cannot continue.
-        'error': 16, //Show all errors, including ones which can be recovered from.
-        'warning': 24, //Show all warnings and errors.Any message related to possibly incorrect or unexpected events will be shown.
-        'info': 32, //Show informative messages during processing.This is in addition to warnings and errors.This is the default value.
-        'verbose': 40,  //Same as info, except more verbose.
-        'debug': 48, //Show everything, including debugging information.
-        'trace': 56
-    };
-
-
-    var writeToLog = function (logLevel) {
-        try {
-            if (shouldLog(logLevel, objOptions.logLevel) === true) {
-                var logData = { timestamp: new Date(), logLevel: logLevel, args: arguments };
-                debug(arrayPrint(arguments));
-                //console.log(arrayPrint(arguments));
-            }
-            self.emit("Log", logData);
-        } catch (ex) {
-            debug('error', 'Error WriteToLog', ex);
-        }
-    };
-
-    var getLogLevel = function (logLevelName) {
-
-        if (logLevels[logLevelName]) {
-            return logLevels[logLevelName];
-        } else {
-            return 100;
-        }
-    };
-
-
-
-    var shouldLog = function (logLevelName, logLevel) {
-
-        if (getLogLevel(logLevelName) <= getLogLevel(logLevel)) {
-            return true;
-        } else {
-            return false;
-        }
-    };
-
-
+   
+    var objOptions = extend({}, defaultOptions, options);
 
     if (process.platform === 'win32' && (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '')) {
         process.env.FFMPEG_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffmpeg.exe');
@@ -262,7 +182,7 @@ var FfmpegOverlay = function (options) {
                 }
             }
         } catch (ex) {
-            writeToLog('error', "error parsing stderror", stderr);
+            logUtilHelper.log(appLogName, "app", 'error', "error parsing stderror", stderr);
         }
         return data;
     };
@@ -276,21 +196,21 @@ var FfmpegOverlay = function (options) {
             case 'verbose':
                 if (stdOut.values.size) {
                     commonData.streamStats.info = stdOut.values;
-                    writeToLog('trace', 'parsed stdErr: ', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'trace', 'parsed stdErr: ', stdOut);
                 } else {
-                    writeToLog('debug', 'parsed stdErr: ', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'debug', 'parsed stdErr: ', stdOut);
                 }
             
                 break;
             default:
-                writeToLog('debug', 'parsed stderr: ', stdOut);
+                logUtilHelper.log(appLogName, "app", 'debug', 'parsed stderr: ', stdOut);
         }
 
     
     };
 
     var commandError = function (err, stdout, stderr) {
-        writeToLog('error', 'an error happened: ' + err.message, err, stdout, stderr);
+        logUtilHelper.log(appLogName, "app", 'error', 'an error happened: ' + err.message, err, stdout, stderr);
         commonData.streamStats.status = "disconnected";
         commonData.streamStats.error = err;
         commonData.streamStats.stdout = stdout;
@@ -315,13 +235,13 @@ var FfmpegOverlay = function (options) {
         commonData.streamStats.status = "disconnected";
         commonData.streamStats.error = "commandEnd Called";
         self.emit('streamStats', commonData.streamStats);
-        writeToLog('error', 'Source Stream Closed');
+        logUtilHelper.log(appLogName, "app", 'error', 'Source Stream Closed');
         setTimeout(restartStream, 30000);
     };
 
     var restartStream = function () {
         //this is where we would play a local file until we get reconnected to internet.
-        writeToLog('error', 'Restarting incoming Stream because it was Closed');
+        logUtilHelper.log(appLogName, "app", 'error', 'Restarting incoming Stream because it was Closed');
    
         startIncomingStream();
     };
@@ -340,7 +260,7 @@ var FfmpegOverlay = function (options) {
     transStream = new Stream.Transform();
     transStream._transform = function (chunk, encoding, done) {
         try {
-            writeToLog('debug', '[' + transChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+            logUtilHelper.log(appLogName, "app", 'debug', '[' + transChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
             this.push(chunk);
             //Write to any active mp4 streams
             //for (const item of Object.values(commonData.activeMp4Streams)) {
@@ -363,7 +283,7 @@ var FfmpegOverlay = function (options) {
 
             return done();
         } catch (ex) {
-            writeToLog('trace', "error", ex);
+            logUtilHelper.log(appLogName, "app", 'trace', "error", ex);
         }
     };
 
@@ -376,7 +296,7 @@ var FfmpegOverlay = function (options) {
         }
         commonData.streamStats.status = "connected"; 
         self.emit('streamStats', commonData.streamStats);
-        writeToLog("debug", "Source Video URL", objOptions.rtspUrl)
+        logUtilHelper.log(appLogName, "app", "debug", "Source Video URL", objOptions.rtspUrl)
 
         command = ffmpeg({ source: objOptions.input });
 
@@ -399,15 +319,15 @@ var FfmpegOverlay = function (options) {
             command.output(objOptions.rtmpUrl)
             command.run();
         }
-        debug("info", "ffmpeg Started");
+        logUtilHelper.log(appLogName, "app", "info", "ffmpeg Started");
     };
 
     var streamStart = function (throwError) {
-    writeToLog('info', 'streamStart Command');
+        logUtilHelper.log(appLogName, "app", 'info', 'streamStart Command');
     try {
         startIncomingStream();
     } catch (ex) {
-        writeToLog('error', 'Error Starting Video Stream ', ex);
+        logUtilHelper.log(appLogName, "app", 'error', 'Error Starting Video Stream ', ex);
         if (throwError === true) {
             throw ex;
         }
@@ -415,13 +335,13 @@ var FfmpegOverlay = function (options) {
 };
 
     var streamStop = function (throwError) {
-        writeToLog('warning', 'streamStop command');
+        logUtilHelper.log(appLogName, "app", 'warning', 'streamStop command');
         try {
             if (!(command === null || command === undefined)) {
                 command.kill();
             }
         } catch (ex) {
-            writeToLog('error', 'Error Stopping Video Stream ', ex);
+            logUtilHelper.log(appLogName, "app", 'error', 'Error Stopping Video Stream ', ex);
             if (throwError === true) {
                 throw ex;
             }
@@ -432,9 +352,9 @@ var FfmpegOverlay = function (options) {
         var overlayFilePath = path.join(__dirname, '..', objOptions.overlayFileName);
         try {
             fs.writeFileSync(overlayFilePath, overlayText);
-
+            logUtilHelper.log(appLogName, "app", "debug", "updateOverlayText", overlayText);
         } catch (ex) {
-            debug("error", "Error Writing OverlayText File", ex);
+            logUtilHelper.log(appLogName, "app", "error", "Error Writing OverlayText File", ex);
         }
     }
 
@@ -442,12 +362,12 @@ var FfmpegOverlay = function (options) {
 
     // disable for port http; force authentication
     self.on('streamStop', function (data) {
-        writeToLog('debug', 'event', 'streamStop');
+        logUtilHelper.log(appLogName, "app", 'debug', 'event', 'streamStop');
         streamStop();
     });
 
     self.on('streamStart', function (data) {
-        writeToLog('debug', 'event', 'streamStart');
+        logUtilHelper.log(appLogName, "app", 'debug', 'event', 'streamStart');
         streamStart();
     });
 
@@ -455,7 +375,7 @@ var FfmpegOverlay = function (options) {
 
 
     self.on('commonData', function (data) {
-        writeToLog('debug', 'event', 'commonData');
+        logUtilHelper.log(appLogName, "app", 'debug', 'event', 'commonData');
         self.emit('commonData', commonData);
     });
 

@@ -1,3 +1,1 @@
-   P: #17 Jon Cleasby     PV: 00.0 MPH    O: 2 B: 0 S: 0
-   B: #8 Jackson Bowles   EV: 68.4 MPH    I: 1 bottom
-
+ PV: 55.2 MPH    EV: 55.2 MPH   

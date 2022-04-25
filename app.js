@@ -1,46 +1,68 @@
 ﻿
-/**
- * Module dependencies.
- */
-
-var express = require('express');
-var extend = require('extend');
-var http = require('http');
-var path = require('path');
-var favicon = require('serve-favicon');
-var Logger = require('./modules/logger.js');
-var cookieParser = require('cookie-parser');
-//var bodyParser = require('body-parser');
-var nconf = require('nconf');
+'use strict';
+const defaultConfig = require('./config/defaultConfig.json');
+const appLogName = "radarMonitor"
+const express = require('express');
+const extend = require('extend');
+const http = require('http');
+const path = require('path');
+const favicon = require('serve-favicon');
+const ConfigHandler = require("@andrewiski/confighandler");
+const LogUtilHelper = require("@andrewiski/logutilhelper");
+const cookieParser = require('cookie-parser');
 const fs = require('fs');
 
-var RadarStalker2 = require("./modules/radarStalker2.js");
-var BatteryMonitor = require("./modules/batteryMonitor.js");
-var GpsMonitor = require("./modules/gpsMonitor.js");
-var DataDisplay = require("./modules/dataDisplay.js");
-var RadarDatabase = require("./modules/radarDatabase.js");
-var FfmpegOverlay = require("./modules/ffmpegOverlay.js");
-var FFplay = require('./modules/ffplay.js');
-const uuidv4 = require('uuid/v4');
+const RadarStalker2 = require("./modules/radarStalker2.js");
+const BatteryMonitor = require("./modules/batteryMonitor.js");
+const GpsMonitor = require("./modules/gpsMonitor.js");
+const DataDisplay = require("./modules/dataDisplay.js");
+const RadarDatabase = require("./modules/radarDatabase.js");
+const FfmpegOverlay = require("./modules/ffmpegOverlay.js");
+const FFplay = require('./modules/ffplay.js');
+const { v4: uuidv4 } = require('uuid');
 
-
-
-if (process.env.localDebug === 'true') {
-    nconf.file('./configs/debug/radarGunMonitorConfig.json');
-    console.log("localDebug Mode Enabled");
-} else {
-    nconf.file('./configs/radarGunMonitorConfig.json');
+var configFileOptions = {
+    "configDirectory": "config",
+    "configFileName": "config.json"
 }
 
-var configFileSettings = nconf.get();
-var defaultOptions = {
-    //loaded from the config file
-};
+var localDebug = false;
+if (process.env.localDebug === "true") {
+    localDebug = true;
+}
+if (process.env.configDirectory) {
+    configFileOptions.configDirectory =process.env.configDirectory;
+}
+if (process.env.configFileName) {
+    configFileOptions.configFileName =process.env.configFileName;
+}
+console.log("configDirectory is " + configFileOptions.configDirectory);
+console.log("configFileName is " + configFileOptions.configFileName);
 
-var objOptions = extend({}, defaultOptions, configFileSettings);
+var configHandler = new ConfigHandler(configFileOptions, defaultConfig);
+
+var objOptions = configHandler.config;
 
 
-var logger = new Logger({ logLevel:objOptions.logLevel, appName:"app"});
+let logUtilHelper = new LogUtilHelper({
+    appLogLevels: objOptions.appLogLevels,
+    logEventHandler: null,
+    logUnfilteredEventHandler: null,
+    logFolder: objOptions.logDirectory,
+    logName: appLogName,
+    debugUtilEnabled: (process.env.DEBUG ? true : undefined) || false,
+    debugUtilName:appLogName,
+    debugUtilUseUtilName: false,
+    debugUtilUseAppName: true,
+    debugUtilUseAppSubName: false,
+    logToFile: !localDebug,
+    logToFileLogLevel: objOptions.logLevel,
+    logToMemoryObject: true,
+    logToMemoryObjectMaxLogLength: objOptions.maxLogLength,
+    logSocketConnectionName: "socketIo",
+    logRequestsName: "access"
+
+})
 
 var app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -48,19 +70,16 @@ app.use(express.urlencoded({ limit: '50mb', extended: false }));
 
 // all environments
 
-var radarStalker2 = new RadarStalker2({});
-var batteryMonitor = new BatteryMonitor({});
-var gpsMonitor = new GpsMonitor({});
-var dataDisplay = new DataDisplay({});
-var ffmpegOverlay = new FfmpegOverlay({});
-var radarDatabase = new RadarDatabase({});;
-
-
+var radarStalker2 = new RadarStalker2(objOptions.radarStalker2, logUtilHelper);
+var batteryMonitor = new BatteryMonitor(objOptions.batteryMonitor, logUtilHelper);
+var gpsMonitor = new GpsMonitor(objOptions.gpsMonitor, logUtilHelper);
+var dataDisplay = new DataDisplay(objOptions.dataDisplay, logUtilHelper);
+var ffmpegOverlay = new FfmpegOverlay(objOptions.ffmpegOverlay, logUtilHelper);
+var radarDatabase = new RadarDatabase(objOptions.radarDatabase, logUtilHelper);
 
 var commonData = {
     game: null,
     currentRadarSpeedData: null
-
 }
 
 //app.set('views', path.join(__dirname, 'views'));
@@ -88,41 +107,33 @@ app.use('/javascript/moment', express.static(path.join(__dirname, 'node_modules'
 //app.use('/javascript/dragtable', express.static(path.join(__dirname, 'node_modules', 'dragtable')));
 //app.use('/javascript/jquery-ui', express.static(path.join(__dirname, 'node_modules', 'jquery-ui', 'ui')));
 // development only
-if (process.platform === 'win32') {
-    app.set('port', objOptions.win32WebserverPort);
-    //app.use(express.favicon());
-   // app.use(express.logger('dev'));
-    //app.use(express.json());
-    //app.use(express.urlencoded());
-    //app.use(express.methodOverride());
-    //app.use(app.router);
-    //app.use(express.errorHandler());
-} else {
-    app.set('port', objOptions.webserverPort);
-    //boneScript = require('bonescript');
-    //boneScript.getPlatform(function (x) {
-    //    console.log('bonescript getPlatform');
-    //    console.log('name = ' + x.name);
-    //    console.log('bonescript = ' + x.bonescript);
-    //    console.log('serialNumber = ' + x.serialNumber);
-    //    console.log('dogtag = ' + x.dogtag);
-    //    console.log('os = ', x.os);
-    //});
-}
+
+app.set('port', objOptions.webserverPort);
+
 app.use(favicon(__dirname + '/public/favicon.ico'));
 //app.use(logger('dev'));
 
 //app.use(logger.express);
 //app.use(express.json());
 //app.use(express.urlencoded({ extended: false }));
+app.use(function (req, res, next) {
+    var connInfo = logUtilHelper.getRequestConnectionInfo(req);
+    logUtilHelper.logRequestConnectionInfo(appLogName, "browser", "debug", req);
+    //logUtilHelper.log(appLogName, "browser", 'debug',  "url:" + req.originalUrl + ", ip:" + connInfo.ip + ", port:" + connInfo.port + ", ua:" + connInfo.ua);
+    next();
+    return;
+})
+
 app.use(cookieParser());
+
+
 
 var routes = express.Router();
 
 
 /* GET home page. */
 routes.get('/', function (req, res) {
-    res.sendfile(path.join(__dirname, 'public/index.htm'));
+    res.sendFile(path.join(__dirname, 'public/index.htm'));
 });
 
 routes.get('/data/teams', function (req, res) {
@@ -343,15 +354,15 @@ var updateOverlayText = function () {
         }
 
 
-        logger.log("debug", "updateOverlayText", OverlayText);
+        logUtilHelper.log(appLogName, "app", "trace", "updateOverlayText", OverlayText);
 
         ffmpegOverlay.updateOverlayText(OverlayText);
     } catch (ex) {
-        logger.log("error", "error updating Overlay text", ex);
+        logUtilHelper.log(appLogName, "app", "error", "error updating Overlay text", ex);
         try {
             ffmpegOverlay.updateOverlayText("");
         } catch (ex2) {
-            logger.log("error", "error blanking Overlay text", ex2)
+            logUtilHelper.log(appLogName, "app", "error", "error blanking Overlay text", ex2)
         }
     }
 }
@@ -360,7 +371,7 @@ app.use('/', routes);
 
 
 var server = http.createServer(app).listen(app.get('port'), function(){
-    logger.log("info", 'Express server listening on port ' + app.get('port'));
+    logUtilHelper.log(appLogName, "app", "info", 'Express server listening on port ' + app.get('port'));
 }); 
 
 
@@ -414,7 +425,7 @@ var audioFileStop = function () {
     }
 }
 
-var io = require('socket.io')(server);
+var io = require('socket.io')(server, {allowEIO3: true});
 
 
 
@@ -428,19 +439,20 @@ var sendToSocketClients = function (cmd, message, includeArduino){
 
 
 io.on('connection', function(socket) {
-    logger.log("info",'socket.io client Connection');
+    //logUtilHelper.log(appLogName, "socketio", "info", "socket.io client Connection");
+    logUtilHelper.logSocketConnection (appLogName, "socketio", "info",  socket, "socket.io client Connection" );
     socket.on('radarConfigCommand', function(data) {
-        logger.log("debug",'radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
+        logUtilHelper.log(appLogName, "socketio", "debug",'radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
         radarStalker2.radarConfigCommand({ data: data, socket: socket });
     });
     socket.on('radarEmulatorCommand', function(data) {
-        logger.log("debug",'radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
+        logUtilHelper.log(appLogName, "socketio", "debug",'radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
         radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
     });
 
 
     socket.on('stream', function (message) {
-        logger.log("debug",'stream:' + message.cmd + ', client id:' + socket.id);
+        logUtilHelper.log(appLogName, "socketio", "debug",'stream:' + message.cmd + ', client id:' + socket.id);
         switch (message.cmd) {
             case "start":
                 ffmpegOverlay.streamStart();
@@ -463,7 +475,7 @@ io.on('connection', function(socket) {
     socket.on("audio", function (message) {
         //audioFile: audioFile
 
-        logger.log("debug", 'audio:' + ', message:' + message + ', client id:' + socket.id);
+        logUtilHelper.log(appLogName, "socketio", "debug", 'audio:' + ', message:' + message + ', client id:' + socket.id);
         try {
             switch (message.cmd) {
                 case "audioFilePlay":
@@ -477,19 +489,19 @@ io.on('connection', function(socket) {
                     break;
             }
         } catch (ex) {
-            logger.log('error', 'audio', ex);
+            logUtilHelper.log(appLogName, "socketio", 'error', 'audio', ex);
         }
 
     });
 
     socket.on("resetRadarSettings", function (message) {
-        logger.log("debug", 'resetRadarSettings:' + ', message:' + message + ', client id:' + socket.id);
+        logUtilHelper.log(appLogName, "socketio", "debug", 'resetRadarSettings:' + ', message:' + message + ', client id:' + socket.id);
         radarStalker2.resetRadarSettings();
 
     })
 
     socket.on("gameChange", function (message) {
-        logger.log("debug",'gameChange:' + ', message:' + message + ', client id:' + socket.id);
+        logUtilHelper.log(appLogName, "socketio", "debug", 'gameChange:' + ', message:' + message + ', client id:' + socket.id);
         if (commonData.game === null) {
             commonData.game = {};
         }
@@ -651,12 +663,12 @@ io.on('connection', function(socket) {
     //})
 
     socket.on("pitch", function (message) {
-        logger.log("debug", 'pitch:' + message.cmd + ', value:' + message.data + ', client id:' + socket.id);
+        logUtilHelper.log(appLogName, "socketio", "debug", 'pitch:' + message.cmd + ', value:' + message.data + ', client id:' + socket.id);
         radarStalker2.pitch({ data: message, socket: socket });
     })
 
     socket.on('ping', function(data) {
-        logger.log("debug", 'ping: client id:' + socket.id);
+        logUtilHelper.log(appLogName, "socketio", "debug", 'ping: client id:' + socket.id);
     });
 
 
@@ -731,7 +743,7 @@ batteryMonitor.on("batteryVoltage",function(data){
 
 
 //io.route('radarSpeed', function(req) {
-//    logger.log("debug",'radarSpeed Connection');
+//    logUtilHelper.log(appLogName, "socketio", "debug",'radarSpeed Connection');
 //    req.io.emit('connected', {
 //        message: 'Connected to Server'
 //    })

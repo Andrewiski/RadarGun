@@ -4,7 +4,7 @@ const EventEmitter = require('events').EventEmitter;
 const debug = require('debug')('ffplay');
 var path = require('path');
 
-function FFplay(folder, file, opts) {
+function FFplay(folder, file, opts, logUtilHelper) {
 
 	var ffplayPath = "";
 	if (process.env.FFPLAY_PATH !== undefined) {

@@ -1,52 +1,56 @@
 ﻿//radarDatabase.js
 //This Module will create a sqlite Database file for Logging DB events
 //
+const appLogName = "radarDatabase";
+const util = require('util');
+const extend = require('extend');
+const EventEmitter = require('events').EventEmitter;
 
-var util = require('util');
-var extend = require('extend');
-var EventEmitter = require('events').EventEmitter;
-var debug = require('debug')('radarDatabase');
-var nconf = require('nconf');
-var fs = require("fs");
-var NoSQL = require('nosql');
-const uuidv4 = require('uuid/v4');
-var path = require('path');
-var RadarDatabase = function (options) {
+const fs = require("fs");
+const NoSQL = require('nosql');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+var RadarDatabase = function (options, logUtilHelper) {
     var self = this;
     var defaultOptions = {
-        deviceId: "",
-        teamsFile: "./data/teams.nosql",
-        gamesFile: "./data/games.nosql",
-        gamesFolder: "./data/games"
+        "deviceId": "",
+        "dataFolder": "./data",
+        "teamsFile": "teams.nosql",
+        "gamesFile": "games.nosql",
+        "playersFile": "player.nosql",
+        "radarDataFile": "radarData.nosql"
     }
-    nconf.file('./configs/radarDatabaseConfig.json');
-    var configFileSettings = nconf.get();
-    var objOptions = extend({}, defaultOptions, configFileSettings, options);
+    
+    var objOptions = extend({}, defaultOptions, options);
 
     if (objOptions.deviceId === undefined || objOptions.deviceId === '') {
         objOptions.deviceId = uuidv4();
         try {
             configFileSettings.deviceId = objOptions.deviceId;
             nconf.save();
-            debug('Settings Saved');
+            logUtilHelper.log(appLogName, "app", "debug", 'Settings Saved');
         } catch (ex) {
-            debug('setting save Error:' + ex);
+            logUtilHelper.log(appLogName, "app", "error", 'setting save Error:' + ex);
         }
     }
 
-    var teamsDbExists = fs.existsSync(objOptions.teamsFile);
-    var gamesDbExists = fs.existsSync(objOptions.gamesFile);
+    var teamsFilePath = path.join(objOptions.dataFolder, objOptions.teamsFile);
+    var gamesFilePath = path.join(objOptions.dataFolder, objOptions.gamesFile);
+    var gamesFolderPath = path.join(objOptions.dataFolder, "games");
+
+    var teamsDbExists = fs.existsSync(teamsFilePath);
+    var gamesDbExists = fs.existsSync(gamesFilePath);
     
     
     // EventEmitters inherit a single event listener, see it in action
     this.on('newListener', function (listener) {
-        debug('radarDatabase Event Listener: ' + listener);
+        logUtilHelper.log(appLogName, "app", "debug", 'radarDatabase Event Listener: ' + listener);
     });
 
     
     // db === Database instance <https://docs.totaljs.com/latest/en.html#api~Database>
-    var teamsDb = NoSQL.load(objOptions.teamsFile);
-    var gamesDb = NoSQL.load(objOptions.gamesFile);
+    var teamsDb = NoSQL.load(teamsFilePath);
+    var gamesDb = NoSQL.load(gamesFilePath);
     //var radarDataDb = NoSQL.load(objOptions.radarDataFile);
 
 
@@ -54,7 +58,7 @@ var RadarDatabase = function (options) {
     this.team_getAll = function (callback) {
         teamsDb.find().where("status",1).make(function (builder) {
             builder.callback(function (err, response) {
-                debug('team_getAll ', response);
+                logUtilHelper.log(appLogName, "app", "debug", 'team_getAll ', response);
                 callback(err, response);
             });
         });
@@ -68,7 +72,7 @@ var RadarDatabase = function (options) {
         teamsDb.update(team, team).make(function (filter) {
             filter.where('id', team.id);
             filter.callback(function (err, count, doc) {
-                debug('team_upsert ', count);
+                logUtilHelper.log(appLogName, "app", "debug", "team_upsert", count);
                 callback(err, count, doc);
             });
         });                                            
@@ -79,12 +83,12 @@ var RadarDatabase = function (options) {
             teamsDb.modify({ status: 0 }, false).where('id', team.id).make(function (builder) {
                 //builder.between('age', 20, 30);
                 builder.callback(function (err, count) {
-                    debug('team_delete ', count);
+                    logUtilHelper.log(appLogName, "app", "debug", 'team_delete', count);
                     callback(err, count);
                 });
             });
         } else {
-            debug('team_delete no teamid');
+            logUtilHelper.log(appLogName, "app", "error", 'team_delete no teamid');
         }
         
         /*
@@ -102,7 +106,7 @@ var RadarDatabase = function (options) {
     this.game_getAll = function (callback) {
         gamesDb.find().where("status", 1).make(function (builder) {
             builder.callback(function (err, response) {
-                debug('game_getAll ', response);
+                logUtilHelper.log(appLogName, "app", "debug", 'game_getAll', response);
                 callback(err, response);
             });
         });
@@ -111,13 +115,13 @@ var RadarDatabase = function (options) {
 
     this.game_get = function (gameId, callback) {
 
-        let gameFile = path.join(objOptions.gamesFolder, gameId, "game.nosql");
+        let gameFile = path.join(gamesFolderPath, gameId, "game.nosql");
         
         if (fs.existsSync(gameFile)) {
             let gameDb = NoSQL.load(gameFile);
             gameDb.one().where("id", gameId).make(function (builder) {
                 builder.callback(function (err, response) {
-                    debug('game_get ', response);
+                    logUtilHelper.log(appLogName, "app", "debug", 'game_get ', response);
                     callback(err, response);
                 });
             });
@@ -125,31 +129,27 @@ var RadarDatabase = function (options) {
 
     }
 
-
     this.game_upsert = function (game, callback) {
         if (!game.id) {
             game.id = uuidv4();
         }
 
-       
-
-        if (fs.existsSync(objOptions.gamesFolder) === false) {
-            fs.mkdirSync(objOptions.gamesFolder);
+        if (fs.existsSync(gamesFolderPath) === false) {
+            fs.mkdirSync(gamesFolderPath);
         }
 
-        if (fs.existsSync(path.join(objOptions.gamesFolder, game.id)) === false) {
-            fs.mkdirSync(path.join(objOptions.gamesFolder, game.id));
+        if (fs.existsSync(path.join(gamesFolderPath, game.id)) === false) {
+            fs.mkdirSync(path.join(gamesFolderPath, game.id));
         }
 
-        let gameFile = path.join(objOptions.gamesFolder, game.id, "game.nosql");
-        
+        let gameFile = path.join(gamesFolderPath, game.id, "game.nosql");
 
         let gameDb = NoSQL.load(gameFile);
 
         gameDb.update(game, game).make(function (filter) {
             filter.where('id', game.id);
             filter.callback(function (err, count) {
-                debug('game_upsert ', count);
+                logUtilHelper.log(appLogName, "app", "debug", 'game_upsert', count);
                 let gameName = "";
                 if (game.home && game.home.team && game.home.team.name) {
                     gameName += game.home.team.name + " vs ";
@@ -164,7 +164,7 @@ var RadarDatabase = function (options) {
                 gamesDb.update(gamesData, gamesData).make(function (filter) {
                     filter.where('id', gamesData.id);
                     filter.callback(function (err, count) {
-                        debug('games_upsert ', count);
+                        logUtilHelper.log(appLogName, "app", "debug", 'games_upsert', count);
                         callback(err, count);
                     });
                 });
@@ -179,12 +179,12 @@ var RadarDatabase = function (options) {
             teamsDb.modify({ status: 0 }, false).where('id', game.id).make(function (builder) {
                 //builder.between('age', 20, 30);
                 builder.callback(function (err, count) {
-                    debug('game_delete ', count);
+                    logUtilHelper.log(appLogName, "app", "debug", 'game_delete', count);
                     callback(err, count);
                 });
             });
         } else {
-            debug('game_delete no gameid');
+            logUtilHelper.log(appLogName, "app", "error", 'game_delete no gameid');
         }
 
         /*
@@ -205,13 +205,13 @@ var RadarDatabase = function (options) {
             { "id": "00000000-0000-0000-0000-000000000000", "name": "New Game", "shortName": "", "startDate": null, "endDate": null, "inning": 1, "inningPosition": "top", "outs": 0, "balls": 0, "strikes": 0, "score": { "home": 0, "guest": 0 }, "home": { "lineup": [], "team": null }, "guest": { "lineup": [], "team": null }, "status": 1, "log": [] }    
         ,
         function (err, callback) {
-            debug("Anonymous Game Inserted");
+            logUtilHelper.log(appLogName, "app", "debug", "Anonymous Game Inserted");
         });
     }
     if (teamsDbExists === false) {
         self.team_upsert({ "id": "00000000-0000-0000-0000-000000000000", "status": 1, "name": "New Team", "roster": [{ "firstName": "", "lastName": "", "jerseyNumber": "" }] },
         function (err, callback) {
-            debug("Anonymous Game Inserted");
+            logUtilHelper.log(appLogName, "app", "debug", "Anonymous Game Inserted");
         });
     }
 }

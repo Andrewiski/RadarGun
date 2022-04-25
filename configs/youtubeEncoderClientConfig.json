@@ -1,19 +1,19 @@
 {
-  "webserverPort": 12336,
+  "webserverPort": 12337,
   "host": "http://10.100.32.231:12336",
   "ffmpegOverlayConfig": {
     "input": "rtsps://10.100.1.1:7441/f724nSZ9iebgPS9e?enableSrtp",
-    "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/a5fv-d7rc-7jsa-v7g4-2c70",
+    "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/e7pv-4pbr-ew6e-5vk5-bjx6",
     "rtmpUrlTest": "rtmp://a.rtmp.youtube.com/live2/a5fv-d7rc-7jsa-v7g4-2c70",
     "rtmpUrlLive": "rtmp://a.rtmp.youtube.com/live2/e7pv-4pbr-ew6e-5vk5-bjx6",
     "logLevel": "debug",
     "inputOptions": [ "-y", "-hwaccel cuda", "-rtsp_transport tcp", "-stimeout 30000000" ],
-    "outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-r 24", "-preset llhq", "-rc vbr_hq", "-f flv" ],
+    "outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-r 50", "-preset llhq", "-rc vbr_hq", "-f flv" ],
     "capture": false,
     "overlayFileName": "overlay.txt",
     "videoFilters": {
       "filter": "drawtext",
-      "options": "fontfile=arial.ttf:fontsize=100:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
+      "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
     }
   }
 }

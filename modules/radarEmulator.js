@@ -1,27 +1,238 @@
 ﻿// This is used when Emulation is turned on to simulate a Stalker radar gun being attached, it respnses to config request and send speed at interval or on demand
 // It is used to debug the application when no radar is avalible or when no one is avalible to throw objects at the radar gun to get a valid speed.
+const appLogName = "radarEmulator";
+const util = require('util');
+const extend = require('extend');
+const EventEmitter = require('events').EventEmitter;
+const math = require('mathjs');
+//const debug = require('debug')('radarEmulator');
 
-var util = require('util');
-var extend = require('extend');
-var EventEmitter = require('events').EventEmitter;
-var math = require('mathjs');
-var debug = require('debug')('radarEmulator');
-var nconf = require('nconf');
   
-var RadarEmulator = function (fakePortName, options) {
+var RadarEmulator = function (fakePortName, options, logUtilHelper) {
 
     var self = this;
     var defaultOptions = {
         portIsOpen: false,
         mode: 'in',  //in, out, inout, outin
         inSpeed: 65,
-        outSpeed: 70
+        outSpeed: 70,
+        
+        "radarConfig": {
+            "TargetDirection": {
+            "id": 2,
+            "value": 1,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Outbound, 1 InBound, 2 Both"
+            },
+            "Range": {
+            "id": 4,
+            "value": 7,
+            "def": 7,
+            "datatype": "int",
+            "notes": "0(min) - 7(max)"
+            },
+            "LowSpeedThreshold": {
+            "id": 7,
+            "value": 30,
+            "def": 50,
+            "datatype": "int",
+            "notes": "0 - 900 MPH"
+            },
+            "HighSpeedThreshold": {
+            "id": 11,
+            "value": 150,
+            "def": 150,
+            "datatype": "int",
+            "notes": "0 - 900 MPH"
+            },
+            "AlarmSpeedThreshold": {
+            "id": 12,
+            "value": 1500,
+            "def": 1500,
+            "datatype": "int",
+            "notes": "0 - 1500 MPH Aux Pin Function"
+            },
+            "PeakSpeedEnable": {
+            "id": 13,
+            "value": 0,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Disabled, 1 Enabled"
+            },
+            "AuxPinConfiguration": {
+            "id": 16,
+            "value": 0,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 = Radar Trigger, 1 = Off, 2 = SpeedAlarm, 3 = Doppler without Squeulch, 4 = Doopler with Sqeulch"
+            },
+            "CosignAngle1": {
+            "id": 18,
+            "value": 0,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0-45 one degree increments"
+            },
+            "CosignAngle2": {
+            "id": 19,
+            "value": null,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0-45 one degree increments"
+            },
+            "Units": {
+            "id": 20,
+            "value": 0,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 MPH, 1 km/h, 2 knots, 3 feet/sec, 4 meters/sec"
+            },
+            "UnitResolution": {
+            "id": 21,
+            "value": 1,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 Ones, 1 Tenths"
+            },
+            "LeadingZeroCharacter": {
+            "id": 23,
+            "value": 1,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Zero, 1 Space, 2 None"
+            },
+            "SerialPortBaudRate": {
+            "id": 29,
+            "value": 38400,
+            "def": 9,
+            "readOnly": true,
+            "datatype": "int",
+            "notes": "0 300, 1 600, 2 1200, 3 2400, 4 4800, 5 9600, 6 19200, 7 38400, 8 57600, 9 115200"
+            },
+            "MessageFormat": {
+            "id": 30,
+            "value": 3,
+            "def": 3,
+            "readOnly": true,
+            "datatype": "int",
+            "notes": "0 None, 1 A, 2 b, 3 bE, 4 S, 5 EE, 6 A1, 7 COL"
+            },
+            "MessagePeriod": {
+            "id": 31,
+            "value": 0,
+            "def": 250,
+            "datatype": "int",
+            "notes": "0 - 10000  10Sec delay"
+            },
+            "ProductID": {
+            "id": 37,
+            "value": "Radar Emulator",
+            "def": "Radar Emulator",
+            "readOnly": true,
+            "datatype": "string",
+            "notes": "Read Only Product ID In Ascii"
+            },
+            "TransmiterControl": {
+            "id": 42,
+            "value": 1,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 = Hold, 1 = Transmit"
+            },
+            "LiveTargetLock": {
+            "id": 43,
+            "value": 0,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 = Release, 1 = Lock"
+            },
+            "ForkMode": {
+            "id": 47,
+            "value": 0,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 Off, 1 On"
+            },
+            "RadarTriggerMode": {
+            "id": 60,
+            "value": 0,
+            "def": 2,
+            "datatype": "int",
+            "notes": "Aux Pin Function 0 Continuous, 1 Start - Stop, 2 Lock"
+            },
+            "ProductType": {
+            "id": 79,
+            "value": "000",
+            "def": "000",
+            "readOnly": true,
+            "datatype": "string",
+            "notes": "3 Byte Code for Model"
+            },
+            "SoftwareVersion": {
+            "id": 81,
+            "value": "0.0.0",
+            "def": "0.0.0",
+            "readOnly": true,
+            "datatype": "string",
+            "notes": "Ascii String for Software Version"
+            },
+            "AutoClearDelay": {
+            "id": 88,
+            "value": 2,
+            "def": 2,
+            "datatype": "int",
+            "notes": "0 -10 sec, 11 20 sec, 12 30 sec, 13 Off"
+            },
+            "MessageTermination": {
+            "id": 101,
+            "value": 0,
+            "def": 0,
+            "readOnly": true,
+            "datatype": "int",
+            "notes": "0 CR, 1 CRLF, 2 Unit CR, 3 Unit CRLF"
+            },
+            "PeakMessageType": {
+            "id": 102,
+            "value": 0,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 Continuous, 1 Single"
+            },
+            "TargetType": {
+            "id": 103,
+            "value": 0,
+            "def": 0,
+            "datatype": "int",
+            "notes": "0 Baseball, 1 Carnival, 2 Car, 3 Tennis"
+            },
+            "FormatASpeed": {
+            "id": 104,
+            "value": 0,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Last/Live, 1 Peak, 2 Hit"
+            },
+            "HitSpeedEnable": {
+            "id": 105,
+            "value": 0,
+            "def": 1,
+            "datatype": "int",
+            "notes": "0 Disabled, 1 Enabled"
+            },
+            "SpeedSensorAddress": {
+            "id": 116,
+            "value": 2,
+            "def": 2,
+            "readOnly": true,
+            "datatype": "int",
+            "notes": "2 RS-2323 is fixed at 2, RS-485 2 - 254"
+            }
+        }
     }
-    nconf.file('./configs/radarEmulatorConfig.json');
-    var configFileSettings = nconf.get();
-    var objOptions = extend({}, defaultOptions, configFileSettings, options);
+    var objOptions = extend({}, defaultOptions, options);
     this.write = function (buffer, callback) {
-        debug('Received ', buffer);
+        logUtilHelper.log(appLogName, "app", "debug", 'Received ', buffer);
         if (buffer != undefined && buffer.length > 0) {
 
             var packets = [];
@@ -50,7 +261,7 @@ var RadarEmulator = function (fakePortName, options) {
                             //Proboly should check for a max packet length here in case we get a bad length 
 
                             if (configPacketLength > 128) {
-                                console.log('Invalid Config Data Packet Length ' + configPacketLength);
+                                logUtilHelper.log(appLogName, "app", "warning", 'Invalid Config Data Packet Length ' + configPacketLength);
                                 break;
                             }
 
@@ -68,7 +279,7 @@ var RadarEmulator = function (fakePortName, options) {
                         }
                         break;
                     default:
-                        console.log("Invalid Byte detected " + radarDataBuffer.readUInt8(i) + " at position " + i);
+                        logUtilHelper.log(appLogName, "app", "warning", "Invalid Byte detected " + radarDataBuffer.readUInt8(i) + " at position " + i);
                         break;
                 }
                 if (needmoredata == true) {
@@ -123,7 +334,7 @@ var RadarEmulator = function (fakePortName, options) {
                                     value = data.toString("ascii", 8, PayloadLength + 6);
                                     break;
                                 default:
-                                    debug('Error no datatype set for ' + ConfigPropertyName);
+                                    logUtilHelper.log(appLogName, "app", "error", 'Error no datatype set for ' + ConfigPropertyName);
                             }
 
                             ConfigProperty.value = value;
@@ -137,10 +348,10 @@ var RadarEmulator = function (fakePortName, options) {
                         sendData(mybuff);
                         //self.emit('data', mybuff);
                     } else {
-                        debug('Invalid Config ID ' + PacketConfigID);
+                        logUtilHelper.log(appLogName, "app", "error", 'Invalid Config ID ' + PacketConfigID);
                     }
                 } else {
-                    debug("Packet is Not For Us its For Device Address " + data.readUInt8(1));
+                    logUtilHelper.log(appLogName, "app", "warning", "Packet is Not For Us its For Device Address " + data.readUInt8(1));
                 }
             });
             
@@ -151,24 +362,24 @@ var RadarEmulator = function (fakePortName, options) {
 
     };
     this.drain = function (callback) {
-        debug('drain');
+        logUtilHelper.log(appLogName, "app", "trace", 'drain');
         if (callback) { callback.call(this, null) };
     };
     this.open = function (callback) {
-        debug('open');
+        logUtilHelper.log(appLogName, "app", "trace", 'open');
         objOptions.portIsOpen = true;
         if (callback) { callback.call(this, null) };
         recursiveTimerStartFakeRadar();
     };
     this.close = function (callback) {
-        debug('close');
+        logUtilHelper.log(appLogName, "app", "trace", 'close');
         objOptions.portIsOpen = false;
         if (callback) { callback.call(this, null) };
         
     };
     var parserEventEmiter = null;
     this.pipe = function (parserMethod) {
-        debug('pipe');
+        logUtilHelper.log(appLogName, "app", "trace", 'pipe');
         parserEventEmiter = parserMethod;
         //util.inherits(parserEventEmiter, EventEmitter);
         return parserEventEmiter;
@@ -184,7 +395,7 @@ var RadarEmulator = function (fakePortName, options) {
         } else {
             socketid = "radar";
         }
-        debug('radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
+        logUtilHelper.log(appLogName, "app", "debug", 'radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client socket id:' + socketid);
         switch (data.cmd) {
             case "radarEmulatorSpeed":
                 //We are going to emulate a pitch coming in with roll out
@@ -407,7 +618,7 @@ var RadarEmulator = function (fakePortName, options) {
         }
     }
     var recursiveTimerStartFakeRadar = function () {
-        //console.log("Radar Emulator Timer Execute!");
+        //logUtilHelper.log(appLogName, "app", "debug", "Radar Emulator Timer Execute!");
         if (objOptions.radarConfig["TransmiterControl"].value == 1) {
             sendData(getRadarSpeedPacket(0.0, 0.0, false, false));
         }
