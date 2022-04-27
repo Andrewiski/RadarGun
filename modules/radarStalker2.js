@@ -854,6 +854,7 @@ const RadarStalker2 = function (options, logUtilHelper){
     
 };
 // extend the EventEmitter class using our RadarMonitor class
+//class RadarStalker2 
 util.inherits(RadarStalker2, EventEmitter);
 
 module.exports = RadarStalker2;

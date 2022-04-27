@@ -60,6 +60,7 @@ var FfmpegOverlay = function (options, logUtilHelper) {
             status: "disconnected",
             error: null,
             metadata: {},
+            info:null
         },
         activeMp4Streams: []
     };
@@ -196,6 +197,7 @@ var FfmpegOverlay = function (options, logUtilHelper) {
             case 'verbose':
                 if (stdOut.values.size) {
                     commonData.streamStats.info = stdOut.values;
+                    self.emit('streamStatsUpdate');
                     logUtilHelper.log(appLogName, "app", 'trace', 'parsed stdErr: ', stdOut);
                 } else {
                     logUtilHelper.log(appLogName, "app", 'debug', 'parsed stdErr: ', stdOut);

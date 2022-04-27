@@ -1,1 +1,1 @@
- PV: 55.2 MPH    EV: 55.2 MPH   
+ PV: 55.8 MPH    EV: 55.1 MPH   

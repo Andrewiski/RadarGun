@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@andrewiski/confighandler": "^1.0.1",
-    "@andrewiski/logutilhelper": "^1.0.17",
+    "@andrewiski/logutilhelper": "^1.0.20",
     "@uirouter/angularjs": "^1.0.25",
     "angular": "^1.8",
     "angular-animate": "^1.7.9",

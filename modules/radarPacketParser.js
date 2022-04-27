@@ -72,7 +72,7 @@ class RadarPacketParser extends Transform {
                                 speedPacketLength = 53; // (7 + (15 * 2) + 1)
                                 break;
                             default:
-                                logUtilHelper.log(appLogName, "app", "warning", "Invalid Byte detected in Speed Stream Packet " + this.buffer.readUInt8(i) + " at position " + (i + 6));
+                                this.logUtilHelper.log(appLogName, "app", "warning", "Invalid Byte detected in Speed Stream Packet " + this.buffer.readUInt8(i) + " at position " + (i + 6));
                                 break;
                         }
                         if (speedPacketLength > 0) {
@@ -99,7 +99,7 @@ class RadarPacketParser extends Transform {
                         //Proboly should check for a max packet length here in case we get a bad length 
 
                         if (configPacketLength > 128) {
-                            logUtilHelper.log(appLogName, "app", "warning", 'Invalid Config Data Packet Length ' + configPacketLength);
+                            this.logUtilHelper.log(appLogName, "app", "warning", 'Invalid Config Data Packet Length ' + configPacketLength);
                             break;
                         }
 
@@ -117,7 +117,7 @@ class RadarPacketParser extends Transform {
                     }
                     break;
                 default:
-                    logUtilHelper.log(appLogName, "app", "warning", "Invalid Byte detected " + this.buffer.readUInt8(i) + " at position " + i);
+                    this.logUtilHelper.log(appLogName, "app", "warning", "Invalid Byte detected " + this.buffer.readUInt8(i) + " at position " + i);
                     break;
             }
             if (needmoredata === true) {

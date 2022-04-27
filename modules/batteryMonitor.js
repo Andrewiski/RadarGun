@@ -1,8 +1,9 @@
 ﻿//rbatteryMonitor.js
 const appLogName = "batteryMonitor"
-var util = require('util');
-var extend = require('extend');
-var EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const extend = require('extend');
+const EventEmitter = require('events').EventEmitter;
+const PlatformDetect = require("./platformDetect");
 var BatteryMonitor = function (options, logUtilHelper) {
     var self = this;
     var defaultOptions = {
@@ -18,10 +19,11 @@ var BatteryMonitor = function (options, logUtilHelper) {
     
     var objOptions = extend({}, defaultOptions,  options);
 
+    var platformDetect = new PlatformDetect({},logUtilHelper);
 
     // EventEmitters inherit a single event listener, see it in action
     this.on('newListener', function (listener) {
-        logUtilHelper.log(appLogName, "app", 'batteryMonitor Event Listener: ' + listener);
+        logUtilHelper.log(appLogName, "app", "debug", 'batteryMonitor Event Listener: ' + listener);
     });
 
     var commonData = {
@@ -61,7 +63,7 @@ var BatteryMonitor = function (options, logUtilHelper) {
 
     var processBatteryVoltage = function (x) {
         var BatteryVoltage = ((x.value * 1.800) / (.107142857));
-        logUtilHelper.log(appLogName, "app", 'Battery Voltage ' + BatteryVoltage);
+        logUtilHelper.log(appLogName, "app", "debug", 'Battery Voltage ' + BatteryVoltage);
         var difference = commonData.lastBatteryVoltage.batteryVoltage - BatteryVoltage;
         if (difference < 0) {
             //if negitive make it a positive value
@@ -87,18 +89,17 @@ var BatteryMonitor = function (options, logUtilHelper) {
     }
 
     var recursiveTimerStart = function () {
-        logUtilHelper.log(appLogName, "app", "Timer Execute!");
+        logUtilHelper.log(appLogName, "app", "debug", "Timer Execute!");
         readBatteryVoltage();
         setTimeout(recursiveTimerStart, objOptions.timerInterval);
     };
 
     var b = undefined;
     if (process.platform !== 'win32') {
-        const isPi = require('./platformDetect.js');
         //b = require('bonescript');
 
-        if (isPi()) {
-            logUtilHelper.log(appLogName, "app", 'Running on Raspberry Pi!');
+        if (platformDetect.isPi()) {
+            logUtilHelper.log(appLogName, "app", "info", 'Running on Raspberry Pi!');
             self.platform = "raspberry";
         } else {
             try {
@@ -112,7 +113,7 @@ var BatteryMonitor = function (options, logUtilHelper) {
                     });
                 }
             } catch (ex) {
-                debug('Not running on Beagle Bone!');
+                logUtilHelper.log(appLogName, "app", "error", 'Not running on Beagle Bone!');
             }
         }
 

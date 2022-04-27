@@ -27,14 +27,14 @@ var configFileOptions = {
 }
 
 var localDebug = false;
-if (process.env.localDebug === "true") {
+if (process.env.LOCALDEBUG === "true") {
     localDebug = true;
 }
-if (process.env.configDirectory) {
-    configFileOptions.configDirectory =process.env.configDirectory;
+if (process.env.CONFIGDIRECTORY) {
+    configFileOptions.configDirectory =process.env.CONFIGDIRECTORY;
 }
-if (process.env.configFileName) {
-    configFileOptions.configFileName =process.env.configFileName;
+if (process.env.CONFIGFILENAME) {
+    configFileOptions.configFileName =process.env.CONFIGFILENAME;
 }
 console.log("configDirectory is " + configFileOptions.configDirectory);
 console.log("configFileName is " + configFileOptions.configFileName);
@@ -55,6 +55,7 @@ let logUtilHelper = new LogUtilHelper({
     debugUtilUseUtilName: false,
     debugUtilUseAppName: true,
     debugUtilUseAppSubName: false,
+    includeErrorStackTrace: localDebug,
     logToFile: !localDebug,
     logToFileLogLevel: objOptions.logLevel,
     logToMemoryObject: true,

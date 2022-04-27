@@ -1,9 +1,10 @@
+const appLogName = 'ffplay';
 const spawn = require('child_process').spawn;
 const util = require('util');
 const EventEmitter = require('events').EventEmitter;
-const debug = require('debug')('ffplay');
-var path = require('path');
-
+//const debug = require('debug')('ffplay');
+const path = require('path');
+const PlatformDetect = require("./platformDetect");
 function FFplay(folder, file, opts, logUtilHelper) {
 
 	var ffplayPath = "";
@@ -15,7 +16,7 @@ function FFplay(folder, file, opts, logUtilHelper) {
 		if (process.platform === 'win32') {
 			ffplayPath = path.join(__dirname, '..', 'ffmpeg', 'ffplay.exe');
 		} else {
-			ffplayPath = 'ffplay'
+			ffplayPath = 'aplay';
         }
     }
 

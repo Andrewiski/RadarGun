@@ -90,6 +90,9 @@
         },
         "radarPacketParser" :{
             "app":"info"
+        },
+        "platformDetect" :{
+            "app":"info"
         }
     }
 }
