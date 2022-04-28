@@ -3,7 +3,7 @@
     "configurations": [
         
         {
-            "env": {"configDirectory": "./config/private/debug" , "LOCALDEBUG":"true", "DEBUG": "radarMonitor,radarStalker2,batteryMonitor,ffmpegOverlay,youtubeEncoderClient"},
+            "env": {"CONFIGDIRECTORY": "./config/private/debug" , "LOCALDEBUG":"true", "DEBUG": "radarMonitor,radarStalker2,batteryMonitor,ffmpegOverlay,ffplay,radarDatabase,radarPacketParser,remoteMongoDBServer,radarEmulator,gpsMonitor"},
             "command": "npm start",
             "name": "LocalDebug Run npm start",
             "request": "launch",
@@ -11,7 +11,7 @@
         },
 
         {
-            "env": {"configDirectory": "./config/private/youtubeEncoder", "LOCALDEBUG":"true", "DEBUG": "youtubeEncoderClient,ffmpegOverlay"},
+            "env": {"CONFIGDIRECTORY": "./config/private/youtubeEncoder", "LOCALDEBUG":"true", "DEBUG": "youtubeEncoderClient,ffmpegOverlay"},
             "command": "node youtubeEncoderClient.js",
             "name": "Run node youtubeEncoderClient.js",
             "request": "launch",

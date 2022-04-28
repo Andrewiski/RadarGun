@@ -1,7 +1,0 @@
-{"id":"00000000-0000-0000-0000-000000000000","name":"New Game","shortName":"","startDate":null,"endDate":null,"inning":1,"inningPosition":"top","outs":0,"balls":0,"strikes":0,"score":{"home":0,"guest":0},"home":{"battingIndex":0,"lineup":[],"team":null},"guest":{"battingIndex":0,"lineup":[],"team":null},"status":1,"log":[]}
-{"id":"77d5f5ca-b251-4bf2-9a5f-496b20710bb2","name":"Vicksburg Bulldogs Varsity vs Portage Central Varsity","startDate":"2022-04-12T20:16:02.008Z","endDate":null,"status":1}
-{"id":"7f5e1349-70c8-4428-8c00-eaa24b317cd0","name":"Vicksburg Bulldogs Varsity vs Paw Paw Varsity","startDate":"2022-04-15T19:38:03.373Z","endDate":null,"status":1}
-{"id":"cf628e49-f436-44d0-88c0-9dcb45b10be3","name":"Vicksburg Bulldogs Varsity vs Portage Northern Varsity","startDate":"2022-04-20T18:08:46.526Z","endDate":null,"status":1}
-{"id":"c73674f0-4c62-45cb-8f59-8ae4281ff372","name":"Vicksburg Bulldogs Varsity vs Portage Northern Varsity","startDate":"2022-04-20T23:13:39.845Z","endDate":null,"status":1}
-{"id":"d2904997-06a2-4b98-ab39-827a1f56c271","name":"Vicksburg Bulldogs JV 2022 vs Allegan JV 2021","startDate":"2022-04-21T19:21:04.613Z","endDate":null,"status":1}
-{"id":"384bbad8-b1c2-4727-bf24-c4a73007ed62","name":"Vicksburg Bulldogs JV 2022 vs Allegan JV 2022","startDate":"2022-04-21T21:41:22.252Z","endDate":null,"status":1}

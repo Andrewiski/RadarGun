@@ -36,13 +36,21 @@ if (process.env.CONFIGDIRECTORY) {
 if (process.env.CONFIGFILENAME) {
     configFileOptions.configFileName =process.env.CONFIGFILENAME;
 }
+if (process.env.DATADIRECTORY) {
+    defaultConfig.dataDirectory =process.env.DATADIRECTORY;
+}
+
+if (defaultConfig.deviceId === undefined || defaultConfig.deviceId === '') {
+    defaultConfig.deviceId = uuidv4();
+}
+
 console.log("configDirectory is " + configFileOptions.configDirectory);
 console.log("configFileName is " + configFileOptions.configFileName);
 
 var configHandler = new ConfigHandler(configFileOptions, defaultConfig);
 
 var objOptions = configHandler.config;
-
+console.log("Data Directory is " + objOptions.dataDirectory);
 
 let logUtilHelper = new LogUtilHelper({
     appLogLevels: objOptions.appLogLevels,
@@ -65,6 +73,27 @@ let logUtilHelper = new LogUtilHelper({
 
 })
 
+if (configHandler.config.deviceId === undefined || configHandler.config.deviceId === '') {
+    configHandler.config.deviceId = uuidv4();
+    try {
+        configHandler.configFileSave();
+        logUtilHelper.log(appLogName, "app", "debug", 'deviceId Setting Saved');
+    } catch (ex) {
+        logUtilHelper.log(appLogName, "app", "error", 'Error Saving Config DeviceId', ex);
+        console.log("Error Saving Config DeviceId " + ex.message);
+    }
+}
+console.log("DeviceId " + configHandler.config.deviceId);
+
+logUtilHelper.log(appLogName, "app", "info", "DeviceId " + configHandler.config.deviceId);
+logUtilHelper.log(appLogName, "app", "info", "configDirectory is " + configFileOptions.configDirectory);
+logUtilHelper.log(appLogName, "app", "info", "configFileName is " + configFileOptions.configFileName);
+logUtilHelper.log(appLogName, "app", "info", "Data Directory is " + objOptions.dataDirectory);
+
+
+var audioFileDirectory = path.join(objOptions.dataDirectory, "audioFiles");
+var walkupAudioDirectory = path.join(audioFileDirectory, "walkup");
+
 var app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: false }));
@@ -76,7 +105,7 @@ var batteryMonitor = new BatteryMonitor(objOptions.batteryMonitor, logUtilHelper
 var gpsMonitor = new GpsMonitor(objOptions.gpsMonitor, logUtilHelper);
 var dataDisplay = new DataDisplay(objOptions.dataDisplay, logUtilHelper);
 var ffmpegOverlay = new FfmpegOverlay(objOptions.ffmpegOverlay, logUtilHelper);
-var radarDatabase = new RadarDatabase(objOptions.radarDatabase, logUtilHelper);
+var radarDatabase = new RadarDatabase(objOptions.radarDatabase, logUtilHelper, objOptions.dataDirectory);
 
 var commonData = {
     game: null,
@@ -198,12 +227,10 @@ routes.get('/data/game', function (req, res) {
 });
 
 routes.get('/data/audioFiles/walkup', function (req, res) {
-
-    const directoryPath = path.join(__dirname, "data/audioFiles/walkup")
     let walkupFiles = [];
-    fs.readdir(directoryPath, function (err, files) {
+    fs.readdir(walkupAudioDirectory, function (err, files) {
         if (err) {
-            console.log("Error getting walkup directory information.");
+            logUtilHelper.log(appLogName, "browser", "error", "Error getting walkup directory information.", walkupAudioDirectory);
         } else {
             files.forEach(function (file) {
                 //console.log(file);
@@ -214,8 +241,23 @@ routes.get('/data/audioFiles/walkup', function (req, res) {
             res.json(walkupFiles);
         }
     })
-    
-    
+});
+
+routes.get('/data/audioFiles', function (req, res) {
+    let audioFiles = [];
+    fs.readdir(audioFileDirectory, function (err, files) {
+        if (err) {
+            logUtilHelper.log(appLogName, "browser", "error", "Error getting audio directory information.", audioFileDirectory);
+        } else {
+            files.forEach(function (file) {
+                //console.log(file);
+                if (path.extname(file) !== ".txt") {
+                    audioFiles.push({ fileName: file });
+                }
+            })
+            res.json(audioFiles);
+        }
+    })    
 });
 
 routes.get('/data/game/:id', function (req, res) {
@@ -407,14 +449,14 @@ var playAudioFileComplete = function (audioFile) {
     io.emit("audio", { cmd: "audioPlayComplete", data: { audioFile: audioFile } });
 }
 
-var audioFilePlay = function (audioFilePath, audioFile, options) {
+var audioFilePlay = function (audioFolder, audioFile, options) {
 
     if (audioFilePlayer !== null) {
         audioFilePlayer.stop();
         audioFilePlayer = null;
     }
-    var audioFolderPath = path.join(__dirname, "data", audioFilePath);
-    audioFilePlayer = new FFplay(audioFolderPath, audioFile.fileName, options);
+    
+    audioFilePlayer = new FFplay(audioFolder, audioFile.fileName, options, logUtilHelper);
 
     audioFilePlayer.on("stopped", playAudioFileComplete);
 
@@ -483,7 +525,7 @@ io.on('connection', function(socket) {
                     audioFilePlay("", message.data.audioFile);
                     break;
                 case "audioFilePlayWalkup":
-                    audioFilePlay("audioFiles/walkup", message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5'])
+                    audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5'])
                     break;
                 case "audioFileStop":
                     audioFileStop();

@@ -16,7 +16,7 @@ function FFplay(folder, file, opts, logUtilHelper) {
 		if (process.platform === 'win32') {
 			ffplayPath = path.join(__dirname, '..', 'ffmpeg', 'ffplay.exe');
 		} else {
-			ffplayPath = 'aplay';
+			ffplayPath = 'ffplay';
         }
     }
 
@@ -25,6 +25,7 @@ function FFplay(folder, file, opts, logUtilHelper) {
 	opts = opts || ['-nodisp', '-autoexit'];
 	opts.unshift(filePath);
 
+	logUtilHelper.log(appLogName, "app", "debug", "playing file", filePath);
 	// Spawn process
 	this.proc = spawn(ffplayPath, opts);
 
@@ -50,15 +51,15 @@ function FFplay(folder, file, opts, logUtilHelper) {
 
 
 	this.proc.stdout.on('data', (data) => {
-		debug(`stdout: ${data}`);
+		logUtilHelper.log(appLogName, "app", "debug", `stdout: ${data}`);
 	});
 
 	this.proc.stderr.on('data', (data) => {
-		debug(`stderr: ${data}`);
+		logUtilHelper.log(appLogName, "app", "debug", `stderr: ${data}`);
 	});
 
 	this.proc.on('close', (code) => {
-		debug(`child process exited with code ${code}`);
+		logUtilHelper.log(appLogName, "app", "debug", `child process exited with code ${code}`);
 	});
 
 

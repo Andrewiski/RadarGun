@@ -1,6 +1,8 @@
 {
     "webserverPort": 12336,
     "useNoSql": true,
+    "deviceId": "",
+    "dataDirectory": "./data/",
     "mongoDbServerUrl": "",
     "mongoDbDatabaseName": "",
     "logDirectory": "logs",
@@ -49,10 +51,6 @@
         
         }
     },
-    "radarDatabaseConfig":{
-        "deviceId": "",
-        "dataFolder": "./data"
-    },
     "ffmpegOverlay":{
         "input": "",
         "rtmpUrl": "",
@@ -65,10 +63,6 @@
             "filter": "drawtext",
             "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
         }
-    },
-    "youtubeEncoderClient":{
-        "webserverPort": 12336,
-        "host": ""
     },
     "appLogLevels":{
         "radarMonitor": {
@@ -92,6 +86,9 @@
             "app":"info"
         },
         "platformDetect" :{
+            "app":"info"
+        },
+        "ffplay" : {
             "app":"info"
         }
     }

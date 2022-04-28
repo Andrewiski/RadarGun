@@ -118,6 +118,7 @@
                     <span ng-bind-html="item.name | highlight: $select.search"></span>
                     <div>
                         <small>
+                            <span ng-bind-html="item.startDate"></span>
                             <span ng-bind-html="item.home.team.name | highlight: $select.search"></span>
                             <span ng-bind-html="item.guest.team.name | highlight: $select.search"></span>
                         </small>
@@ -127,6 +128,11 @@
 
         </div>
         <div ng-show="commonData.isGameScore">
+            <div class="row">
+                <div class="col-sm-1">
+                    <span class="h3">commonData.selectedGame.startDate - </span>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-sm-1">
                     <label class="control-label">Inning</label>
@@ -271,33 +277,47 @@
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <button type="button" class="btn btn-primary" ng-click="inning()">I</button>
-                        <button type="button" class="btn btn-primary" ng-click="ball()">B</button>
-                        <button type="button" class="btn btn-primary" ng-click="strike()">S</button>
-                        <button type="button" class="btn btn-primary" ng-click="foul()">F</button>
+                        <button type="button" class="btn btn-primary" ng-click="ball()" title="Ball">B</button>
+                        <button type="button" class="btn btn-primary" ng-click="strike()" title="Strike">S</button>
+                        <!-- <button type="button" class="btn btn-primary" ng-click="strikeWatching()" title="Strike Wathing">SW</button> -->
+                        <button type="button" class="btn btn-primary" ng-click="foul()" title="Foul">F</button>
+                        <button type="button" class="btn btn-primary" ng-click="wildPitch()" title="Wild Pitch">WP</button>
                     </div>
                     <div class="form-group">
-                        <button type="button" class="btn btn-primary" ng-click="groundBall()">GB</button>
-                        <button type="button" class="btn btn-primary" ng-click="flyBall()">FB</button>
-                        <button type="button" class="btn btn-primary" ng-click="lineDrive()">LD</button>
-                        <button type="button" class="btn btn-primary" ng-click="hitByPitch()">HBP</button>
-                        <button type="button" class="btn btn-primary" ng-click="nextBatter()">NB</button>
+                        <button type="button" class="btn btn-success" ng-click="groundBall()" title="Batter Safe Ground Ball">GB</button>
+                        <button type="button" class="btn btn-success" ng-click="flyBall()" title="Batter Safe Fly Ball">FB</button>
+                        <button type="button" class="btn btn-success" ng-click="lineDrive()" title="Batter Safe Line Drive" >LD</button>
+                        <button type="button" class="btn btn-success" ng-click="hitByPitch()" title="Batter Safe Hit By Pitch">HBP</button>
+                        <button type="button" class="btn btn-success" ng-click="baulk()" title="Batter Safe Baulk">Baulk</button>
+                        <button type="button" class="btn btn-success" ng-click="batterSafeError()" title="Batter Safe Error">E</button>
+                        <button type="button" class="btn btn-success" ng-click="nextBatter()" title="Batter Safe Misc Next Batter">NB</button>
                     </div>
                     <div class="form-group">
-                        <button type="button" class="btn btn-primary" ng-click="batterOut()">O</button>
-                        <button type="button" class="btn btn-primary" ng-click="groundOut()">GO</button>
-                        <button type="button" class="btn btn-primary" ng-click="flyOut()">FO</button>
-                        <button type="button" class="btn btn-primary" ng-click="lineOut()">LO</button>
+                        <button type="button" class="btn btn-danger" ng-click="groundOut()" title="Batter Out Ground Out">GO</button>
+                        <button type="button" class="btn btn-danger" ng-click="flyOut()" title="Batter Out Fly Out">FO</button>
+                        <button type="button" class="btn btn-danger" ng-click="lineOut()" title="Batter Out Line Out">LO</button>
+                        <button type="button" class="btn btn-danger" ng-click="batterSafeFieldersChoice()" title="Out Fielders Choice">FC</button>
+                        <button type="button" class="btn btn-danger" ng-click="batterOutDoublePlay()" title="Batter Out Double Play">DP</button>
+                        <button type="button" class="btn btn-danger" ng-click="batterOutTriplePlay()" title="Batter Out Triple Play">TP</button>
+                        <button type="button" class="btn btn-danger" ng-click="batterOutMisc()" title="Batter Out Misc">O</button>
                     </div>
+                    
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <button type="button" class="btn btn-primary" ng-click="stolenBase2()"  title="Stole Second">SB2</button>
-                        <button type="button" class="btn btn-primary" ng-click="stolenBase3()"  title="Stole Third">SB3</button>
-                        <button type="button" class="btn btn-primary" ng-click="stolenBase4()" title="Stole Home">SB4</button>
-                        <button type="button" class="btn btn-primary" ng-click="runnerOut()" title="Back Pick">BP</button>
-                        <button type="button" class="btn btn-primary" ng-click="runnerOut()" title="Caught Stealing">CS</button>
+                        <button type="button" class="btn btn-danger" ng-click="inning()" title="Inning Over">I</button>
                     </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-success" ng-click="stolenBase2()" title="Stole Second">SB2</button>
+                        <button type="button" class="btn btn-success" ng-click="stolenBase3()" title="Stole Third">SB3</button>
+                        <button type="button" class="btn btn-success" ng-click="stolenBase4()" title="Stole Home">SB4</button>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-danger" ng-click="runnerOut()" title="Back Pick">BP</button>
+                        <button type="button" class="btn btn-danger" ng-click="runnerOut()" title="Caught Stealing">CS</button>
+                    </div>
+                    
+                    
                 </div>
 
             </div>
@@ -336,6 +356,7 @@
                             <button type="button" class="btn" ng-click="commonData.selectedGame.batter = null; batterChange()" data-toggle="tooltip" data-placement="bottom" title="Clear Batter"><i class="fa fa-ban"></i></button>
                             <button type="button" class="btn" ng-show="commonData.selectedGame.batter.player.walkupFile !== undefined && commonData.selectedGame.batter.player.walkupFile !== null" ng-click="audioFilePlayWalkup(commonData.selectedGame.batter.player.walkupFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
                             <button type="button" class="btn" ng-show="commonData.selectedGame.batter.player.walkupFile !== undefined && commonData.selectedGame.batter.player.walkupFile !== null" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                            <span ng-bind="commonData.selectedGame.batter.player.walkupFile.fileName" ng-show="commonData.selectedGame.batter.player.walkupFile !== undefined && commonData.selectedGame.batter.player.walkupFile !== null"></span>
                             <ui-select ng-model="commonData.selectedGame.batter" ng-change="batterChange()" theme="bootstrap">
                                 <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.player.jerseyNumber}} {{$select.selected.player.firstName}} {{$select.selected.player.lastName}} - {{getPlayerPositionLongName($select.selected.fieldingPosition)}}</ui-select-match>
                                 <ui-select-choices repeat="item in commonData.batters | filter: $select.search">
@@ -473,7 +494,7 @@
                                                         <lable class="form-control" ng-bind="index + 1" />
                                                     </div>
                                                     <div class="form-control-sm" ng-show="commonData.selectedGame.home.lineup[index].fieldingPosition === '11'">
-                                                        <label class="form-control">DH/{{getPlayerPositionLongName(commonData.selectedGame.home.lineup[index].dhFieldingPosition)}}</label>
+                                                        <label class="form-control">DH/{{getPlayerPositionLongName(commonData.selectedGame.home.lineup[index].dh.fieldingPosition)}}</label>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -489,7 +510,7 @@
                                                     </div>
                                                     <div class="form-control-sm" ng-show="commonData.selectedGame.home.lineup[index].fieldingPosition === '11'">
 
-                                                        <ui-select ng-model="commonData.selectedGame.home.lineup[index].dhPlayer" theme="bootstrap">
+                                                        <ui-select ng-model="commonData.selectedGame.home.lineup[index].dh.player" theme="bootstrap">
                                                             <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
                                                             <ui-select-choices repeat="item in commonData.selectedGame.home.team.roster | filter: $select.search | uniquePlayer : index : commonData.selectedGame.home.lineup : 'player'">
                                                                 #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
@@ -507,7 +528,7 @@
                                                     </div>
                                                     <div class="form-control-sm" ng-show="commonData.selectedGame.home.lineup[index].fieldingPosition === '11'">
                                                         <!--<lable class="form-control" ng-bind="player.fielding" />-->
-                                                        <select class="form-control" ng-model="commonData.selectedGame.home.lineup[index].dhFieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.home.lineup">
+                                                        <select class="form-control" ng-model="commonData.selectedGame.home.lineup[index].dh.fieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.home.lineup">
                                                         </select>
                                                     </div>
                                                 </td>
@@ -557,7 +578,7 @@
                                                         <lable class="form-control" ng-bind="index + 1" />
                                                     </div>
                                                     <div class="form-control-sm" ng-show="commonData.selectedGame.guest.lineup[index].fieldingPosition === '11'">
-                                                        <label class="form-control">DH/{{getPlayerPositionLongName(commonData.selectedGame.guest.lineup[index].dhFieldingPosition)}}</label>
+                                                        <label class="form-control">DH/{{getPlayerPositionLongName(commonData.selectedGame.guest.lineup[index].dh.fieldingPosition)}}</label>
                                                     </div>
                                                     
                                                 </td>
@@ -574,7 +595,7 @@
                                                     </div>
                                                     <div class="form-control-sm" ng-show="commonData.selectedGame.guest.lineup[index].fieldingPosition === '11'">
                                                         
-                                                        <ui-select ng-model="commonData.selectedGame.guest.lineup[index].dhPlayer" theme="bootstrap">
+                                                        <ui-select ng-model="commonData.selectedGame.guest.lineup[index].dh.player" theme="bootstrap">
                                                             <ui-select-match placeholder="Select or search a person in the list...">#{{$select.selected.jerseyNumber}} {{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
                                                             <ui-select-choices repeat="item in commonData.selectedGame.guest.team.roster | filter: $select.search | uniquePlayer : index : commonData.selectedGame.guest.lineup : 'player'">
                                                                 #<span ng-bind-html="item.jerseyNumber | highlight: $select.search"></span>
@@ -592,7 +613,7 @@
                                                     </div>
                                                     <div class="form-control-sm" ng-show="commonData.selectedGame.guest.lineup[index].fieldingPosition === '11'">
                                                         <!--<lable class="form-control" ng-bind="player.fielding" />-->
-                                                        <select class="form-control" ng-model="commonData.selectedGame.guest.lineup[index].dhFieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.guest.lineup">
+                                                        <select class="form-control" ng-model="commonData.selectedGame.guest.lineup[index].dh.fieldingPosition" placeholder="Fielding Position" ng-options="item.value as item.name for item in commonData.fieldingPositions | uniqueLineupPosition : index : commonData.selectedGame.guest.lineup">
                                                         </select>
                                                     </div>
                                                 </td>
@@ -896,6 +917,7 @@
                         <i class="fa fa-music"></i> Audio Files
                     </uib-tab-heading>
                     <div>
+                        <div class="h3">Walkup Songs</div>
                         <div class="input-group">
                             <ui-select ng-model="commonData.walkupFile" theme="bootstrap">
                                 <ui-select-match placeholder="Select or search a song in the list...">{{$select.selected.fileName}}</ui-select-match>
@@ -906,6 +928,22 @@
                             <span class="input-group-btn">
                                 <button type="button" class="btn" ng-click="refreshWalkupFiles()"><i class="fa fa-refresh"></i></button>
                                 <button type="button" class="btn" ng-click="audioFilePlayWalkup(commonData.walkupFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
+                                <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="h3">Full Songs</div>
+                        <div class="input-group">
+                            <ui-select ng-model="commonData.audioFile" theme="bootstrap">
+                                <ui-select-match placeholder="Select or search a song in the list...">{{$select.selected.fileName}}</ui-select-match>
+                                <ui-select-choices repeat="item in commonData.audioFiles | filter: $select.search">
+                                    <div ng-bind-html="item.fileName | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <span class="input-group-btn">
+                                <button type="button" class="btn" ng-click="refreshAudioFiles()"><i class="fa fa-refresh"></i></button>
+                                <button type="button" class="btn" ng-click="audioFilePlay(commonData.audioFile)" data-toggle="tooltip" data-placement="bottom" title="Play Song"><i class="fa fa-play"></i></button>
                                 <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
                             </span>
                         </div>
@@ -950,7 +988,7 @@
                                 </div>
                             </div>
                             <div class="wifidog">
-                                <form class="wifidogform" style="display: ;" action="config?act=config" name="wifi_info" method="post">
+                                <form class="wifidogform" style="display: none" action="config?act=config" name="wifi_info" method="post">
                                     <select id='ssid' name="ssid" onclick='select_click()'>
                                         <option value="note">click to select ssid</option>
                                     </select>

@@ -158,19 +158,26 @@
                    });
            }
 
-           var getCurrentGame = function () {
-               return $http.get('/data/game').
-                   then(function (response) {
-                       $scope.commonData.game = response.data;
-                   });
-           }
+        var getCurrentGame = function () {
+            return $http.get('/data/game').
+                then(function (response) {
+                    $scope.commonData.game = response.data;
+                });
+        }
 
-           var refreshWalkupFiles = function () {
-               return $http.get('/data/audioFiles/walkup').
-                   then(function (response) {
-                       $scope.commonData.walkupFiles = response.data;
-                   });
-           }
+        var refreshWalkupFiles = function () {
+            return $http.get('/data/audioFiles/walkup').
+                then(function (response) {
+                    $scope.commonData.walkupFiles = response.data;
+                });
+        }
+
+        var refreshAudioFiles = function () {
+        return $http.get('/data/audioFiles').
+            then(function (response) {
+                $scope.commonData.audioFiles = response.data;
+            });
+        }
 
            var initData = function () {
                refreshTeams();
@@ -359,6 +366,10 @@
                }
            }
 
+           $scope.wildPitch = function () {
+                $scope.ball();
+           }
+
            $scope.strike = function () {
 
                if ($scope.commonData.selectedGame.strikes >= 2) {
@@ -411,6 +422,60 @@
            }
            $scope.lineDrive = function () {
                $scope.nextBatter();
+           }
+
+           $scope.batterSafeError = function () {
+                $scope.nextBatter();
+           }
+
+           $scope.batterOutMisc = function(){
+                $scope.batterOut();
+           }
+           $scope.batterSafeFieldersChoice = function (){
+                if ($scope.commonData.selectedGame.outs >= 2) {
+                    var data = {};
+                    $scope.nextBatter(data);
+                    $scope.inning(data); 
+                } else {
+                    var data = {};
+                    $scope.commonData.selectedGame.outs++;
+                    //$scope.commonData.selectedGame.balls = 0;
+                    //$scope.commonData.selectedGame.strikes = 0;
+                    data.outs = $scope.commonData.selectedGame.outs;
+                    //data.strikes = 0;
+                    //data.balls = 0;
+                    $scope.nextBatter(data);
+                    addToGameLog(data);
+                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+                }  
+                
+           }
+
+           $scope.batterOutDoublePlay = function(){
+                if ($scope.commonData.selectedGame.outs >= 1) {
+                    var data = {};
+                    $scope.nextBatter(data);
+                    $scope.inning(data); 
+                } else {
+                    var data = {};
+                    $scope.commonData.selectedGame.outs = 2;
+                    data.outs = $scope.commonData.selectedGame.outs;
+                    $scope.nextBatter(data);
+                    addToGameLog(data);
+                    radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+                }  
+           }
+           $scope.batterOutTripplePlay = function(){
+                var data = {};
+                $scope.commonData.selectedGame.outs = 3;
+                data.outs = $scope.commonData.selectedGame.outs;
+                $scope.nextBatter(data);
+                addToGameLog(data);
+                radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange", data: data });
+           }
+
+           $scope.baulk = function () {
+            $scope.nextBatter();
            }
 
            $scope.hitByPitch = function () {
@@ -619,8 +684,9 @@
                        break;
                    } else {
                        if (lineup[i].fieldingPosition === "11" || lineup[i].fieldingPosition === 11) {
-                           if (lineup[i].dhFieldingPosition === "1" || lineup[i].dhFieldingPosition === 1) {
-                               pitcher = lineup[i].dhPlayer;
+                           if (lineup[i].dh && (lineup[i].dh.fieldingPosition === "1" || lineup[i].dh.fieldingPosition === 1)) {
+                               pitcher = lineup[i].dh;
+                               //pitcher = lineup[i];
                                break;
                            }
                        }
@@ -766,6 +832,16 @@
                }
                return "";
            }
+
+        //    $scope.getPlayerDefensePosition = function (lineup){
+        //         if (lineup.fieldingPosition === "11" || lineup.fieldingPosition === 11) {
+        //             return lineup.dhPlayer;
+                    
+        //         }else{
+
+        //         }
+        //         return "";
+        //     }
 
            $scope.guestTeamLinupAdd = function () {
                $scope.commonData.selectedGame.guest.lineup.push(angular.copy($scope.commonData.emptyLineup) )

@@ -10,11 +10,9 @@ const fs = require("fs");
 const NoSQL = require('nosql');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
-var RadarDatabase = function (options, logUtilHelper) {
+var RadarDatabase = function (options, logUtilHelper, dataDirectory, deviceId) {
     var self = this;
     var defaultOptions = {
-        "deviceId": "",
-        "dataFolder": "./data",
         "teamsFile": "teams.nosql",
         "gamesFile": "games.nosql",
         "playersFile": "player.nosql",
@@ -23,20 +21,17 @@ var RadarDatabase = function (options, logUtilHelper) {
     
     var objOptions = extend({}, defaultOptions, options);
 
-    if (objOptions.deviceId === undefined || objOptions.deviceId === '') {
-        objOptions.deviceId = uuidv4();
-        try {
-            configFileSettings.deviceId = objOptions.deviceId;
-            nconf.save();
-            logUtilHelper.log(appLogName, "app", "debug", 'Settings Saved');
-        } catch (ex) {
-            logUtilHelper.log(appLogName, "app", "error", 'setting save Error:' + ex);
-        }
-    }
+    
 
-    var teamsFilePath = path.join(objOptions.dataFolder, objOptions.teamsFile);
-    var gamesFilePath = path.join(objOptions.dataFolder, objOptions.gamesFile);
-    var gamesFolderPath = path.join(objOptions.dataFolder, "games");
+    const nosqlDataDirectory = path.join(dataDirectory,"nosql");
+    if(fs.existsSync(nosqlDataDirectory) === false){
+        fs.mkdirSync(nosqlDataDirectory,{recursive:true})
+    };
+    
+
+    var teamsFilePath = path.join(nosqlDataDirectory, objOptions.teamsFile);
+    var gamesFilePath = path.join(nosqlDataDirectory, objOptions.gamesFile);
+    var gamesFolderPath = path.join(nosqlDataDirectory, "games");
 
     var teamsDbExists = fs.existsSync(teamsFilePath);
     var gamesDbExists = fs.existsSync(gamesFilePath);

@@ -1,5 +1,6 @@
 # DataFile
 data/games
+data/nosql
 data/teams.nosql
 data/games.nosql
 data/audioFiles
