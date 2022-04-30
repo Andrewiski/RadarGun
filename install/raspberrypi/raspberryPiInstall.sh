@@ -8,6 +8,9 @@ sudo mkdir /opt/de
 sudo chown $(id -u):$(id -g) /opt/de
 sudo useradd -m radar
 sudo groupadd radar
+sudo usermod -a -G dialout radar
+sudo usermod -a -G audio radar
+sudo usermod -a -G i2c radar
 sudo usermod -a -G radar $(id -u -n)
 newgrp radar
 mkdir /opt/de/radar
