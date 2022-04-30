@@ -85,6 +85,7 @@
                pitchers: null,
                batters: null,
                walkupFiles: null,
+               audioFiles: null,
                isGameAdmin: false,
                isGameSelect: false,
                isGameSelected: false,
