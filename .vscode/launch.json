@@ -16,6 +16,22 @@
             "name": "Run node youtubeEncoderClient.js",
             "request": "launch",
             "type": "node-terminal"
+        },
+        
+        {
+            "env": { "DEBUG": "testVideoCapture,rtspVideoInput,ffmpegVideoInput,ffmpegVideoOutputRtmp,ffmpegVideoOutputMp4File"},
+            "command": "node tests/testVideoCapture.js",
+            "name": "Run node tests/testVideoCapture.js",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+
+        {
+            "env": {"DEBUG" : "testRadarSerialPort,radarPacketParser"},
+            "command": "node tests/testRadarSerialport.js",
+            "name": "Run node tests/testRadarSerialport.js",
+            "request": "launch",
+            "type": "node-terminal"
         }
         
     ]

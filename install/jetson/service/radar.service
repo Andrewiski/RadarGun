@@ -1,0 +1,15 @@
+[Unit]
+Description=Radar Monitor
+Documentation=https://github.com/Andrewiski/RadarGun
+After=network.target
+
+[Service]
+Environment="CONFIGDIRECTORY=/opt/de/appdata/radar/config" "DATADIRECTORY=/opt/de/appdata/radar/data"
+WorkingDirectory=/opt/de/radar
+Type=exec
+User=radar
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

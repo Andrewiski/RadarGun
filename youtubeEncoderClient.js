@@ -94,6 +94,16 @@ try {
                 if (commonData.game && commonData.game.home && commonData.game.home.team && commonData.game.home.team.name) {
                     homeTeamName = commonData.game.home.team.shortName
                 }
+
+                if (commonData.game.score && (commonData.game.score.home || commonData.game.score.guest)) {
+                    if(commonData.game.score.home === undefined){
+                        commonData.game.score.home = 0;
+                    }
+                    if (commonData.game.score.guest === undefined){
+                        commonData.game.score.guest = 0;
+                    }
+                }
+
                 if (commonData.game.score && commonData.game.score.home) {
                     OverlayText += homeTeamName.padStart(12) + ": " + commonData.game.score.home.toString().padStart(2);
                 }
@@ -128,16 +138,22 @@ try {
             if (commonData.game) {
 
 
-                if (commonData.game.outs !== undefined && commonData.game.balls !== null) {
+                if (commonData.game.outs !== undefined && commonData.game.outs !== null) {
                     OverlayText += " O: " + commonData.game.outs.toString();
+                }else{
+                    OverlayText += " ".padEnd(4);
                 }
 
                 if (commonData.game.balls !== undefined && commonData.game.balls !== null) {
                     OverlayText += " B: " + commonData.game.balls;
+                }else{
+                    OverlayText += " ".padEnd(4);
                 }
 
                 if (commonData.game.strikes !== undefined && commonData.game.strikes !== null) {
                     OverlayText += " S: " + commonData.game.strikes;
+                }else{
+                    OverlayText += " ".padEnd(4);
                 }
 
             }
@@ -152,7 +168,7 @@ try {
                 if (commonData.game && commonData.game.guest && commonData.game.guest.team && commonData.game.guest.team.name) {
                     guestTeamName = commonData.game.guest.team.shortName;
                 }
-                if (commonData.game.score && commonData.game.score.home) {
+                if (commonData.game.score && commonData.game.score.guest) {
                     OverlayText += guestTeamName.padStart(12) + ": " + commonData.game.score.guest.toString().padStart(2);
                 }
 
@@ -185,6 +201,8 @@ try {
 
                 if (commonData.game.inning && commonData.game.inningPosition) {
                     OverlayText += " I: " + commonData.game.inning.toString() + " " + commonData.game.inningPosition;
+                }else{
+                    OverlayText += " ".padEnd(22);
                 }
             }
             ffmpegOverlay.updateOverlayText(OverlayText);
@@ -267,7 +285,7 @@ try {
     
         socketClient = require('socket.io-client')(objOptions.radarMonitorServerUrl);
         socketClient.on('connect', function () {
-            logUtilHelper.log(appLogName, "socketio", "debug",'Socket Connected');
+            logUtilHelper.log(appLogName, "socketio", "info",'Socket Connected to ' + objOptions.radarMonitorServerUrl );
             if(io){
                 io.emit("RadarMonitorRemoteServerStatus", {status : "connected"})
             }
@@ -284,7 +302,7 @@ try {
 
         socketClient.on("stream", function (message) {
             try {
-                logUtilHelper.log(appLogName, "socketio", "info", 'stream:' + message.cmd + ', client id:' + socket.id);
+                logUtilHelper.log(appLogName, "socketio", "info", 'stream:' + message.cmd + ', client id:' + socketClient.id);
                 switch (message.cmd) {
                     case "startRemote":
                         ffmpegOverlay.streamStart();
@@ -311,6 +329,7 @@ try {
                     switch (message.cmd) {
                         case "scoreGame":
                             commonData.game = message.data;
+                            logUtilHelper.log(appLogName, "socketio", "info", 'gameChanged', message.cmd, 'client id:' + socketClient.id, message);
                             updateOverlayText();
                             break;
                         case "gameChanged":
@@ -477,24 +496,25 @@ try {
         //    console.log('Socket radarCommand Event', data);
         //});
         socketClient.on('disconnect', function () {
-            logUtilHelper.log(appLogName, "socketio", "info", 'Socket Disconnected Radar Monitor Server');
+            logUtilHelper.log(appLogName, "socketio", "error", 'Socket Disconnected Radar Monitor Server');
             if(io){
                 io.emit("RadarMonitorRemoteServerStatus", {status : "disconnected"})
             }
         });
         
         socketClient.on('connect_error', function () {
-            logUtilHelper.log(appLogName, "socketio", 'trace', "connect_error to Radar Monitor Server");
+            logUtilHelper.log(appLogName, "socketio", 'error', "connect_error to Radar Monitor Server");
             if(io){
                 io.emit("RadarMonitorRemoteServerStatus", {status : "disconnected"})
             }
         });
         socketClient.on('connect_timeout', function () {
-            logUtilHelper.log(appLogName, "socketio", 'trace',  "connect_timeout to Radar Monitor Server");
+            logUtilHelper.log(appLogName, "socketio", 'error',  "connect_timeout to Radar Monitor Server");
         });
     
         socketClient.on('reconnect', function () {
-            logUtilHelper.log(appLogName, "socketio", 'info',  "reconnect to Radar Monitor Server");
+            
+            logUtilHelper.log(appLogName, "socketio", 'info',  "reconnect to Radar Monitor Server to " + objOptions.radarMonitorServerUrl);
             if(io){
                 io.emit("RadarMonitorRemoteServerStatus", {status : "connected"})
             }
@@ -513,7 +533,7 @@ try {
         });
         
         socketClient.on('reconnect_failed', function () {
-            logUtilHelper.log(appLogName, "socketio", 'trace',  "reconnect_failed to Radar Monitor Server");
+            logUtilHelper.log(appLogName, "socketio", 'warning',  "reconnect_failed to Radar Monitor Server");
             if(io){
                 io.emit("RadarMonitorRemoteServerStatus", {status : "connected"})
             }

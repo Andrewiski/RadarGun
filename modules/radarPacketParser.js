@@ -22,11 +22,13 @@ class RadarPacketParser extends Transform {
         }
         this.logUtilHelper = logUtilHelper
         this.bufferSize = options.bufferSize;
+        this.traceLog = options.traceLog || false;
         this.position = 0;
         this.buffer = Buffer.alloc(this.bufferSize);
     }
 
-    _transform(chunk, encoding, cb) {        
+    _transform(chunk, encoding, cb) {   
+          
         if (this.position + chunk.length > this.bufferSize) {
             //We Are going to blow are max buffer size as something has gone wrong so discard saved buffer and start over
             this.logUtilHelper.log(appLogName, "app", "warning", 'RadarPacketParser over our bufferSize discarding partial packet buffer. bufferSize = ' + this.bufferSize + " position = " + this.position + " chunk.length = " + chunk.length);
@@ -41,7 +43,9 @@ class RadarPacketParser extends Transform {
             this.position = this.position + chunk.length;
         }
         
-                   
+        if(this.traceLog) {
+            this.logUtilHelper.log(appLogName, "app", "trace", "buffer",  this.buffer.subarray(0, this.position).toString("hex"));
+        }             
 
         //data should have the any pending and current data in it lets process what ever full packets we have and if any left over bytes
         // we will copy to start of this.buffer and set the this.position
@@ -73,6 +77,7 @@ class RadarPacketParser extends Transform {
                                 break;
                             default:
                                 this.logUtilHelper.log(appLogName, "app", "warning", "Invalid Byte detected in Speed Stream Packet " + this.buffer.readUInt8(i) + " at position " + (i + 6));
+                                this.logUtilHelper.log(appLogName, "app", "trace", "Invalid Byte detected in Speed Stream Packet " + this.buffer.readUInt8(i) + " at position " + (i + 6));
                                 break;
                         }
                         if (speedPacketLength > 0) {

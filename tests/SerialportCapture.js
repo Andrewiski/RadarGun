@@ -1,7 +1,8 @@
 var SerialPort = require("serialport");
 const { Stream } = require("stream");
 
-let serialPort = new SerialPort("com8", {
+let serialPort = new SerialPort({
+    path:"/dev/ttyTHS1",
     baudRate: 19200,
     autoOpen: false,
     rtscts: false,

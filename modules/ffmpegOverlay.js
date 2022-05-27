@@ -188,6 +188,7 @@ var FfmpegOverlay = function (options, logUtilHelper) {
         return data;
     };
 
+    var streamOutPutCounter = 0;
     var commandStdError = function (stderr) {
 
         var stdOut = parseStdOutput(stderr);
@@ -197,8 +198,12 @@ var FfmpegOverlay = function (options, logUtilHelper) {
             case 'verbose':
                 if (stdOut.values.size) {
                     commonData.streamStats.info = stdOut.values;
-                    self.emit('streamStatsUpdate');
-                    logUtilHelper.log(appLogName, "app", 'trace', 'parsed stdErr: ', stdOut);
+                    streamOutPutCounter++;
+                    if(streamOutPutCounter >= 50){
+                        self.emit('streamStatsUpdate');
+                        logUtilHelper.log(appLogName, "app", 'info', 'parsed stdErr: ', stdOut);
+                        streamOutPutCounter = 0;
+                    }
                 } else {
                     logUtilHelper.log(appLogName, "app", 'debug', 'parsed stdErr: ', stdOut);
                 }
@@ -262,7 +267,7 @@ var FfmpegOverlay = function (options, logUtilHelper) {
     transStream = new Stream.Transform();
     transStream._transform = function (chunk, encoding, done) {
         try {
-            logUtilHelper.log(appLogName, "app", 'debug', '[' + transChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+            //logUtilHelper.log(appLogName, "app", 'trace', '[' + transChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
             this.push(chunk);
             //Write to any active mp4 streams
             //for (const item of Object.values(commonData.activeMp4Streams)) {
@@ -319,6 +324,9 @@ var FfmpegOverlay = function (options, logUtilHelper) {
                 command.videoFilters(objOptions.videoFilters);
             }
             command.output(objOptions.rtmpUrl)
+            if(objOptions.file){
+                command.output(objOptions.file)
+            }
             command.run();
         }
         logUtilHelper.log(appLogName, "app", "info", "ffmpeg Started");
