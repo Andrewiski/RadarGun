@@ -4,7 +4,7 @@ Documentation=https://github.com/Andrewiski/RadarGun
 After=network.target
 
 [Service]
-Environment="CONFIGDIRECTORY=/opt/de/appdata/radar/config" "DATADIRECTORY=/opt/de/appdata/radar/data"
+Environment="CONFIGDIRECTORY=/opt/de/appdata/radar/config" "DATADIRECTORY=/opt/de/appdata/radar/data" "LOGDIRECTORY=/opt/de/appdata/radar/logs"
 WorkingDirectory=/opt/de/radar
 Type=exec
 User=radar

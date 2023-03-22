@@ -40,6 +40,11 @@ if (process.env.DATADIRECTORY) {
     defaultConfig.dataDirectory =process.env.DATADIRECTORY;
 }
 
+if (process.env.LOGDIRECTORY) {
+    defaultConfig.logDirectory =process.env.LOGDIRECTORY;
+}
+
+
 if (defaultConfig.deviceId === undefined || defaultConfig.deviceId === '') {
     defaultConfig.deviceId = uuidv4();
 }
@@ -51,6 +56,7 @@ var configHandler = new ConfigHandler(configFileOptions, defaultConfig);
 
 var objOptions = configHandler.config;
 console.log("Data Directory is " + objOptions.dataDirectory);
+console.log("Log Directory is " + objOptions.logDirectory);
 
 let logUtilHelper = new LogUtilHelper({
     appLogLevels: objOptions.appLogLevels,
@@ -89,6 +95,7 @@ logUtilHelper.log(appLogName, "app", "info", "DeviceId " + configHandler.config.
 logUtilHelper.log(appLogName, "app", "info", "configDirectory is " + configFileOptions.configDirectory);
 logUtilHelper.log(appLogName, "app", "info", "configFileName is " + configFileOptions.configFileName);
 logUtilHelper.log(appLogName, "app", "info", "Data Directory is " + objOptions.dataDirectory);
+logUtilHelper.log(appLogName, "app", "info", "Log Directory is " + objOptions.logDirectory);
 
 
 var audioFileDirectory = path.join(objOptions.dataDirectory, "audioFiles");

@@ -1,0 +1,39 @@
+{
+  "name": "eeprom",
+  "version": "0.0.1",
+  "private": false,
+  "license": "Apache-2.0",
+  "keywords": [
+    "embedded",
+    "linux",
+    "eeprom"
+  ],
+  "scripts": {
+    "start": "node ./testEeprom.js",
+    "stop": "pkill --signal SIGINT RadarGunMonitor"
+  },
+  "bugs": {
+    "url": "https://github.com/Andrewiski/RadarGunMonitor/issues"
+  },
+  "homepage": "https://github.com/Andrewiski/RadarGunMonitor#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Andrewiski/RadarGunMonitor.git"
+  },
+  "description": "Digital Example Eeprom Test ",
+  "main": "app.js",
+  "engines": {
+    "node": ">= 16.0.0"
+  },
+  "author": {
+    "name": "adevries",
+    "email": "adevries@digitalexample.com"
+  },
+  "dependencies": {
+    "debug": "^4.3.3",
+    "extend": "^3.0.2",
+    "i2c-bus": "5.2.2",
+    "node-promise": "^0.5.14",
+    "hexy": "^0.3.4"
+  }
+}

@@ -63,7 +63,7 @@ var adafruitLedBackpack = function () {
                 function (err, port) {
 
                     if (err) {
-                        debug('bonescript i2c.open error %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
+                        debug('i2c.open error %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, err);
                         isInited = false;
                         if (Callback) {
                             Callback(err, callbackData);
@@ -264,8 +264,10 @@ var adafruitLedBackpack = function () {
 
     self.writeNumber = function(number, displayColon, Callback, callbackData){
        try {
+                
                 debug('writeNumber %s ' + objOptions.I2CDevice + '/' + objOptions.I2CAddress, number)
-                var digitsToWrite = number.toString();
+                //var digitsToWrite = number.toString();
+                var digitsToWrite = (Math.round(number * 100) / 100).toFixed(2);
                 if (digitsToWrite.length < 4) {
                     digitsToWrite = "    ".substring(digitsToWrite.length, 4) + digitsToWrite;
                 } else if (digitsToWrite.length > 4) {
