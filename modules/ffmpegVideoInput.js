@@ -6,6 +6,7 @@ const EventEmitter = require('events').EventEmitter;
 const path = require('path');
 const extend = require('extend');
 const ffmpeg = require('fluent-ffmpeg');
+const { libcamera } = require('@andrewiski/libcamera');
 const fs = require('fs');
 const { Stream } = require("stream");
 const FfmpegVideoOutputRtmp = require("./ffmpegVideoOutputRtmp");
@@ -15,7 +16,7 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
     var self = this;
     var defaultOptions = {
         "input": "video='Integrated Camera':audio='Microphone (Realtek High Definition Audio)'",
-        "inputOptions": ["-rtsp_transport tcp", "-stimeout 30000000"], // ["-rtsp_transport tcp","-stimeout 30000000"]
+        "inputOptions": ["-f dshow", "-video_size 1280x720", "-rtbufsize 702000k", "-framerate 30"], // ["-rtsp_transport tcp","-stimeout 30000000"]
         //"outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-r 50", "-preset llhq", "-rc vbr_hq", "-f flv" ],
         "capture":true,
         outputs: null
@@ -281,6 +282,7 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
     var ffmpegVideoOutputRtmp = null;
     var ffmpegVideoOutputRtmp2 = null;
     var ffmpegVideoOutputMp4File = null;
+
     
     var startIncomingStream = function () {
     
@@ -290,16 +292,37 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
         commonData.streamStats.status = "connected"; 
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", "debug", "Source Video URL", self.options.input)
-        command = ffmpeg({ source: self.options.input });    
-        command.inputOptions(self.options.inputOptions)
-        command.outputOptions(self.options.outputOptions)
-        command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info            
-        command.on('error', commandError)
-        command.on('progress', commandProgress)
-        command.on('stderr', commandStdError)
-        command.on('end', commandEnd);
+        if(self.options.input.startsWith("libcamera")){
+            self.options.inputOptions.output = incomingTransStream;
+            let results = libcamera.vid({ config: self.options.inputOptions });
+            results.then(executeResult => {
+                console.log("Got Results");
+                command = executeResult;
+                command.on("exit", commandEnd);
+                //executeResult.stdout.on("data",(data) => console.log(data.toString()))
+                //executeResult.stdout.pipe( incomingMonitorStream);
+                command.on('error', commandError)
+                command.on('progress', commandProgress)
+                command.stderr.on('data', commandStdError)
+                command.on('end', commandEnd);
+            });
+            results.catch(err => {
+                logUtilHelper.log(appLogName, "app", "error", "libcamera", err)
+                //console.log(executeResult.message)
+            });
+        }else{
+            command = ffmpeg({ source: self.options.input });    
+            command.inputOptions(self.options.inputOptions)
+            command.outputOptions(self.options.outputOptions)
+            command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info            
+            command.on('error', commandError)
+            //command.on('progress', commandProgress)
+            command.on('stderr', commandStdError)
+            command.on('end', commandEnd);
+            
+            //command.pipe(incomingTransStream, { end: false });
+        }
         
-        command.pipe(incomingTransStream, { end: false });
         
         logUtilHelper.log(appLogName, "app","info", "ffmpeg Started");
     };

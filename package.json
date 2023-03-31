@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@andrewiski/confighandler": "^1.0.1",
+    "@andrewiski/libcamera": "^1.0.11",
     "@andrewiski/logutilhelper": "^1.0.20",
     "@uirouter/angularjs": "^1.0.25",
     "angular": "^1.8",
@@ -52,7 +53,6 @@
     "fluent-ffmpeg": "^2.1.2",
     "font-awesome": "^4.6.3",
     "gps": "^0.5.3",
-    "i2c-bus": "5.2.2",
     "jquery": "^3.6.0",
     "mathjs": ">=7.5.1",
     "moment": "^2.29.3",
@@ -70,5 +70,14 @@
     "verror": "1.6.x",
     "winston": "^3.5",
     "winston-daily-rotate-file": "^4.6.0"
+  },
+  "overrides": {
+    "os": {
+      "linux": {
+        "dependencies": {
+          "i2c-bus": "5.2.2"
+        }
+      }
+    }
   }
 }

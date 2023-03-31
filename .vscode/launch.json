@@ -27,6 +27,14 @@
         },
 
         {
+            "env": { "DEBUG": "testVideoCapture,rtspVideoInput,ffmpegVideoInput,ffmpegVideoOutputRtmp,ffmpegVideoOutputMp4File,libcamera"},
+            "command": "node tests/testLibcameraVideoCapture.js",
+            "name": "Run node tests/testLibcameraVideoCapture.js",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+
+        {
             "env": {"DEBUG" : "testRadarSerialPort,radarPacketParser"},
             "command": "node tests/testRadarSerialport.js",
             "name": "Run node tests/testRadarSerialport.js",

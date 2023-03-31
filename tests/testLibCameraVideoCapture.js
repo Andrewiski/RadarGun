@@ -1,6 +1,5 @@
 'use strict';
-const path = require('path');
-const fs = require('fs');
+
 const extend = require('extend');
 const FfmpegVideoInput = require("../modules/ffmpegVideoInput.js");
 //const RtspVideoCapture = require("../modules/rtspVideoInput.js");
@@ -29,11 +28,8 @@ var objOptions = {
     ffmpegVideoInput: {
         //input:"rtsps://10.100.1.1:7441/f724nSZ9iebgPS9e?enableSrtp",
         //input:"rtsp://10.100.32.91:554/s0",
-        input:"video=Integrated Camera:audio=Microphone (Realtek High Definition Audio)",
-        inputOptions: ["-f dshow", "-video_size 1280x720", "-rtbufsize 702000k", "-framerate 30"], // ["-rtsp_transport tcp","-stimeout 30000000"]
-        //inputOptions: ["-rtsp_transport tcp", "-stimeout 30000000"],
-        //outputOptions: [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 12", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-preset hq", "-f flv" ],
-        outputOptions: [ "-c:a copy", "-c:v copy", "-f nut" ],
+        input:"libcamera-vid",
+        inputOptions: {"width": "1080", "height": "768", "autofocus-mode": "manual", "inline":true, "nopreview":1, timeout:100000 }, // ["-rtsp_transport tcp","-stimeout 30000000"]
         capture:true,
         outputs: {
             ffmpegVideoOutputRtmp : {
@@ -120,17 +116,6 @@ let logUtilHelper = new LogUtilHelper({
 })
 
 
-// if (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '') {
-//     process.env.FFMPEG_PATH = path.join(__dirname, 'ffmpeg', 'ffmpeg.exe');
-// }
-
-// if (process.env.FFPLAY_PATH === undefined || process.env.FFPLAY_PATH === '') {
-//     process.env.FFPLAY_PATH = path.join(__dirname, 'ffmpeg', 'ffplay.exe');
-// }
-
-// if (process.env.FFPROBE_PATH === undefined || process.env.FFPROBE_PATH === '') {
-//     process.env.FFPROBE_PATH = path.join(__dirname, 'ffmpeg', 'ffmpeg.exe');
-// }
 
 
 try{
