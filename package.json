@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@andrewiski/confighandler": "^1.0.1",
-    "@andrewiski/libcamera": "^1.0.11",
+    "@andrewiski/libcamera": "^1.0.12",
     "@andrewiski/logutilhelper": "^1.0.20",
     "@uirouter/angularjs": "^1.0.25",
     "angular": "^1.8",

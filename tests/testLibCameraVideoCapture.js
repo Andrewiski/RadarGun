@@ -4,7 +4,8 @@ const extend = require('extend');
 const FfmpegVideoInput = require("../modules/ffmpegVideoInput.js");
 //const RtspVideoCapture = require("../modules/rtspVideoInput.js");
 const LogUtilHelper = require("@andrewiski/logutilhelper");
-const appLogName = "testVideoCapture"
+const appLogName = "testVideoCapture";
+const path = require('path');
 //ffmpeg -h encoder=h264_nvenc
 var objOptions = {
     appLogLevels:{
@@ -29,7 +30,8 @@ var objOptions = {
         //input:"rtsps://10.100.1.1:7441/f724nSZ9iebgPS9e?enableSrtp",
         //input:"rtsp://10.100.32.91:554/s0",
         input:"libcamera-vid",
-        inputOptions: {"width": "1080", "height": "768", "autofocus-mode": "manual", "inline":true, "nopreview":1, timeout:100000 }, // ["-rtsp_transport tcp","-stimeout 30000000"]
+        
+        inputOptions: {"libcamaraPath": path.join(__dirname,"libcamera"), "libcamaraPathExt" : ".cmd", "width": "1080", "height": "768", "autofocus-mode": "manual", "inline":true, "nopreview":1, timeout:100000 }, // ["-rtsp_transport tcp","-stimeout 30000000"]
         capture:true,
         outputs: {
             ffmpegVideoOutputRtmp : {
