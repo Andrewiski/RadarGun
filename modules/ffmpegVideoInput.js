@@ -229,11 +229,16 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
     var incomingTransStream = null;
     var first100 = false;
     // incoming and backup transtream pipe to this depending on active source  to transform stream
-    var incomingTransStreamChunkCounter = 0;
+    commonData.streamStats.incoming.incomingChunkCounter = 0;
+    commonData.streamStats.incoming.incomingChunkShow = 0;
     incomingTransStream = new Stream.Transform();
     incomingTransStream._transform = function (chunk, encoding, done) {
         try {
-            //logUtilHelper.log(appLogName, "app", 'debug', '[' + incomingTransStreamChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+            if (commonData.streamStats.incoming.incomingChunkCounter >= commonData.streamStats.incoming.incomingChunkShow) {
+                logUtilHelper.log(appLogName, "app", 'trace', "incomingMonitorStream", "chunks processed: " + commonData.streamStats.incoming.incomingChunkShow);
+                commonData.streamStats.incoming.incomingChunkShow = commonData.streamStats.incoming.incomingChunkShow + 50;
+            }
+            commonData.streamStats.incoming.incomingChunkCounter++;
             this.push(chunk);
             return done();
         } catch (ex) {
@@ -277,7 +282,7 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
         next();
     };
 
-    incomingTransStream.pipe(incomingMonitorStream);
+    //incomingTransStream.pipe(incomingMonitorStream);
 
     var ffmpegVideoOutputRtmp = null;
     var ffmpegVideoOutputRtmp2 = null;
@@ -320,7 +325,7 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
             command.on('stderr', commandStdError)
             command.on('end', commandEnd);
             
-            //command.pipe(incomingTransStream, { end: false });
+            command.pipe(incomingTransStream, { end: false });
         }
         
         

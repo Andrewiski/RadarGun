@@ -224,10 +224,15 @@ var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
     var first100 = false;
     // incoming and backup transtream pipe to this depending on active source  to transform stream
     var incomingTransStreamChunkCounter = 0;
+    var incomingTransStreamChunkShow = 0;
     incomingTransStream = new Stream.Transform();
     incomingTransStream._transform = function (chunk, encoding, done) {
         try {
-            //logUtilHelper.log(appLogName, "app", 'debug', '[' + incomingTransStreamChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+            if(incomingTransStreamChunkCounter >= incomingTransStreamChunkShow ){
+                logUtilHelper.log(appLogName, "app", 'debug', '[' + incomingTransStreamChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+                incomingTransStreamChunkShow = incomingTransStreamChunkShow + 50;
+            }
+            incomingTransStreamChunkCounter++;
             this.push(chunk);
             return done();
         } catch (ex) {

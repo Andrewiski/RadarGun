@@ -86,6 +86,7 @@
                batters: null,
                walkupFiles: null,
                audioFiles: null,
+               serverLogs: [],
                isGameAdmin: false,
                isGameSelect: false,
                isGameSelected: false,
@@ -166,6 +167,8 @@
                 });
         }
 
+        
+
         var refreshWalkupFiles = function () {
             return $http.get('/data/audioFiles/walkup').
                 then(function (response) {
@@ -210,6 +213,15 @@
                refreshWalkupFiles();
            }
 
+           $scope.tabAudioFilesClick = function() {
+                console.log("tabLogsClick");
+                if($scope.commonData.walkupFiles === null){
+                    refreshWalkupFiles();
+                }
+                if($scope.commonData.audioFiles === null){
+                    refreshAudioFiles();
+                }
+            }
 
            $scope.gameSelect = function () {
                $scope.commonData.isGameSelect = true;
@@ -675,6 +687,16 @@
                $scope.commonData.isGuestTeamEdit = false;
 
 
+           }
+
+           
+
+           $scope.tabLogsClick = function() {
+                console.log("tabLogsClick")
+           }
+
+           $scope.getServerLogs = function() {
+            
            }
 
            var findPitcher = function(lineup){

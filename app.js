@@ -116,7 +116,8 @@ var radarDatabase = new RadarDatabase(objOptions.radarDatabase, logUtilHelper, o
 
 var commonData = {
     game: null,
-    currentRadarSpeedData: null
+    currentRadarSpeedData: null,
+    radar: {log:[]}
 }
 
 //app.set('views', path.join(__dirname, 'views'));
@@ -136,10 +137,11 @@ app.use('/javascript/angular-ui-event', express.static(path.join(__dirname, 'nod
 app.use('/javascript/angular-ui-date', express.static(path.join(__dirname, 'node_modules', 'angular-ui-date', 'dist')));
 app.use('/javascript/angular-ui-select', express.static(path.join(__dirname, 'node_modules', 'ui-select', 'dist')));
 // not needed already served up by io app.use('/javascript/socket.io', express.static(path.join(__dirname, 'node_modules', 'socket.io', 'node_modules', 'socket.io-client', 'dist')));
-app.use('/javascript/fontawesome', express.static(path.join(__dirname, 'node_modules', 'font-awesome')));
+app.use('/javascript/fontawesome', express.static(path.join(__dirname, 'node_modules', '@fortawesome','fontawesome-free')));
 app.use('/javascript/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
 app.use('/javascript/jquery', express.static(path.join(__dirname, 'node_modules', 'jquery', 'dist')));
 app.use('/javascript/moment', express.static(path.join(__dirname, 'node_modules', 'moment', 'min')));
+app.use('/javascript/jsoneditor', express.static(path.join(__dirname, 'node_modules', 'jsoneditor', 'dist')));
 //app.use('/javascript/bootstrap-table', express.static(path.join(__dirname, 'node_modules', 'bootstrap-table', 'dist')));
 //app.use('/javascript/dragtable', express.static(path.join(__dirname, 'node_modules', 'dragtable')));
 //app.use('/javascript/jquery-ui', express.static(path.join(__dirname, 'node_modules', 'jquery-ui', 'ui')));
@@ -529,7 +531,7 @@ io.on('connection', function(socket) {
         try {
             switch (message.cmd) {
                 case "audioFilePlay":
-                    audioFilePlay("", message.data.audioFile);
+                    audioFilePlay(audioFileDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5']);
                     break;
                 case "audioFilePlayWalkup":
                     audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5'])
@@ -722,6 +724,30 @@ io.on('connection', function(socket) {
     });
 
 
+    socket.on('config', function(message) {
+        logUtilHelper.log(appLogName, "socketio", "debug", 'config:' + message.cmd + ' client id:' + socket.id);
+        switch(message.cmd){
+            case "get":
+                break;
+
+        }
+    });
+
+    socket.on('serverLogs', function(message) {
+        logUtilHelper.log(appLogName, "socketio", "debug", 'serverLogs:' + message.cmd + ' client id:' + socket.id);
+        switch(message.cmd){
+            case "getServerLogs":
+                socket.emit("serverLogs", {cmd:message.cmd, data: logUtilHelper.memoryData} )
+                break;
+            case "getAppLogLevels":
+               socket.emit("serverLogs", {cmd:message.cmd, data: logUtilHelper.getLogLevelAppLogLevels} );
+               break;
+        }
+        
+        
+    });
+
+
     
 
     //socket.on("startStream", function (data) {
@@ -763,7 +789,11 @@ radarStalker2.on('radarSpeed', function (data) {
         }
         commonData.game.log.push(JSON.parse(JSON.stringify(data)));
         commonData.gameIsDirty = true;
-    }    
+    }   
+    commonData.radar.log.push(JSON.parse(JSON.stringify(data)));
+    if(commonData.radar.log.length>objOptions.maxRadarLogLength){
+        commonData.radar.log.shift()
+    } 
     dataDisplay.updateSpeedData(data);
     io.emit('radarSpeed', data);
     commonData.currentRadarSpeedData = data;

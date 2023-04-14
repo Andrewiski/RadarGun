@@ -62,7 +62,8 @@ var FfmpegOverlay = function (options, logUtilHelper) {
             metadata: {},
             info:null
         },
-        activeMp4Streams: []
+        activeMp4Streams: [],
+        shouldAutoRestart: false
     };
 
 
@@ -224,7 +225,10 @@ var FfmpegOverlay = function (options, logUtilHelper) {
         commonData.streamStats.stderr = stderr;
         self.emit('streamStats', commonData.streamStats);
         if (err && err.message && err.message.startsWith('ffmpeg exited with code') === true) {
-            setTimeout(restartStream, 30000);
+            if(commonData.shouldAutoRestart){
+                logUtilHelper.log(appLogName, "app", 'info', 'Command Error', 'Will Autorestart');
+                setTimeout(restartStream, 30000);
+            }
         }
     };
 
@@ -243,13 +247,15 @@ var FfmpegOverlay = function (options, logUtilHelper) {
         commonData.streamStats.error = "commandEnd Called";
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", 'error', 'Source Stream Closed');
-        setTimeout(restartStream, 30000);
+        if(commonData.shouldAutoRestart){
+            logUtilHelper.log(appLogName, "app", 'info', 'Will Autorestart');
+            setTimeout(restartStream, 30000);
+        }
     };
 
     var restartStream = function () {
-        //this is where we would play a local file until we get reconnected to internet.
+        
         logUtilHelper.log(appLogName, "app", 'error', 'Restarting incoming Stream because it was Closed');
-   
         startIncomingStream();
     };
 
@@ -297,13 +303,13 @@ var FfmpegOverlay = function (options, logUtilHelper) {
 
 
     var startIncomingStream = function () {
-    
+        commonData.shouldAutoRestart = false;
         if (!(command === null || command === undefined)) {
             command.kill();
         }
         commonData.streamStats.status = "connected"; 
         self.emit('streamStats', commonData.streamStats);
-        logUtilHelper.log(appLogName, "app", "debug", "Source Video URL", objOptions.rtspUrl)
+        logUtilHelper.log(appLogName, "app", "debug", "Source Video URL", objOptions.input)
 
         command = ffmpeg({ source: objOptions.input });
 
@@ -329,7 +335,9 @@ var FfmpegOverlay = function (options, logUtilHelper) {
             }
             command.run();
         }
-        logUtilHelper.log(appLogName, "app", "info", "ffmpeg Started");
+        logUtilHelper.log(appLogName, "app", "info", "ffmpeg Started", "Source Video URL", objOptions.input, "Output Url", objOptions.rtmpUrl);
+        commonData.shouldAutoRestart = true;
+        
     };
 
     var streamStart = function (throwError) {
@@ -345,13 +353,31 @@ var FfmpegOverlay = function (options, logUtilHelper) {
 };
 
     var streamStop = function (throwError) {
+        commonData.shouldAutoRestart = false;
         logUtilHelper.log(appLogName, "app", 'warning', 'streamStop command');
         try {
             if (!(command === null || command === undefined)) {
-                command.kill();
+                command.ffmpegProc.stdin.write('q');
             }
         } catch (ex) {
             logUtilHelper.log(appLogName, "app", 'error', 'Error Stopping Video Stream ', ex);
+            if (throwError === true) {
+                throw ex;
+            }
+        }
+    };
+
+    var streamKill = function (throwError) {
+        commonData.shouldAutoRestart = false;
+            
+        logUtilHelper.log(appLogName, "app", 'warning', 'streamKill command');
+        try {
+            if (!(command === null || command === undefined)) {
+                
+                command.kill();
+            }
+        } catch (ex) {
+            logUtilHelper.log(appLogName, "app", 'error', 'Error Killing Video Stream ', ex);
             if (throwError === true) {
                 throw ex;
             }
