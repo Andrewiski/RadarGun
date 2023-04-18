@@ -981,18 +981,68 @@
                 
                 <uib-tab index="7" ng-show="commonData.isGameAdmin">
                     <uib-tab-heading>
-                        <i class="fa-sharp fa-light fa-video"></i> Video Streams
+                        <i class="fa-solid fa-video"></i> Video Streams
                     </uib-tab-heading>
                     <div>
-                        <div>
-                            <div class="btn-group" role="group" aria-label="Buttons">
-                                <button class="btn btn-primary" ng-click="streamStart()">Start Stream</button>
-                                <button class="btn btn-primary" ng-click="streamStop()">Stop Stream</button>
+                        <div class="well well-sm">
+                            <div>
+                                <div><label><i class="fa-solid fa-video"></i> Camera</label></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-model="commonData.youtubeRtmpUrl" placeholder="Rtsp Camera Stream URL" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" ng-click="videoStreamStart()">Start Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamStop()">Stop Stream</button>
+                                    </span>
+                                </div>
+                                
+                                <!--<div class="btn-group" role="group" aria-label="Buttons">
+                                    <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
+                                    <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
+                                </div>-->
                             </div>
+                        </div>
 
-                            <div class="btn-group" role="group" aria-label="Buttons">
-                                <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
-                                <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
+                        <div class="well well-sm">
+                            
+                            <div>
+                                <div><label><i class="fa-brands fa-youtube"></i> YouTube</label></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-model="commonData.youtubeRtmpUrl" placeholder="YouTube Stream URL" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" ng-click="videoStreamYoutubeStart()">Start Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamYoutubeStop()">Stop Stream</button>
+                                    </span>
+                                </div>
+                                
+                                <!--<div class="btn-group" role="group" aria-label="Buttons">
+                                    <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
+                                    <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
+                                </div>-->
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="well well-sm">
+                                <div><label><img src="/app/img/GameChanger-icon.svg" style="width:20px" alt="" class="gamechanger-logo"> GameChanger</label></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-model="commonData.gamechangerRtmpUrl" placeholder="Gamechanger RTMP URL" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" ng-click="videoStreamGameChangerStart()">Start Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamGameChangerStop()">Stop Stream</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="well well-sm">
+                                <div><label><i class="fa-solid fa-clapperboard"></i> File</label></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.FileName" placeholder="fileName" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" ng-click="videoStreamFileStart()">Start Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamFileStop()">Stop Stream</button>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

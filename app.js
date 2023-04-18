@@ -17,7 +17,9 @@ const BatteryMonitor = require("./modules/batteryMonitor.js");
 const GpsMonitor = require("./modules/gpsMonitor.js");
 const DataDisplay = require("./modules/dataDisplay.js");
 const RadarDatabase = require("./modules/radarDatabase.js");
-const FfmpegOverlay = require("./modules/ffmpegOverlay.js");
+//const FfmpegOverlay = require("./modules/ffmpegOverlay.js");
+const FfmpegVideoInput = require("./modules/ffmpegVideoInput.js");
+const VideoOverlayParser = require("./modules/videoOverlayParser.js");
 const FFplay = require('./modules/ffplay.js');
 const { v4: uuidv4 } = require('uuid');
 
@@ -111,7 +113,10 @@ var radarStalker2 = new RadarStalker2(objOptions.radarStalker2, logUtilHelper);
 var batteryMonitor = new BatteryMonitor(objOptions.batteryMonitor, logUtilHelper);
 var gpsMonitor = new GpsMonitor(objOptions.gpsMonitor, logUtilHelper);
 var dataDisplay = new DataDisplay(objOptions.dataDisplay, logUtilHelper);
-var ffmpegOverlay = new FfmpegOverlay(objOptions.ffmpegOverlay, logUtilHelper);
+//var ffmpegOverlay = new FfmpegOverlay(objOptions.ffmpegOverlay, logUtilHelper);
+var videoOverlayParser = new VideoOverlayParser(objOptions.videoOverlayParser, logUtilHelper);
+var ffmpegVideoInput = new FfmpegVideoInput(objOptions.ffmpegVideoInput, videoOverlayParser, logUtilHelper);
+
 var radarDatabase = new RadarDatabase(objOptions.radarDatabase, logUtilHelper, objOptions.dataDirectory);
 
 var commonData = {
@@ -215,7 +220,9 @@ routes.put('/data/scoregame', function (req, res) {
     //    }
     //})
     commonData.game = game;
-    updateOverlayText();
+    if(ffmpegVideoInput != null){
+       ffmpegVideoInput.updateOverlay({gameData:commonData.game, radarData:commonData.currentRadarSpeedData});
+    }
     io.emit("gameChanged", { cmd: "scoreGame", data: { game: commonData.game } });
     res.json({ game: commonData.game });
     
@@ -302,122 +309,7 @@ routes.put('/data/team', function (req, res) {
 });
 
 
-var updateOverlayText = function () {
-    try {
-        var OverlayText = ""
-        if (commonData.game) {
 
-            let homeTeamName = "Home";
-            if (commonData.game && commonData.game.home && commonData.game.home.team && commonData.game.home.team.name) {
-                homeTeamName = commonData.game.home.team.shortName
-            }
-            if (commonData.game.score && commonData.game.score.home) {
-                OverlayText += homeTeamName.padStart(12) + ": " + commonData.game.score.home.toString().padStart(2);
-            }
-
-
-            if (commonData.game.pitcher) {
-                OverlayText += "   P: "
-                var pitcherName = " ";
-                if (commonData.game.pitcher.player) {
-                    pitcherName = "#" + commonData.game.pitcher.player.jerseyNumber + " " + commonData.game.pitcher.player.firstName + " " + commonData.game.pitcher.player.lastName;
-
-                    if (pitcherName.length > 19) {
-                        pitcherName = "#" + commonData.game.pitcher.player.jerseyNumber + " " + commonData.game.pitcher.player.firstName.substring(0, 1) + ".  " + commonData.game.pitcher.player.lastName;
-                    }
-                    if (pitcherName.length > 19) {
-                        pitcherName = ("#" + commonData.game.pitcher.player.jerseyNumber + " " + commonData.game.pitcher.player.lastName).substring(0, 19);
-                    }
-                }
-                //need checks to ControlLength pad and truncate
-                OverlayText += pitcherName.padEnd(19);
-            } else {
-                OverlayText += " ".padEnd(22);
-            }
-        }
-
-        if (commonData.currentRadarSpeedData) {
-            OverlayText += " PV: " + commonData.currentRadarSpeedData.inMaxSpeed.toFixed(1).toString().padStart(4, "0") + " MPH   "
-        } else {
-            OverlayText += " PV: 00.0 MPH   "
-        }
-
-        if (commonData.game) {
-           
-
-            if (commonData.game.outs) {
-                OverlayText += " O: " + commonData.game.outs.toString();
-            }
-
-            if (commonData.game.balls !== undefined && commonData.game.balls !== null) {
-                OverlayText += " B: " + commonData.game.balls;
-            }
-
-            if (commonData.game.strikes !== undefined && commonData.game.strikes !== null) {
-                OverlayText += " S: " + commonData.game.strikes;
-            } 
-            
-        }
-        
-        if (commonData.game) {
-            
-            
-            
-            OverlayText += "\n";
-
-            let guestTeamName = "Guest";
-            if (commonData.game && commonData.game.guest && commonData.game.guest.team && commonData.game.guest.team.name) {
-                guestTeamName = commonData.game.guest.team.shortName;
-            }
-            if (commonData.game.score && commonData.game.score.home) {
-                OverlayText += guestTeamName.padStart(12) + ": " + commonData.game.score.guest.toString().padStart(2);
-            }
-
-            if (commonData.game.batter ) {
-                OverlayText += "   B: ";
-                var batterName = "";
-                if (commonData.game.batter.player) {
-                    batterName =  "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.firstName + " " + commonData.game.batter.player.lastName;
-
-                    //need checks to ControlLength pad and truncate
-                    if (batterName.length > 19) {
-                        batterName = "#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.firstName.substring(0, 1) + ".  " + commonData.game.batter.player.lastName;
-                    }
-                    if (batterName.length > 19) {
-                        batterName = ("#" + commonData.game.batter.player.jerseyNumber + " " + commonData.game.batter.player.lastName).substring(0, 19);
-                    }
-                }
-
-                OverlayText += batterName.padEnd(19);
-            } else {
-                OverlayText += " ".padEnd(22);
-            }
-        }
-        if (commonData.currentRadarSpeedData) {
-            OverlayText += " EV: " + commonData.currentRadarSpeedData.outMaxSpeed.toFixed(1).toString().padStart(4, "0") + " MPH   ";
-        } else {
-            OverlayText += " EV: 00.0 MPH   ";
-        }
-        if (commonData.game) {
-
-            if (commonData.game.inning && commonData.game.inningPosition) {
-                OverlayText += " I: " + commonData.game.inning.toString() + " " + commonData.game.inningPosition;
-            }
-        }
-
-
-        logUtilHelper.log(appLogName, "app", "trace", "updateOverlayText", OverlayText);
-
-        ffmpegOverlay.updateOverlayText(OverlayText);
-    } catch (ex) {
-        logUtilHelper.log(appLogName, "app", "error", "error updating Overlay text", ex);
-        try {
-            ffmpegOverlay.updateOverlayText("");
-        } catch (ex2) {
-            logUtilHelper.log(appLogName, "app", "error", "error blanking Overlay text", ex2)
-        }
-    }
-}
 
 app.use('/', routes);
 
@@ -503,21 +395,41 @@ io.on('connection', function(socket) {
     });
 
 
-    socket.on('stream', function (message) {
-        logUtilHelper.log(appLogName, "socketio", "debug",'stream:' + message.cmd + ', client id:' + socket.id);
+    socket.on('videoStream', function (message) {
+        logUtilHelper.log(appLogName, "socketio", "debug",'videoStream:' + message.cmd + ', client id:' + socket.id);
         switch (message.cmd) {
             case "start":
-                ffmpegOverlay.streamStart();
+                ffmpegVideoInput.streamStart();
                 break;
             case "stop":
-                ffmpegOverlay.streamStop();
+                ffmpegVideoInput.streamStop();
                 break;
-            case "startRemote":
-                io.emit('stream', message);
+            case "youtubeStart":
+                ffmpegVideoInput.streamStartRtmp();
                 break;
-            case "stopRemote":
-                io.emit('stream', message);
+            case "youtubeStop":
+                ffmpegVideoInput.streamStopRtmp();
                 break;
+            
+            case "gamechangerStart":
+                ffmpegVideoInput.streamStartRtmp2();
+                break;
+            case "gamechangerStop":
+                ffmpegVideoInput.streamStopRtmp2();
+                break;
+            case "fileStart":
+                ffmpegVideoInput.streamStartFile();
+                break;
+            case "fileStop":
+                ffmpegVideoInput.streamStopFile();
+                break;
+            //Was used in cases where local CPU power not enough to encode so started encoding server side encoded and sent rtmp to distination
+            // case "startRemote":
+            //     io.emit('stream', message);
+            //     break;
+            // case "stopRemote":
+            //     io.emit('stream', message);
+            //     break;
         }
 
     });
@@ -631,76 +543,11 @@ io.on('connection', function(socket) {
                 }
                 commonData.gameIsDirty = true;
                 io.emit("gameChanged", { cmd: "gameChanged", data: message.data });      //use io to send it to everyone
-                updateOverlayText();
+                if(ffmpegVideoInput !== null){
+                    ffmpegVideoInput.updateOverlay({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
+                }
                 break;
-
-
-            //case "inningChange":
-            //    commonData.game.inning = message.data.inning;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "inningChanged", data: { inning: commonData.game.inning } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "inningPositionChange":
-            //    commonData.game.inningPosition = message.data.inningPosition;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "inningPositionChanged", data: { inningPosition: commonData.game.inningPosition } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "homeScoreChange":
-            //    if (commonData.game.score === undefined) {
-            //        commonData.game.score = {};
-            //    }
-            //    commonData.game.score.home = message.data.score.home;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "homeScoreChanged", data: { score: { home: commonData.game.score.home } } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "guestScoreChange":
-            //    if (commonData.game.score === undefined) {
-            //        commonData.game.score = {};
-            //    }
-            //    commonData.game.score.guest = message.data.score.guest;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "guestScoreChanged", data: { score: { guest: commonData.game.score.guest } } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "outsChange":
-            //    commonData.game.outs = message.data.outs;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "outsChanged", data: { outs: commonData.game.outs } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "strikesChange":
-            //    commonData.game.strikes = message.data.strikes;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "strikesChanged", data: { strikes: commonData.game.strikes } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "ballsChange":
-            //    commonData.game.balls = message.data.balls;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "ballsChanged", data: { balls: commonData.game.balls } });      //use io to send it to everyone
-            //    updateOverlayText();
-            //    break;
-            //case "pitcherChange":
-            //    commonData.game.pitcher = message.data.pitcher;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "pitcherChanged", data: { pitcher: commonData.game.pitcher } });      //use io to send it to everyone
-            //    //radarStalker2.pitcher({ data: data.pitcher, socket: socket });
-            //    updateOverlayText();
-            //    break;
-            //case "batterChange":
-            //    commonData.game.batter = message.data.batter;
-            //    commonData.gameIsDirty = true;
-            //    io.emit("gameChanged", { cmd: "batterChanged", data: { batter: commonData.game.batter } });      //use io to send it to everyone
-            //    //radarStalker2.batter({ data: data.batter, socket: socket });
-            //    updateOverlayText();
-            //    break;
-            
         }
-
-        //updateOverlayText();
         
     })
 
@@ -750,20 +597,7 @@ io.on('connection', function(socket) {
 
     
 
-    //socket.on("startStream", function (data) {
-    //    ffmpegOverlay.startStream();
-    //})
-    //socket.on("stopStream", function (data) {
-    //    ffmpegOverlay.stopStream();
-    //})
-
-
-    //socket.on("startRemoteStream", function (data) {
-    //    io.emit('startRemoteStream', data);
-    //})
-    //socket.on("stopRemoteStream", function (data) {
-    //    io.emit('stopRemoteStream', data);
-    //})
+    
 
 
     if (socket.client.request.headers["origin"] !== "ArduinoSocketIo") {
@@ -797,7 +631,9 @@ radarStalker2.on('radarSpeed', function (data) {
     dataDisplay.updateSpeedData(data);
     io.emit('radarSpeed', data);
     commonData.currentRadarSpeedData = data;
-    updateOverlayText();
+    if(ffmpegVideoInput !== null){
+        ffmpegVideoInput.updateOverlay({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
+    }
 });
 radarStalker2.on('radarTimeout', function (data) {
     io.emit('radarTimeout', data);

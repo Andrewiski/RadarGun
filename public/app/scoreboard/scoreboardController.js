@@ -101,10 +101,10 @@
                radarSpeedDataHistory: [],
                showRadarConfig : true,
                editRadarConfig: false,
+               serverLogsSubscribe: {timer:null,sockets:[]},
                radarSpeedData: {
                    id: 0,
                    time: new Date(),
-                   
                    inMinSpeed: 0,
                    inMaxSpeed: 0,
                    outMinSpeed: 0,
@@ -227,6 +227,27 @@
                $scope.commonData.isGameSelect = true;
            }
 
+            
+            var resubscribeServerLogs = function () {
+                console.log("resubscribeServerLogs");
+                if (streamerDetailsSubscribe.timerID && streamerDetailsSubscribe.audioStreamerId) {
+                    Service.socket.emit("AudioStreamerAction", { "actionId": getFakeGuid(), "audioStreamerId": streamerDetailsSubscribe.audioStreamerId, "action": "SubscribeStreamerDetails" });
+                    streamerDetailsSubscribe.timerID = window.setTimeout(resubscribeStreamerDetails, 10 * 60 * 1000);
+                }
+            }
+        
+            var subscribeServerLogs = function (audioStreamerId) {
+                console.log("subscribeServerLogs");
+                if (streamerDetailsSubscribe.timerID) {
+                    unsubscribeStreamerDetails();
+                }
+                streamerDetailsSubscribe.audioStreamerId = audioStreamerId;
+                Service.socket.emit("AudioStreamerAction", { "actionId": getFakeGuid(), "audioStreamerId": streamerDetailsSubscribe.audioStreamerId, "action": "SubscribeStreamerDetails", data: { logLevel: "info" } });
+                streamerDetailsSubscribe.timerID = window.setTimeout(resubscribeStreamerDetails, 10 * 60 * 1000 );
+                
+            }
+
+
            $scope.gameScore = function () {
                if ($scope.commonData.selectedGame.id === '00000000-0000-0000-0000-000000000000') {
                    $scope.commonData.selectedGame.id = null;
@@ -285,26 +306,46 @@
 
            }
 
-           $scope.streamStart = function () {
-               //Tell server the inningChanged
-               radarMonitor.sendServerCommand("stream", { cmd: "start"});
-           }
+           $scope.videoStreamStart = function () {
+            //Tell server the inningChanged
+                radarMonitor.sendServerCommand("videoStream", { cmd: "start"});
+            }
 
-           $scope.streamStop= function () {
-               //Tell server the inningChanged
-               radarMonitor.sendServerCommand("stream", { cmd: "stop" });
-           }
+            $scope.videoStreamStop= function () {
+                //Tell server the inningChanged
+                radarMonitor.sendServerCommand("videoStream", { cmd: "stop" });
+            }
 
+            $scope.videoStreamYoutubeStart = function () {
+                //Tell server the inningChanged
+                radarMonitor.sendServerCommand("videoStream", { cmd: "youtubeStart"});
+            }
 
-           $scope.streamStartRemote = function () {
-               //Tell server the inningChanged
-               radarMonitor.sendServerCommand("stream", { cmd: "startRemote" });
-           }
+            $scope.videoStreamYoutubeStop= function () {
+                //Tell server the inningChanged
+                radarMonitor.sendServerCommand("videoStream", { cmd: "youtubeStop" });
+            }
 
-           $scope.streamStopRemote = function () {
-               //Tell server the inningChanged
-               radarMonitor.sendServerCommand("stream", { cmd: "stopRemote" });
-           }
+            $scope.videoStreamGameChangerStart = function () {
+            //Tell server the inningChanged
+                radarMonitor.sendServerCommand("videoStream", { cmd: "gamechangerStart"});
+            }
+
+            $scope.videoStreamGameChangerStop= function () {
+                //Tell server the inningChanged
+                radarMonitor.sendServerCommand("videoStream", { cmd: "gamechangerStop" });
+            }
+
+            $scope.videoStreamFileStart = function () {
+            //Tell server the inningChanged
+                radarMonitor.sendServerCommand("videoStream", { cmd: "fileStart"});
+            }
+
+            $scope.videoStreamFileStop= function () {
+                //Tell server the inningChanged
+                radarMonitor.sendServerCommand("videoStream", { cmd: "fileStop" });
+            }
+           
 
 
            $scope.batterChange = function () {
@@ -1114,6 +1155,16 @@
            //    $scope.commonData.pitcher = data.data;
            //    $scope.$apply();
            //});
+
+
+           $rootScope.$on('stream:youtubeStarted', function(event, data) {
+            // use the data accordingly
+            //console.log('radarMonitor:radarSpeedDataHistory detected ');
+            console.debug(data);
+            $scope.commonData.stream = data;
+            $scope.$apply();
+        });
+
 
             $rootScope.$on('radarMonitor:radarSpeedDataHistory', function(event, data) {
                 // use the data accordingly

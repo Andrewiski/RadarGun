@@ -8,7 +8,7 @@ const extend = require('extend');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const { Stream } = require("stream");
-var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
+var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper) {
 
     var self = this;
     var defaultOptions = {
@@ -24,6 +24,7 @@ var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
 
     self.options = extend({}, defaultOptions, options);
     
+    self.videoOverlayParser = videoOverlayParser;
 
     if (process.platform === 'win32' && (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '')) {
         process.env.FFMPEG_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffmpeg.exe');
@@ -170,29 +171,29 @@ var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
             case 'verbose':
                 if (stdOut.values.size) {
                     commonData.streamStats.info = stdOut.values;
-                    logUtilHelper.log(appLogName, "app", 'trace', 'parsed stdErr: ', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'trace', self.options.rtmpUrl, 'parsed stdErr: ', stdOut);
                 } else {
-                    logUtilHelper.log(appLogName, "app", 'debug', 'parsed stdErr: ', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stdErr: ', stdOut);
                 }
             
                 break;
             default:
-                logUtilHelper.log(appLogName, "app", 'debug', 'parsed stderr: ', stdOut);
+                logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stderr: ', stdOut);
         }
 
     
     };
 
     var commandError = function (err, stdout, stderr) {
-        logUtilHelper.log(appLogName, "app", 'error', 'an error happened: ' + err.message, err, stdout, stderr);
+        logUtilHelper.log(appLogName, "app", 'error',  self.options.rtmpUrl, 'an error happened: ' + err.message, err, stdout, stderr);
         commonData.streamStats.status = "disconnected";
         commonData.streamStats.error = err;
         commonData.streamStats.stdout = stdout;
         commonData.streamStats.stderr = stderr;
         self.emit('streamStats', commonData.streamStats);
-        if (err && err.message && err.message.startsWith('ffmpeg exited with code') === true) {
-            setTimeout(restartStream, 30000);
-        }
+        // if (err && err.message && err.message.startsWith('ffmpeg exited with code') === true) {
+        //     setTimeout(restartStream, 30000);
+        // }
     };
 
     var commandProgress = function (progress) {
@@ -209,34 +210,26 @@ var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
         commonData.streamStats.status = "disconnected";
         commonData.streamStats.error = "commandEnd Called";
         self.emit('streamStats', commonData.streamStats);
-        logUtilHelper.log(appLogName, "app", 'error', 'Source Stream Closed');
-        //setTimeout(restartStream, 30000);
+        logUtilHelper.log(appLogName, "app", 'error',  self.options.rtmpUrl, 'Source Stream Closed');
     };
 
-    var restartStream = function () {
-        //this is where we would play a local file until we get reconnected to internet.
-        logUtilHelper.log(appLogName, "app", 'error', 'Restarting incoming Stream because it was Closed');
-   
-        startIncomingStream();
-    };
+    
 
     var incomingTransStream = null;
-    var first100 = false;
-    // incoming and backup transtream pipe to this depending on active source  to transform stream
     var incomingTransStreamChunkCounter = 0;
     var incomingTransStreamChunkShow = 0;
-    incomingTransStream = new Stream.Transform();
+    incomingTransStream = new Stream.Transform({highWaterMark: 1638400});
     incomingTransStream._transform = function (chunk, encoding, done) {
         try {
             if(incomingTransStreamChunkCounter >= incomingTransStreamChunkShow ){
-                logUtilHelper.log(appLogName, "app", 'debug', '[' + incomingTransStreamChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+                logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, '[' + incomingTransStreamChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
                 incomingTransStreamChunkShow = incomingTransStreamChunkShow + 50;
             }
             incomingTransStreamChunkCounter++;
             this.push(chunk);
             return done();
         } catch (ex) {
-            logUtilHelper.log(appLogName, "app", 'trace', "error", ex);
+            logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, ex);
         }
     };
 
@@ -259,7 +252,7 @@ var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
     // incomingTransStream.pipe(incomingMonitorStream);
 
 
-    var startIncomingStream = function () {
+    var startIncomingStream = function (sourceStream) {
     
         if (!(command === null || command === undefined)) {
             command.kill();
@@ -268,6 +261,7 @@ var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", "info", "RTMP destination", self.options.rtmpUrl)
         command = ffmpeg({ source: incomingTransStream });    
+        //command = ffmpeg({ source: sourceStream });    
         command.inputOptions(self.options.inputOptions)
         
         command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info            
@@ -289,25 +283,29 @@ var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
         }
         command.run();
         
-        logUtilHelper.log(appLogName, "app","info", "ffmpeg Started");
+        logUtilHelper.log(appLogName, "app", "info", self.options.rtmpUrl, "ffmpeg Started");
     };
 
     var streamStart = function (sourceStream,throwError) {
-        logUtilHelper.log(appLogName, "app", 'info', 'streamStart Command');
+        logUtilHelper.log(appLogName, "app", 'info', self.options.rtmpUrl, 'streamStart Command');
     try {
         sourceStream.unpipe(incomingTransStream);
         sourceStream.pipe(incomingTransStream);
-        startIncomingStream();
+        startIncomingStream(sourceStream);
     } catch (ex) {
-        logUtilHelper.log(appLogName, "app", 'error', 'Error Starting Video Stream ', ex);
+        logUtilHelper.log(appLogName, "app", 'error',  self.options.rtmpUrl, 'Error Starting Video Stream ', ex);
         if (throwError === true) {
             throw ex;
         }
     }
 };
 
-    var streamStop = function (sourceStream,throwError) {
-        logUtilHelper.log(appLogName, "app", 'warning', 'streamStop command');
+
+
+    var streamKill = function (sourceStream,throwError) {
+        commonData.shouldAutoRestart = false;
+            
+        logUtilHelper.log(appLogName, "app", 'warning', self.options.rtmpUrl, 'streamKill command');
         try {
             sourceStream.unpipe(incomingTransStream);
             commonData.streamStats.status = "disconnected";
@@ -315,32 +313,62 @@ var FfmpegVideoOutputRtmp = function (options, logUtilHelper) {
             if (!(command === null || command === undefined)) {
                 command.kill();
             }
-            eventEmit("streamStats", commonData.streamStats);
+            self.emit("streamStats", commonData.streamStats);
         } catch (ex) {
-            logUtilHelper.log(appLogName, "app", 'error', 'Error Stopping Video Stream ', ex);
+            logUtilHelper.log(appLogName, "app", 'error', 'Error Killing Video Stream ', ex);
             if (throwError === true) {
                 throw ex;
             }
         }
     };
 
-    var updateOverlayText = function (overlayText) {
-        var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
-        try {
-            fs.writeFileSync(overlayFilePath, overlayText);
 
+    var streamStop = function (sourceStream,throwError) {
+        commonData.shouldAutoRestart = false;
+        logUtilHelper.log(appLogName, "app", 'warning', self.options.rtmpUrl, 'streamStop command');
+        try {
+            sourceStream.unpipe(incomingTransStream);
+            commonData.streamStats.status = "disconnected";
+            commonData.streamStats.error = "commandEnd Called";
+            if (!(command === null || command === undefined || command.ffmpegProc === null || command.ffmpegProc === undefined || command.ffmpegProc.stdin === null || command.ffmpegProc.stdin === undefined)) {
+                command.ffmpegProc.stdin.write('q');
+            }else{
+                streamKill(sourceStream,throwError);
+            }
+            self.emit("streamStats", commonData.streamStats);
         } catch (ex) {
-            logUtilHelper.log(appLogName, "app", "error", "Error Writing OverlayText File", ex);
+            logUtilHelper.log(appLogName, "app", 'error',  self.options.rtmpUrl, 'Error Stopping Video Stream ', ex);
+            if (throwError === true) {
+                throw ex;
+            }
+        }
+    };
+
+    var updateOverlay = function (options) {
+        try {
+            if(self.videoOverlayParser){
+                var overlayText = self.videoOverlayParser.getOverlayText(options)
+                if(self.options.overlayFileName != null ){
+                    var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
+                    try {
+                        fs.writeFileSync(overlayFilePath, overlayText);
+
+                    } catch (ex) {
+                        logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error Writing OverlayText File", ex);
+                    }
+                }   
+            }else{
+                logUtilHelper.log(appLogName, "app", "warning", self.options.rtmpUrl, "videoOverlayParser is not set", ex);    
+            }
+        } catch (ex) {
+            logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error updating Overlay", ex);
         }
     }
 
-   
-
-    
-
     self.streamStart = streamStart;
     self.streamStop = streamStop;
-
+    self.streamKill = streamKill;
+    self.updateOverlay = updateOverlay;
     self.commonData = function () {
         return commonData;
     }

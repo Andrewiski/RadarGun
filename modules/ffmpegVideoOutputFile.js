@@ -1,5 +1,5 @@
 'use strict';
-const appLogName = "ffmpegVideoOutputMp4File";
+const appLogName = "ffmpegVideoOutputFile";
 var util = require('util');
 const EventEmitter = require('events').EventEmitter;
 //const debug = require('debug')('ffmpegVideoCapture');
@@ -8,7 +8,7 @@ const extend = require('extend');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const { Stream } = require("stream");
-var FfmpegVideoOutputMp4File = function (options, logUtilHelper) {
+var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper) {
 
     var self = this;
     var defaultOptions = {
@@ -23,7 +23,7 @@ var FfmpegVideoOutputMp4File = function (options, logUtilHelper) {
     }
 
     self.options = extend({}, defaultOptions, options);
-    
+    self.videoOverlayParser = videoOverlayParser;
 
     if (process.platform === 'win32' && (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '')) {
         process.env.FFMPEG_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffmpeg.exe');
@@ -210,22 +210,16 @@ var FfmpegVideoOutputMp4File = function (options, logUtilHelper) {
         commonData.streamStats.error = "commandEnd Called";
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", 'error', 'Source Stream Closed');
-        //setTimeout(restartStream, 30000);
+        
     };
 
-    var restartStream = function () {
-        //this is where we would play a local file until we get reconnected to internet.
-        logUtilHelper.log(appLogName, "app", 'error', 'Restarting incoming Stream because it was Closed');
    
-        startIncomingStream();
-    };
-
     var incomingTransStream = null;
     var first100 = false;
     // incoming and backup transtream pipe to this depending on active source  to transform stream
     var incomingTransStreamChunkCounter = 0;
-    var incomingTransStreamChunkCounter = 0;
-    incomingTransStream = new Stream.Transform();
+    var incomingTransStreamChunkShow = 0;
+    incomingTransStream = new Stream.Transform({highWaterMark: 1638400});
     incomingTransStream._transform = function (chunk, encoding, done) {
         try {
             if(incomingTransStreamChunkCounter >= incomingTransStreamChunkShow ){
@@ -236,28 +230,11 @@ var FfmpegVideoOutputMp4File = function (options, logUtilHelper) {
             this.push(chunk);
             return done();
         } catch (ex) {
-            logUtilHelper.log(appLogName, "app", 'trace', "error", ex);
+            logUtilHelper.log(appLogName, "app", "error", ex);
         }
     };
 
-    // // Start incomingMonitor Stream 
-    // // Read from the source stream, to keeps it alive and flowing
-    // var incomingMonitorStream = new Stream.Writable({});
-    // // Consume the stream
-    // incomingMonitorStream._write = (chunk, encoding, next) => {
-        
-    //     commonData.streamStats.incoming.chunkCounter++;
-    //     if (commonData.streamStats.incoming.chunkCounter >= commonData.streamStats.incoming.chunkShow) {
-    //         logUtilHelper.log(appLogName, "app", 'trace', "incomingMonitorStream", "chunks processed: " + commonData.streamStats.incoming.chunkCounter);
-    //         commonData.streamStats.incoming.chunkShow = commonData.streamStats.incoming.chunkShow + 50;
-    //         self.emit('streamStats', commonData.streamStats, false);
-    //     }
-        
-    //     next();
-    // };
-
-    // incomingTransStream.pipe(incomingMonitorStream);
-
+    
 
     var startIncomingStream = function () {
     
@@ -304,11 +281,13 @@ var FfmpegVideoOutputMp4File = function (options, logUtilHelper) {
         try {
             sourceStream.unpipe(incomingTransStream);
             commonData.streamStats.status = "disconnected";
-            commonData.streamStats.error = "commandEnd Called";
-            if (!(command === null || command === undefined)) {
-                command.kill();
+            commonData.streamStats.error = "commandEnd Called q sent";
+            if (!(command === null || command === undefined || command.ffmpegProc === null || command.ffmpegProc === undefined || command.ffmpegProc.stdin === null || command.ffmpegProc.stdin === undefined)) {
+                command.ffmpegProc.stdin.write('q');
+            }else{
+                streamKill(sourceStream,throwError);
             }
-            eventEmit("streamStats", commonData.streamStats);
+            self.emit("streamStats", commonData.streamStats);
         } catch (ex) {
             logUtilHelper.log(appLogName, "app", 'error', 'Error Stopping Video Stream ', ex);
             if (throwError === true) {
@@ -317,13 +296,44 @@ var FfmpegVideoOutputMp4File = function (options, logUtilHelper) {
         }
     };
 
-    var updateOverlayText = function (overlayText) {
-        var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
+    var streamKill = function (sourceStream, throwError) {
+        commonData.shouldAutoRestart = false;
+            
+        logUtilHelper.log(appLogName, "app", 'warning', self.options.rtmpUrl, 'streamKill command');
         try {
-            fs.writeFileSync(overlayFilePath, overlayText);
-
+            sourceStream.unpipe(incomingTransStream);
+            commonData.streamStats.status = "disconnected";
+            commonData.streamStats.error = "commandKill Called";
+            if (!(command === null || command === undefined)) {
+                command.kill();
+            }
+            self.emit("streamStats", commonData.streamStats);
         } catch (ex) {
-            logUtilHelper.log(appLogName, "app", "error", "Error Writing OverlayText File", ex);
+            logUtilHelper.log(appLogName, "app", 'error', 'Error Killing Video Stream ', ex);
+            if (throwError === true) {
+                throw ex;
+            }
+        }
+    };
+
+    var updateOverlay = function (options) {
+        try {
+            if(self.videoOverlayParser){
+                var overlayText = self.videoOverlayParser.getOverlayText(options)
+                if(self.options.overlayFileName != null ){
+                    var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
+                    try {
+                        fs.writeFileSync(overlayFilePath, overlayText);
+
+                    } catch (ex) {
+                        logUtilHelper.log(appLogName, "app", "error", "Error Writing OverlayText File", ex);
+                    }
+                }   
+            }else{
+                logUtilHelper.log(appLogName, "app", "warning", "videoOverlayParser is not set", ex);    
+            }
+        } catch (ex) {
+            logUtilHelper.log(appLogName, "app", "error", "Error updating Overlay", ex);
         }
     }
 
@@ -333,6 +343,8 @@ var FfmpegVideoOutputMp4File = function (options, logUtilHelper) {
 
     self.streamStart = streamStart;
     self.streamStop = streamStop;
+    self.streamKill= streamKill;
+    self.updateOverlay = updateOverlay;
 
     self.commonData = function () {
         return commonData;
@@ -340,7 +352,7 @@ var FfmpegVideoOutputMp4File = function (options, logUtilHelper) {
 
 }
 // extend the EventEmitter class using our RadarMonitor class
-util.inherits(FfmpegVideoOutputMp4File, EventEmitter);
+util.inherits(FfmpegVideoOutputFile, EventEmitter);
 
-module.exports = FfmpegVideoOutputMp4File;
+module.exports = FfmpegVideoOutputFile;
 
