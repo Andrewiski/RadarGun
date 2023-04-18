@@ -44,8 +44,17 @@ sudo systemctl enable radar
 # Make it so Node can use Port 80 no Root/Sudo user
 #sudo apt-get install libcap2-bin
 #sudo setcap cap_net_bind_service=+ep /usr/bin/node
-#Test Config
-#sudo DEBUG=app,dataDisplay,radar,adafruitLedBackpack,gpsMonitor,radarEmulato CONFIGDIRECTORY=/opt/de/appdata/radar/config DATADIRECTORY=/opt/de/appdata/radar/data LOGDIRECTORY=/opt/de/appdata/radar/logs npm start
+#
+#Change Radar Password
+#sudo passwd radar
+#Set Radar Bash Sell
+#sudo chsh -s /bin/bash radar
+#Change to radar User
+#su radar
+#Set Radar Bash
+#
+#Test Config do this as Radar after su radar
+# DEBUG=app,dataDisplay,radar,adafruitLedBackpack,gpsMonitor,radarEmulato CONFIGDIRECTORY=/opt/de/appdata/radar/config DATADIRECTORY=/opt/de/appdata/radar/data LOGDIRECTORY=/opt/de/appdata/radar/logs npm start
 
 
 

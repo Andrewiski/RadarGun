@@ -9,7 +9,7 @@ const fs = require('fs');
 const { Stream, pipeline } = require("stream");
 var http = require('http');
 const FfmpegVideoOutputRtmp = require("./ffmpegVideoOutputRtmp");
-const FfmpegVideoOutputMp4File = require("./ffmpegVideoOutputMp4File");
+const FfmpegVideoOutputFile = require("./ffmpegVideoOutputFile");
 var FfmpegVideoInput = function (options, logUtilHelper) {
 
     var self = this;
@@ -146,8 +146,8 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
             }
             if (self.options.outputs && self.options.outputs.ffmpegVideoOutputMp4File) { 
                 
-                if (ffmpegVideoOutputMp4File === null) {
-                    ffmpegVideoOutputMp4File = new FfmpegVideoOutputMp4File(self.options.outputs.ffmpegVideoOutputMp4File, logUtilHelper);
+                if (ffmpegVideoOutputFile === null) {
+                    ffmpegVideoOutputFile = new FfmpegVideoOutputFile(self.options.outputs.ffmpegVideoOutputMp4File, logUtilHelper);
                 }
                 ffmpegVideoOutputMp4File.streamStart(incomingTransStream, throwError);
             }
@@ -164,8 +164,8 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
         if (ffmpegVideoOutputRtmp !== null) {
             ffmpegVideoOutputRtmp.streamStop(throwError);
         }
-        if (ffmpegVideoOutputMp4File !== null) {
-            ffmpegVideoOutputMp4File.streamStop(throwError);
+        if (ffmpegVideoOutputFile !== null) {
+            ffmpegVideoOutputFile.streamStop(throwError);
         }
         try {
             if (!(command === null || command === undefined)) {

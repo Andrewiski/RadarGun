@@ -406,6 +406,11 @@
                     <div class="container-fluid ">
                         <div class="row">
                             <div class="col-sm-12">
+                                <button type="button" class="btn" ng-click="historySave()">Save</button><button type="button" class="btn" ng-click="historyClear()">Clear</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
                                 <table class="table table-striped speedHistoryTable">
                                     <thead>
                                         <tr><th>Time</th><th>Pitcher</th><th>Max In</th><th>Min In</th><th>Batter</th><th>Max Out</th><th>Min Out</th></tr>
@@ -912,7 +917,7 @@
                     </div>
 
                 </uib-tab>
-                <uib-tab index="4" ng-show="commonData.isGameAdmin">
+                <uib-tab index="4" ng-show="commonData.isGameAdmin" ng-click="tabAudioFilesClick()">
                     <uib-tab-heading>
                         <i class="fa fa-music"></i> Audio Files
                     </uib-tab-heading>
@@ -949,57 +954,137 @@
                         </div>
                     </div>
                 </uib-tab>
+
                 <uib-tab index="5" ng-show="commonData.isGameAdmin">
                     <uib-tab-heading>
-                        <i class="glyphicon glyphicon-bell"></i> Config
+                        <i class="fa fa-baseball-bat-ball"></i> Practice Mode
+                    </uib-tab-heading>
+                    <div>
+                        <div class="player" >
+                            <div>Name: {{commonData.player.lastName}}, {{commonData.player.firstName}} </div>
+                            <div class="btn-group" role="group" aria-label="Buttons">
+                                <button type="button" class="btn btn-secondary" ng-click="playerShowDone()">Done</button>
+                                <button type="button" class="btn btn-primary" ng-click="playerEdit()">Edit</button>
+                            </div>
+                        </div>
+
+                        <div class="playerEdit" >
+                            <div>First Name:<input style="width:45px" type="number" ng-model="commonData.player.firstName" /></div>
+                            <div>Last Name:<input style="width:45px" type="number" ng-model="commonData.player.lastName" /></div>
+                            <div class="btn-group" role="group" aria-label="Buttons">
+                                <button type="button" class="btn btn-secondary" ng-click="playerEditCancel()">Cancel</button>
+                                <button type="button" class="btn btn-primary" ng-click="playerEditSave()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+                
+                <uib-tab index="7" ng-show="commonData.isGameAdmin">
+                    <uib-tab-heading>
+                        <i class="fa-solid fa-video"></i> Video Streams
+                    </uib-tab-heading>
+                    <div>
+                        <div class="well well-sm">
+                            <div>
+                                <div><label><i class="fa-solid fa-video"></i> Camera</label></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-model="commonData.youtubeRtmpUrl" placeholder="Rtsp Camera Stream URL" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" ng-click="videoStreamStart()">Start Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamStop()">Stop Stream</button>
+                                    </span>
+                                </div>
+                                
+                                <!--<div class="btn-group" role="group" aria-label="Buttons">
+                                    <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
+                                    <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
+                                </div>-->
+                            </div>
+                        </div>
+
+                        <div class="well well-sm">
+                            
+                            <div>
+                                <div><label><i class="fa-brands fa-youtube"></i> YouTube</label></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-model="commonData.youtubeRtmpUrl" placeholder="YouTube Stream URL" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" ng-click="videoStreamYoutubeStart()">Start Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamYoutubeStop()">Stop Stream</button>
+                                    </span>
+                                </div>
+                                
+                                <!--<div class="btn-group" role="group" aria-label="Buttons">
+                                    <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
+                                    <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
+                                </div>-->
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="well well-sm">
+                                <div><label><img src="/app/img/GameChanger-icon.svg" style="width:20px" alt="" class="gamechanger-logo"> GameChanger</label></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-model="commonData.gamechangerRtmpUrl" placeholder="Gamechanger RTMP URL" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" ng-click="videoStreamGameChangerStart()">Start Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamGameChangerStop()">Stop Stream</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="well well-sm">
+                                <div><label><i class="fa-solid fa-clapperboard"></i> File</label></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.FileName" placeholder="fileName" />
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" ng-click="videoStreamFileStart()">Start Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamFileStop()">Stop Stream</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab index="8" ng-show="commonData.isGameAdmin" ng-click="getServerLogs()">
+                    <uib-tab-heading>
+                        <i class="fa-regular fa-file-lines"></i> Logs
+                    </uib-tab-heading>
+                    <div>
+                        <div><i class="fa-solid fa-arrows-rotate"></i><select class="appLogName"></select><select class="appLogSubname"></select><select class="appLogLevelName"><option>error</option><option>warning</option><option>info</option><option>debug</option><option>trace</option></select></div>
+                        <div class="container-fluid ">
+                            <table class="table table-condensed">
+                                <thead>
+                                    <tr><th>Timestamp</th><th>Name</th><th>Sub Name</th><th>Level</th><th>Message</th></tr>
+                                </thead>
+                                <tbody class="serverLogs">
+                                </tbody>
+                            </table>
+                        </div>  
+                    </div>
+                </uib-tab>
+                <uib-tab index="9" ng-show="commonData.isGameAdmin">
+                    <uib-tab-heading>
+                        <i class="fa-solid fa-gear"></i> Config
                     </uib-tab-heading>
                     <div>
                         <div>
-                            <div class="player" ng-show="commonData.showPlayer">
-                                <div>Name: {{commonData.player.lastName}}, {{commonData.player.firstName}} </div>
-                                <div class="btn-group" role="group" aria-label="Buttons">
-                                    <button type="button" class="btn btn-secondary" ng-click="playerShowDone()">Done</button>
-                                    <button type="button" class="btn btn-primary" ng-click="playerEdit()">Edit</button>
-                                </div>
-                            </div>
-
-                            <div class="playerEdit" ng-show="commonData.showPlayerEdit">
-                                <div>First Name:<input style="width:45px" type="number" ng-model="commonData.player.firstName" /></div>
-                                <div>Last Name:<input style="width:45px" type="number" ng-model="commonData.player.lastName" /></div>
-                                <div class="btn-group" role="group" aria-label="Buttons">
-                                    <button type="button" class="btn btn-secondary" ng-click="playerEditCancel()">Cancel</button>
-                                    <button type="button" class="btn btn-primary" ng-click="playerEditSave()">Save</button>
-                                </div>
-                            </div>
-
-                            <div class="team" ng-show="commonData.showTeam">
-                                <div>Name: {{commonData.team.name}}</div>
-                                <div class="btn-group" role="group" aria-label="Buttons">
-                                    <button type="button" class="btn btn-secondary" ng-click="teamShowDone()">Done</button>
-                                    <button type="button" class="btn btn-primary" ng-click="teamEdit()">Edit</button>
-                                </div>
-                            </div>
-
-                            <div class="teamEdit" ng-show="commonData.showTeamEdit">
-                                <div>Team Name:<input style="width:45px" type="number" ng-model="commonData.team.name" ng-change="commonData.team.isDirty = true" /></div>
-                                <div class="btn-group" role="group" aria-label="Buttons">
-                                    <button type="button" class="btn btn-secondary" ng-click="teamEditCancel()">Cancel</button>
-                                    <button type="button" class="btn btn-primary" ng-click="teamEditSave()">Save</button>
-                                </div>
-                            </div>
-                            <div class="wifidog">
-                                <form class="wifidogform" style="display: none" action="config?act=config" name="wifi_info" method="post">
-                                    <select id='ssid' name="ssid" onclick='select_click()'>
-                                        <option value="note">click to select ssid</option>
-                                    </select>
-                                    <input type="password" name="password" placeholder="Password" autocomplete="wifi_pwd" />
-                                    <input type="hidden" name="admin" placeholder="Your board password" />
-                                    <input type="button" class='btn' size="15" style="background-color: transparent; border: 0;" onclick="check()" value="OK" />
-                                </form>
-                            </div>
-
-
-
+                            <div class="serverConfigJson"></div>
+                        </div>
+                        <div>
+                            <button class="btn btn-info" data-action="ReadConfig">Read Config</button>
+                            <button class="btn btn-danger" data-action="SaveConfig">Save Config</button>
+                        </div>
+                            
+                           
+                    </div>
+                </uib-tab>
+                <uib-tab index="10" ng-show="commonData.isGameAdmin">
+                    <uib-tab-heading>
+                        <i class="fa-solid fa-satellite-dish"></i> Radar Config
+                    </uib-tab-heading>
+                    <div>
                             <div class="radarConfig" ng-show="commonData.showRadarConfig">
                                 <div>
                                     <div ng-show="commonData.radarConfig.TransmiterControl.value !== 1"><a class="btn btn-sm btn-danger" ng-click="radarCommand('TransmiterControl',1)">Off</a>(Click to Turn On)</div>
@@ -1047,25 +1132,6 @@
                         </div>
                     </div>
                 </uib-tab>
-                <uib-tab index="7" ng-show="commonData.isGameAdmin">
-                    <uib-tab-heading>
-                        <i class="fa fa-youtube-play"></i> Youtube Stream
-                    </uib-tab-heading>
-                    <div>
-                        <div>
-                            <div class="btn-group" role="group" aria-label="Buttons">
-                                <button class="btn btn-primary" ng-click="streamStart()">Start Stream</button>
-                                <button class="btn btn-primary" ng-click="streamStop()">Stop Stream</button>
-                            </div>
-
-                            <div class="btn-group" role="group" aria-label="Buttons">
-                                <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
-                                <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
-                            </div>
-                        </div>
-                    </div>
-                </uib-tab>
-
             </uib-tabset>
         </div>
     </div>

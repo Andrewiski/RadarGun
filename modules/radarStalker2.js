@@ -19,7 +19,7 @@ const RadarStalker2 = function (options, logUtilHelper){
         "softwareConfig": {
           "logRawRadarPackets": false,
           "radarSpeedTimeOutMinutes": 30,
-          "radarSpeedHistoryCount": 20,
+          "radarSpeedHistoryCount": 50,  // This is Sent to webclients on Connect do not make to large, in app there is much larger commonData.radar.log
           "zeroCounterLimit": 15,
           "LiveGameMode": {
             "id": -1,

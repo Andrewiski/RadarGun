@@ -10,15 +10,15 @@ const { libcamera } = require('@andrewiski/libcamera');
 const fs = require('fs');
 const { Stream } = require("stream");
 const FfmpegVideoOutputRtmp = require("./ffmpegVideoOutputRtmp");
-const FfmpegVideoOutputMp4File = require("./ffmpegVideoOutputMp4File");
-var FfmpegVideoInput = function (options, logUtilHelper) {
+const FfmpegVideoOutputFile = require("./ffmpegVideoOutputFile");
+var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
 
     var self = this;
     var defaultOptions = {
         "input": "video='Integrated Camera':audio='Microphone (Realtek High Definition Audio)'",
         "inputOptions": ["-f dshow", "-video_size 1280x720", "-rtbufsize 702000k", "-framerate 30"], // ["-rtsp_transport tcp","-stimeout 30000000"]
         //"outputOptions": [ "-c:a copy", "-pix_fmt +", "-c:v h264_nvenc", "-g 50", "-use_wallclock_as_timestamps 1", "-fflags +genpts", "-r 50", "-preset llhq", "-rc vbr_hq", "-f flv" ],
-        "capture":true,
+        "capture":true,       
         outputs: null
     }
 
@@ -27,6 +27,7 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
     }
 
     self.options = extend({}, defaultOptions, options);
+    self.videoOverlayParser = videoOverlayParser;
     var CircularChunkArray = [];
 
     if (process.platform === 'win32' && (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '')) {
@@ -229,11 +230,16 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
     var incomingTransStream = null;
     var first100 = false;
     // incoming and backup transtream pipe to this depending on active source  to transform stream
-    var incomingTransStreamChunkCounter = 0;
-    incomingTransStream = new Stream.Transform();
+    commonData.streamStats.incoming.incomingChunkCounter = 0;
+    commonData.streamStats.incoming.incomingChunkShow = 0;
+    incomingTransStream = new Stream.Transform({highWaterMark: 1638400});
     incomingTransStream._transform = function (chunk, encoding, done) {
         try {
-            //logUtilHelper.log(appLogName, "app", 'debug', '[' + incomingTransStreamChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+            if (commonData.streamStats.incoming.incomingChunkCounter >= commonData.streamStats.incoming.incomingChunkShow) {
+                logUtilHelper.log(appLogName, "app", 'trace', "incomingTransStream", "chunks processed: " + commonData.streamStats.incoming.incomingChunkShow);
+                commonData.streamStats.incoming.incomingChunkShow = commonData.streamStats.incoming.incomingChunkShow + 100;
+            }
+            commonData.streamStats.incoming.incomingChunkCounter++;
             this.push(chunk);
             return done();
         } catch (ex) {
@@ -252,7 +258,6 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
         if (commonData.streamStats.incoming.chunkCounter >= commonData.streamStats.incoming.chunkShow) {
             logUtilHelper.log(appLogName, "app", 'trace', "incomingMonitorStream", "chunks processed: " + commonData.streamStats.incoming.chunkCounter);
             commonData.streamStats.incoming.chunkShow = commonData.streamStats.incoming.chunkShow + 50;
-            self.emit('streamStats', commonData.streamStats, false);
         }
         // CircularChunkArray.push(new Buffer.from(chunk));
         // if (CircularChunkArray.length > 100) {
@@ -281,7 +286,7 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
 
     var ffmpegVideoOutputRtmp = null;
     var ffmpegVideoOutputRtmp2 = null;
-    var ffmpegVideoOutputMp4File = null;
+    var ffmpegVideoOutputFile = null;
 
     
     var startIncomingStream = function () {
@@ -320,7 +325,7 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
             command.on('stderr', commandStdError)
             command.on('end', commandEnd);
             
-            //command.pipe(incomingTransStream, { end: false });
+            command.pipe(incomingTransStream, { end: false });
         }
         
         
@@ -331,27 +336,10 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
         logUtilHelper.log(appLogName, "app", 'info', 'streamStart Command');
         try {
             startIncomingStream();
-            if (self.options.outputs && self.options.outputs.ffmpegVideoOutputRtmp) { 
-                
-                if (ffmpegVideoOutputRtmp === null) {
-                    ffmpegVideoOutputRtmp = new FfmpegVideoOutputRtmp(self.options.outputs.ffmpegVideoOutputRtmp, logUtilHelper);
-                }
-                ffmpegVideoOutputRtmp.streamStart(incomingTransStream, throwError);
-            }
-            if (self.options.outputs && self.options.outputs.ffmpegVideoOutputRtmp2) { 
-                
-                if (ffmpegVideoOutputRtmp2 === null) {
-                    ffmpegVideoOutputRtmp2 = new FfmpegVideoOutputRtmp(self.options.outputs.ffmpegVideoOutputRtmp2, logUtilHelper);
-                }
-                ffmpegVideoOutputRtmp2.streamStart(incomingTransStream, throwError);
-            }
-            if (self.options.outputs && self.options.outputs.ffmpegVideoOutputMp4File) { 
-                
-                if (ffmpegVideoOutputMp4File === null) {
-                    ffmpegVideoOutputMp4File = new FfmpegVideoOutputMp4File(self.options.outputs.ffmpegVideoOutputMp4File, logUtilHelper);
-                }
-                ffmpegVideoOutputMp4File.streamStart(incomingTransStream, throwError);
-            }
+            streamStartRtmp();
+            streamStartRtmp2();
+            streamStartFile();
+            self.emit("streamStarted",{});
         } catch (ex) {
             logUtilHelper.log(appLogName, "app", 'error', 'Error Starting Video Stream ', ex);
             if (throwError === true) {
@@ -361,20 +349,16 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
     };
 
     var streamStop = function (throwError) {
+        
         logUtilHelper.log(appLogName, "app", 'warning', 'streamStop command');
-        if (ffmpegVideoOutputRtmp !== null) {
-            ffmpegVideoOutputRtmp.streamStop(throwError);
-        }
-        if (ffmpegVideoOutputRtmp2 !== null) {
-            ffmpegVideoOutputRtmp2.streamStop(throwError);
-        }
-        if (ffmpegVideoOutputMp4File !== null) {
-            ffmpegVideoOutputMp4File.streamStop(throwError);
-        }
+        streamStopRtmp();
+        streamStopRtmp2();
+        streamStopFile();
         try {
             if (!(command === null || command === undefined)) {
                 command.kill();
             }
+            self.emit("streamStopped",{});
         } catch (ex) {
             logUtilHelper.log(appLogName, "app", 'error', 'Error Stopping Video Stream ', ex);
             if (throwError === true) {
@@ -383,20 +367,111 @@ var FfmpegVideoInput = function (options, logUtilHelper) {
         }
     };
 
-    var updateOverlayText = function (overlayText) {
-        var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
-        try {
-            fs.writeFileSync(overlayFilePath, overlayText);
+    var streamStartRtmp = function (throwError){
+        if (self.options.outputs && self.options.outputs.ffmpegVideoOutputRtmp && self.options.outputs.ffmpegVideoOutputRtmp.rtmpUrl) { 
+                
+            if (ffmpegVideoOutputRtmp === null) {
+                ffmpegVideoOutputRtmp = new FfmpegVideoOutputRtmp(self.options.outputs.ffmpegVideoOutputRtmp, self.videoOverlayParser, logUtilHelper);
+                ffmpegVideoOutputRtmp.on("streamStart", function (data) {
+                    self.emit("streamStartRtmp",{});
+                });
+                ffmpegVideoOutputRtmp.on("streamStop", function (data) {
+                    self.emit("streamStopRtmp",{});
+                })
+            }
+            ffmpegVideoOutputRtmp.streamStart(incomingTransStream, throwError);
+        }
+    };
+    var streamStopRtmp= function (throwError){
+        if (ffmpegVideoOutputRtmp !== null) {
+            ffmpegVideoOutputRtmp.streamStop(incomingTransStream, throwError);
+        }
+    };
+    var streamStartRtmp2 = function (throwError){
+        if (self.options.outputs && self.options.outputs.ffmpegVideoOutputRtmp2 && self.options.outputs.ffmpegVideoOutputRtmp2.rtmpUrl) { 
+                
+            if (ffmpegVideoOutputRtmp2 === null) {
+                ffmpegVideoOutputRtmp2 = new FfmpegVideoOutputRtmp(self.options.outputs.ffmpegVideoOutputRtmp2, self.videoOverlayParser, logUtilHelper);
+                ffmpegVideoOutputRtmp.on("streamStart", function (data) {
+                    self.emit("streamStartRtmp2",{});
+                });
+                ffmpegVideoOutputRtmp.on("streamStop", function (data) {
+                    self.emit("streamStopRtmp2",{});
+                });
+            }
+            ffmpegVideoOutputRtmp2.streamStart(incomingTransStream, throwError);
+        }
+    };
+    var streamStopRtmp2= function (throwError){
+        if (ffmpegVideoOutputRtmp2 !== null) {
+            ffmpegVideoOutputRtmp2.streamStop(incomingTransStream, throwError);
+        }
+    };
+    var streamStartFile= function (throwError){
+        if (self.options.outputs && self.options.outputs.ffmpegVideoOutputFile && self.options.outputs.ffmpegVideoOutputFile.outputFile) { 
+                
+            if (ffmpegVideoOutputFile === null) {
+                ffmpegVideoOutputFile = new FfmpegVideoOutputFile(self.options.outputs.ffmpegVideoOutputFile, self.videoOverlayParser, logUtilHelper);
+                ffmpegVideoOutputRtmp.on("streamStart", function (data) {
+                    self.emit("streamStartFile",{});
+                });
+                ffmpegVideoOutputRtmp.on("streamStop", function (data) {
+                    self.emit("streamStopFile",{});
+                });
+            }
+            ffmpegVideoOutputFile.streamStart(incomingTransStream, throwError);
+        }
+    };
+    var streamStopFile= function (throwError){
+        if (ffmpegVideoOutputFile !== null) {
+            ffmpegVideoOutputFile.streamStop(incomingTransStream, throwError);
+        }
+    };
 
+
+    var updateOverlay= function (options) {
+        try {
+            if(self.videoOverlayParser !== null){
+                var overlayText = self.videoOverlayParser.getOverlayText(options)
+                if(self.options.overlayFileName != null ){
+                    var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
+                    try {
+                        fs.writeFileSync(overlayFilePath, overlayText);
+
+                    } catch (ex) {
+                        logUtilHelper.log(appLogName, "app", "error", "Error Writing OverlayText File", ex);
+                    }
+                }
+                if (ffmpegVideoOutputRtmp !== null) {
+                    ffmpegVideoOutputRtmp.updateOverlay(options);
+                }
+                if (ffmpegVideoOutputRtmp2 !== null) {
+                    ffmpegVideoOutputRtmp2.updateOverlay(options);
+                }
+                if (ffmpegVideoOutputFile !== null) {
+                    ffmpegVideoOutputFile.updateOverlay(options);
+                }
+            }else{
+                logUtilHelper.log(appLogName, "app", "warning", "videoOverlayParser is null");    
+            }
         } catch (ex) {
             logUtilHelper.log(appLogName, "app", "error", "Error Writing OverlayText File", ex);
         }
+
     }
 
    
 
     self.streamStart = streamStart;
     self.streamStop = streamStop;
+
+    self.streamStartRtmp = streamStartRtmp;
+    self.streamStopRtmp = streamStopRtmp;
+    self.streamStartRtmp2 = streamStartRtmp2;
+    self.streamStopRtmp2 = streamStopRtmp2;
+    self.streamStartFile = streamStartFile;
+    self.streamStopFile = streamStopFile;
+    self.updateOverlay = updateOverlay;
 
     self.commonData = function () {
         return commonData;
