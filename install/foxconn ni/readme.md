@@ -8,6 +8,8 @@ sudo apt-get install alsa
 sudo alsa force-reload
 ffplay -nodisp -autoexit Pitbull_Fireball.m4a
 
+# Set Volume using amixer
+amixer set Master 50%
 
 # no Video Device is due to no x11   sudo apt-get install xorg-dev
 

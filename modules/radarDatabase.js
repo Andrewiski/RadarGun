@@ -56,8 +56,16 @@ var RadarDatabase = function (options, logUtilHelper, dataDirectory, deviceId) {
                 logUtilHelper.log(appLogName, "app", "debug", 'team_getAll ', response);
                 callback(err, response);
             });
-        });
-            
+        });  
+    }
+
+    this.team_getDeleted = function (callback) {
+        teamsDb.find().where("status",0).make(function (builder) {
+            builder.callback(function (err, response) {
+                logUtilHelper.log(appLogName, "app", "debug", 'team_getAllDeleted ', response);
+                callback(err, response);
+            });
+        });  
     }
 
     this.team_upsert = function (team, callback) {
@@ -73,9 +81,9 @@ var RadarDatabase = function (options, logUtilHelper, dataDirectory, deviceId) {
         });                                            
     }
 
-    this.team_delete = function (team, callback) {
-        if (team.teamId) {
-            teamsDb.modify({ status: 0 }, false).where('id', team.id).make(function (builder) {
+    this.team_delete = function (teamId, callback) {
+        if (teamId) {
+            teamsDb.modify({ status: 0 }, false).where('id', teamId).make(function (builder) {
                 //builder.between('age', 20, 30);
                 builder.callback(function (err, count) {
                     logUtilHelper.log(appLogName, "app", "debug", 'team_delete', count);

@@ -102,7 +102,7 @@ logUtilHelper.log(appLogName, "app", "info", "Log Directory is " + objOptions.lo
 
 var audioFileDirectory = path.join(objOptions.dataDirectory, "audioFiles");
 var walkupAudioDirectory = path.join(audioFileDirectory, "walkup");
-
+var fullSongAudioDirectory = path.join(audioFileDirectory, "fullSongs");
 var app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: false }));
@@ -200,6 +200,16 @@ routes.put('/data/team', function (req, res) {
     })
 });
 
+routes.delete('/data/team/:id', function (req, res) {
+    radarDatabase.team_delete(req.params.id, function (err, response) {
+        if (err) {
+            res.json(500, { err: err })
+        } else {
+            res.json(response);
+        }
+    })
+});
+
 routes.put('/data/uuidv4', function (req, res) {
     
     res.json({ id: uuidv4()});
@@ -259,19 +269,19 @@ routes.get('/data/audioFiles/walkup', function (req, res) {
     })
 });
 
-routes.get('/data/audioFiles', function (req, res) {
-    let audioFiles = [];
-    fs.readdir(audioFileDirectory, function (err, files) {
+routes.get('/data/audioFiles/fullSongs', function (req, res) {
+    let fullsongFiles = [];
+    fs.readdir(fullSongAudioDirectory, function (err, files) {
         if (err) {
-            logUtilHelper.log(appLogName, "browser", "error", "Error getting audio directory information.", audioFileDirectory);
+            logUtilHelper.log(appLogName, "browser", "error", "Error getting audio directory information.", fullSongAudioDirectory);
         } else {
             files.forEach(function (file) {
                 //console.log(file);
                 if (path.extname(file) !== ".txt") {
-                    audioFiles.push({ fileName: file });
+                    fullsongFiles.push({ fileName: file });
                 }
             })
-            res.json(audioFiles);
+            res.json(fullsongFiles);
         }
     })    
 });
@@ -405,10 +415,11 @@ io.on('connection', function(socket) {
                 ffmpegVideoInput.streamStop();
                 break;
             case "youtubeStart":
-                ffmpegVideoInput.streamStartRtmp();
+                
+                ffmpegVideoInput.streamStart();
                 break;
             case "youtubeStop":
-                ffmpegVideoInput.streamStopRtmp();
+                ffmpegVideoInput.streamStop();
                 break;
             
             case "gamechangerStart":
@@ -442,8 +453,8 @@ io.on('connection', function(socket) {
         logUtilHelper.log(appLogName, "socketio", "debug", 'audio:' + ', message:' + message + ', client id:' + socket.id);
         try {
             switch (message.cmd) {
-                case "audioFilePlay":
-                    audioFilePlay(audioFileDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5']);
+                case "audioFilePlayFullSong":
+                    audioFilePlay(fullSongAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5']);
                     break;
                 case "audioFilePlayWalkup":
                     audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5'])
@@ -631,6 +642,7 @@ radarStalker2.on('radarSpeed', function (data) {
     dataDisplay.updateSpeedData(data);
     io.emit('radarSpeed', data);
     commonData.currentRadarSpeedData = data;
+    logUtilHelper.log(appLogName, "app", "info", 'radarData', data);
     if(ffmpegVideoInput !== null){
         ffmpegVideoInput.updateOverlay({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
     }

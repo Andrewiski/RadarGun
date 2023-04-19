@@ -85,12 +85,14 @@
                pitchers: null,
                batters: null,
                walkupFiles: null,
-               audioFiles: null,
+               fullSongFiles: null,
                serverLogs: [],
                isGameAdmin: false,
                isGameSelect: false,
                isGameSelected: false,
                isGameEdit: false,
+               isSelectTeam: true,
+               isTeamEdit: false,
                isSelectHomeTeam: false,
                isSelectGuestTeam: false,
                isHomeTeamEdit: false,
@@ -142,7 +144,13 @@
                    { name: "9 (RF)", value: "9", longName: "Right Field"},
                    { name: "11 (DH)", value: "11", longName: "Designated Hitter"},
                    { name: "12 (EH)", value: "12", longName: "Extra Hitter"},
-               ]
+               ],
+               videoStreams: {
+                youtubeRtspUrl:"rtsp://10.100.34.112:554/s0",
+                youtubeRtmpUrl: "rtmp://a.rtmp.youtube.com/live2/-d657-4j03-9ema-9m1r",
+                gamechangerRtspUrl:"rtsp://10.100.34.112:554/s2",
+                gamechangerRtmpUrl: "rtmps://601c62c19c9e.global-contribute.live-video.net:443/app/"
+               }
            }
 
 
@@ -176,10 +184,10 @@
                 });
         }
 
-        var refreshAudioFiles = function () {
-        return $http.get('/data/audioFiles').
+        var refreshFullSongFiles = function () {
+        return $http.get('/data/audioFiles/fullSongs').
             then(function (response) {
-                $scope.commonData.audioFiles = response.data;
+                $scope.commonData.fullSongFiles = response.data;
             });
         }
 
@@ -213,13 +221,10 @@
                refreshWalkupFiles();
            }
 
-           $scope.tabAudioFilesClick = function() {
-                console.log("tabLogsClick");
-                if($scope.commonData.walkupFiles === null){
-                    refreshWalkupFiles();
-                }
-                if($scope.commonData.audioFiles === null){
-                    refreshAudioFiles();
+           $scope.tabFullSongsClick = function() {
+                console.log("tabFullSongsClick");
+                if($scope.commonData.fullSongFiles === null){
+                    refreshFullSongFiles();
                 }
             }
 
@@ -306,6 +311,13 @@
 
            }
 
+           $scope.tabWalkupSongsClick = function(){
+                console.log("tabWalkupSongsClick");
+                if($scope.commonData.walkupFiles === null){
+                    refreshWalkupFiles();
+                }
+           }
+
            $scope.videoStreamStart = function () {
             //Tell server the inningChanged
                 radarMonitor.sendServerCommand("videoStream", { cmd: "start"});
@@ -318,7 +330,7 @@
 
             $scope.videoStreamYoutubeStart = function () {
                 //Tell server the inningChanged
-                radarMonitor.sendServerCommand("videoStream", { cmd: "youtubeStart"});
+                radarMonitor.sendServerCommand("videoStream", { cmd: "youtubeStart", data: { url: $scope.commonData.videoStreams.youtubeRtspUrl, url: $scope.commonData.videoStreams.youtubeRtmpUrl }});
             }
 
             $scope.videoStreamYoutubeStop= function () {
@@ -328,7 +340,7 @@
 
             $scope.videoStreamGameChangerStart = function () {
             //Tell server the inningChanged
-                radarMonitor.sendServerCommand("videoStream", { cmd: "gamechangerStart"});
+                radarMonitor.sendServerCommand("videoStream", { cmd: "gamechangerStart", data: { url: $scope.commonData.videoStreams.youtubeRtspUrl, url: $scope.commonData.videoStreams.youtubeRtmpUrl }});
             }
 
             $scope.videoStreamGameChangerStop= function () {
@@ -630,9 +642,14 @@
                radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange",  data: data});               
            }
 
-           $scope.audioFilePlay = function (audioFile) {
-               radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlay", data: { audioFile: audioFile } });
-           }
+        //    $scope.audioFilePlay = function (audioFile) {
+        //        radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlay", data: { audioFile: audioFile } });
+        //    }
+
+
+            $scope.audioFilePlayFullSong = function (audioFile) {
+                radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayFullSong", data: { audioFile: audioFile } });
+            }
 
            $scope.audioFilePlayWalkup = function (audioFile) {
                radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayWalkup", data: { audioFile: audioFile } });
@@ -737,9 +754,92 @@
            }
 
            $scope.getServerLogs = function() {
-            
+            console.log("getServerLogs")
            }
 
+
+           // Begin Team Tab Functions
+
+            $scope.teamDeletePlayer = function (index, player) {
+                $scope.commonData.selectedTeam.roster.splice(index, 1);
+                //$scope.$apply();
+            }
+            $scope.teamAddPlayer = function () {
+
+                $scope.commonData.selectedTeam.roster.push(angular.copy($scope.commonData.emptyPlayer))
+            }
+
+            $scope.teamSave = function () {
+                if ($scope.commonData.selectedTeam.id === '00000000-0000-0000-0000-000000000000') {
+                    $scope.commonData.selectedTeam.id = null;
+                }
+                $http.put('/data/team', $scope.commonData.selectedTeam).
+                    then(function (response) {
+                        //$scope.commonData.teams = response.data;
+                        $scope.commonData.isTeamEdit = false;
+                    });
+
+            }
+            $scope.teamCancel = function () {
+                $scope.commonData.isTeamEdit = false;
+            }
+
+            $scope.teamDelete = function () {
+                if ($scope.commonData.selectedTeam.id !== '00000000-0000-0000-0000-000000000000') {
+                    $http.delete('/data/team/' + $scope.commonData.selectedTeam.id).
+                    then(function (response) {
+                        //$scope.commonData.teams = response.data;
+                        $scope.commonData.selectedTeam = null;
+                        refreshTeams();
+                        $scope.commonData.isTeamEdit = false;
+                        $scope.commonData.isTeamSelect = true;
+                    });    
+                }
+                
+                
+            }
+
+            $scope.teamEdit = function () {
+                $scope.commonData.isTeamEdit = true;
+                if ($scope.commonData.walkupFiles === null) {
+                    refreshWalkupFiles();
+                }
+            }
+ 
+            
+            $scope.teamSelectCancel = function(){
+                $scope.commonData.isSelectTeam = false;
+            }
+            $scope.teamSelected = function () {
+                if ($scope.commonData.selectedTeam && $scope.commonData.selectedTeam.id === '00000000-0000-0000-0000-000000000000') {
+                    //this is a new Team
+                    $scope.commonData.selectedTeam = JSON.parse(JSON.stringify($scope.commonData.selectedTeam));
+                    $scope.commonData.selectedTeam.id = radarMonitor.uuid();
+                    $scope.commonData.selectedTeam.name = "";
+                    if ($scope.commonData.selectedTeam.roster === undefined) {
+                        $scope.commonData.selectedTeam.roster = [];
+                    }
+                    for (var i = 0; i < 15; i++) {
+                        $scope.commonData.selectedTeam.roster.push(angular.copy($scope.commonData.emptyPlayer))
+                    }
+                    $scope.commonData.isTeamEdit = true;
+                } else {
+                    //$scope.commonData.selectedTeam = $scope.commonData.selectedTeam;
+                }
+ 
+                $scope.commonData.isSelectTeam = false;
+            }
+ 
+            $scope.teamSelect = function () {
+                if ($scope.commonData.walkupFiles === null) {
+                    refreshWalkupFiles();
+                }
+                $scope.commonData.isSelectTeam = true;
+ 
+            }
+
+
+            // End Team Tab Functions
            var findPitcher = function(lineup){
                let pitcher = null;
                for (var i = 0; i < lineup.length; i++) {
@@ -1109,6 +1209,39 @@
                     //radarOffModalInstance.show();
                 }
             }
+
+
+            // $scope.showConfirmDeleteModal = function () {
+            //     if (radarOffModalInstance === null) {
+            //         radarOffModalInstance = $uibModal.open({
+            //             animation: $scope.animationsEnabled,
+            //             templateUrl: '/app/scoreboard/radarOffModal.html',
+            //             controller: function ($scope) {
+            //                 $scope.turnRadarOn = function () {
+            //                     $scope.$close({ turnOn: true });
+            //                 };
+            //             },
+            //             controllerAs: '$ctrl',
+
+            //             resolve: {
+            //                 item: function () {
+            //                     return { turnOn: true };
+            //                 }
+            //             }
+            //         });
+
+            //         radarOffModalInstance.result.then(function (selectedItem) {
+            //             if (selectedItem) {
+            //                 $scope.radarCommand('TransmiterControl', 1);
+            //             }
+            //         }, function () {
+            //             $log.info('Modal dismissed at: ' + new Date());
+            //             $scope.radarCommand('TransmiterControl', 1);
+            //         });
+            //     } else {
+            //         //radarOffModalInstance.show();
+            //     }
+            // }
 
             $rootScope.$on('radarMonitor:radarConfigProperty', function(event, data) {
                 // use the data accordingly
