@@ -74,7 +74,7 @@ const RadarStalker2 = function (options, logUtilHelper){
           },
           "HighSpeedThreshold": {
             "id": 11,
-            "value": 100,
+            "value": 110,
             "def": 150,
             "datatype": "int",
             "notes": "0 - 900 MPH"
