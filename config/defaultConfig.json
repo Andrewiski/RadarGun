@@ -52,42 +52,44 @@
         
         }
     },
-    "ffmpegVideoInput": {
-        "input":"rtsp://10.100.34.112:554/s0",
-        "inputOptions": ["-rtsp_transport tcp"],
-        "outputOptions": [ "-c:a copy", "-c:v copy", "-f nut" ],
-        "capture":true,
-        "outputs": {
-            "ffmpegVideoOutputRtmp" : {
-                "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/",
-                "inputOptions": [],
-                "outputOptions": [ "-c:a copy", "-c:v libx264", "-preset ultrafast", "-qp 0", "-f flv" ],
-                "overlayFileName": "data/overlays/youtubeOverlay.txt",
-                "videoFilters": {
-                     "filter": "drawtext",
-                     "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
-                }
-             },
-            "ffmpegVideoOutputRtmp2" : {
-                "rtmpUrl": "rtmps://601c62c19c9e.global-contribute.live-video.net:443/app/",
-                "inputOptions": [],
-                "outputOptions": [ "-c:a copy", "-c:v libx264", "-vf scale=1920:1080",  "-preset ultrafast", "-qp 0", "-f flv" ],
-                "overlayFileName": "data/overlays/gamechangerOverlay.txt",
-                "overlayFilter": {"showRadarIn":true},
-                "videoFilters": {
-                    "filter": "drawtext",
-                    "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
-                }
-            },
-            "ffmpegVideoOutputFile" :  {
-                "inputOptions": [],
-                "outputOptions": [ "-c:a copy", "-c:v copy", "-f flv", "-y" ],
-                "outputFile": "data/videos/captureVideo.flv",
-                "overlayFileName": null,
-                "videoFilters": null
-            }
-        }    
-      },
+    "videoStreams":{
+        "teamName": "My Team",
+        "opponentTeamName": "Their Team",
+        "videosFolder": "data/videos",
+        "youtube": {
+            "input": "rtsp://10.100.34.112:554/s0",
+            "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/cmpp-d657-4j03-9ema-9m1r",
+            "inputOptions": [ "-rtsp_transport tcp" ],
+            "outputOptions": [ "-c:v copy", "-c:a copy", "-f flv" ],
+            "overlayFileName": "data/overlays/youtubeOverlay.txt",
+            "videoFilters": null
+        },
+        "gamechanger": {
+            "input": "rtsp://10.100.34.112:554/s2",
+            "rtmpUrl": "rtmps://601c62c19c9e.global-contribute.live-video.net:443/app/sk_us-east-1_a8gQblEYUN3V_iHEQ0mXeSm1VROYp7YHqGapllvvXd5",
+            "inputOptions": [ "-rtsp_transport tcp" ],
+            "outputOptions": [ "-c:v copy", "-c:a copy", "-f flv" ],
+            "overlayFileName": "data/overlays/youtubeOverlay.txt",
+            "videoFilters": null
+        },
+        "file" : {
+            "input": "rtsp://10.100.34.112:554/s0",
+            "inputOptions": ["-rtsp_transport tcp"],
+            "outputOptions": [ "-c:a copy", "-c:v copy", "-f nut" ],
+            "capture":true,
+                "outputs": {
+                    "ffmpegVideoOutputRtmp" : null,
+                    "ffmpegVideoOutputRtmp2" : null,
+                    "ffmpegVideoOutputFile" :  {
+                        "inputOptions": [],
+                        "outputOptions": [ "-c:a copy", "-c:v copy", "-f flv", "-y" ],
+                        "outputFile": "e:\\videos\\testVideoCapture.flv",
+                        "overlayFileName": null,
+                        "videoFilters": null
+                    }
+                }     
+        }
+    },
     "appLogLevels":{
         "radarMonitor": {
             "app":"info",
@@ -96,6 +98,9 @@
         },
         "radarStalker2": {
           "app":"info"
+        },
+        "ffmpegRtmp" :{
+            "app":"info"
         },
         "ffmpegVideoInput" :{
             "app":"info"

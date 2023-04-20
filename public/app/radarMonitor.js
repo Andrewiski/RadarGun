@@ -97,6 +97,10 @@
                $rootScope.$emit("gameChanged", message);
            });
 
+           Service.socket.on('videoStreams', function (message) {
+                console.log('radarMonitorService received videoStreams', message);
+                $rootScope.$emit("videoStreams", message);
+           });
            
            /** Generate a guid / uuid  --  682db637-0f31-4847-9cdf-25ba9613a75c
             */

@@ -3,7 +3,7 @@
     "configurations": [
         
         {
-            "env": {"CONFIGDIRECTORY": "./config/private/debug" , "LOCALDEBUG":"true", "DEBUG": "radarMonitor,radarStalker2,batteryMonitor,ffmpegVideoInput,ffmpegVideoOutputFile,ffmpegVideoOutputRtmp,ffplay,radarDatabase,radarPacketParser,remoteMongoDBServer,radarEmulator,gpsMonitor"},
+            "env": {"CONFIGDIRECTORY": "./config/private/debug" , "LOCALDEBUG":"true", "DEBUG": "radarMonitor,radarStalker2,batteryMonitor,ffmpegRtmp,ffmpegVideoInput,ffmpegVideoOutputFile,ffmpegVideoOutputRtmp,ffplay,radarDatabase,radarPacketParser,remoteMongoDBServer,radarEmulator,gpsMonitor"},
             "command": "npm start",
             "name": "LocalDebug Run npm start",
             "request": "launch",

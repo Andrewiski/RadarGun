@@ -146,10 +146,13 @@
                    { name: "12 (EH)", value: "12", longName: "Extra Hitter"},
                ],
                videoStreams: {
+                teamName: "Vicksburg Bulldogs Varsity",
+                opponentTeamName: "Andy Test Team",
                 youtubeRtspUrl:"rtsp://10.100.34.112:554/s0",
                 youtubeRtmpUrl: "rtmp://a.rtmp.youtube.com/live2/-d657-4j03-9ema-9m1r",
                 gamechangerRtspUrl:"rtsp://10.100.34.112:554/s2",
-                gamechangerRtmpUrl: "rtmps://601c62c19c9e.global-contribute.live-video.net:443/app/"
+                gamechangerRtmpUrl: "rtmps://601c62c19c9e.global-contribute.live-video.net:443/app/",
+                fileRtspUrl:"rtsp://10.100.34.112:554/s0",
                }
            }
 
@@ -176,6 +179,27 @@
         }
 
         
+        var updateVideoStreamSettings = function (data) {
+            try{
+                //extend($scope.commonData.videoStreams, data);
+                $scope.commonData.videoStreams.teamName = data.teamName; 
+                $scope.commonData.videoStreams.opponentTeamName, data.opponentTeamName; 
+                $scope.commonData.videoStreams.youtubeRtmpUrl = data.youtubeRtmpUrl; 
+                $scope.commonData.videoStreams.youtubeRtspUrl = data.youtubeRtspUrl; 
+                $scope.commonData.videoStreams.gamechangerRtmpUrl = data.gamechangerRtmpUrl; 
+                $scope.commonData.videoStreams.gamechangerRtspUrl = data.gamechangerRtspUrl; 
+                $scope.commonData.videoStreams.fileRtspUrl = data.fileRtspUrl; 
+            }catch(ex){
+                console.log("error", "updateVideoStreamSettings",  ex.message, ex.stack);
+            }
+        }
+
+        var refreshVideoStreamSettings = function () {
+            return $http.get('/data/settings/videostreams').
+                then(function (response) {
+                    updateVideoStreamSettings(response.data);
+                });
+        }
 
         var refreshWalkupFiles = function () {
             return $http.get('/data/audioFiles/walkup').
@@ -191,66 +215,66 @@
             });
         }
 
-           var initData = function () {
-               refreshTeams();
-               refreshGames();
-               getCurrentGame().then(
-                   function (response) {
-                       if (window.location.hash === "#scoreGame") {
-                           $scope.commonData.selectedGame = $scope.commonData.game;
-                           $scope.commonData.isGameSelected = true;
-                           $scope.commonData.isGameScore = true;
-                           $scope.commonData.isGameAdmin = true;
-                           $scope.updatePitchersBatters();
-                       }
-                   }
-               );
-
-               
-               
-           }
-
-           var addToGameLog = function(data){
-               if ($scope.commonData.selectedGame.log === undefined) {
-                   $scope.commonData.selectedGame.log = [];
-               }
-               $scope.commonData.selectedGame.log.push({ timestamp: moment(), data: data });
-           }
-
-           $scope.refreshWalkupFiles = function () {
-               refreshWalkupFiles();
-           }
-
-           $scope.tabFullSongsClick = function() {
-                console.log("tabFullSongsClick");
-                if($scope.commonData.fullSongFiles === null){
-                    refreshFullSongFiles();
+        var initData = function () {
+            refreshTeams();
+            refreshGames();
+            getCurrentGame().then(
+                function (response) {
+                    if (window.location.hash === "#scoreGame") {
+                        $scope.commonData.selectedGame = $scope.commonData.game;
+                        $scope.commonData.isGameSelected = true;
+                        $scope.commonData.isGameScore = true;
+                        $scope.commonData.isGameAdmin = true;
+                        $scope.updatePitchersBatters();
+                    }
                 }
-            }
-
-           $scope.gameSelect = function () {
-               $scope.commonData.isGameSelect = true;
-           }
+            );
 
             
-            var resubscribeServerLogs = function () {
-                console.log("resubscribeServerLogs");
-                if (streamerDetailsSubscribe.timerID && streamerDetailsSubscribe.audioStreamerId) {
-                    Service.socket.emit("AudioStreamerAction", { "actionId": getFakeGuid(), "audioStreamerId": streamerDetailsSubscribe.audioStreamerId, "action": "SubscribeStreamerDetails" });
-                    streamerDetailsSubscribe.timerID = window.setTimeout(resubscribeStreamerDetails, 10 * 60 * 1000);
-                }
+            
+        }
+
+        var addToGameLog = function(data){
+            if ($scope.commonData.selectedGame.log === undefined) {
+                $scope.commonData.selectedGame.log = [];
             }
-        
-            var subscribeServerLogs = function (audioStreamerId) {
-                console.log("subscribeServerLogs");
-                if (streamerDetailsSubscribe.timerID) {
-                    unsubscribeStreamerDetails();
-                }
-                streamerDetailsSubscribe.audioStreamerId = audioStreamerId;
-                Service.socket.emit("AudioStreamerAction", { "actionId": getFakeGuid(), "audioStreamerId": streamerDetailsSubscribe.audioStreamerId, "action": "SubscribeStreamerDetails", data: { logLevel: "info" } });
-                streamerDetailsSubscribe.timerID = window.setTimeout(resubscribeStreamerDetails, 10 * 60 * 1000 );
-                
+            $scope.commonData.selectedGame.log.push({ timestamp: moment(), data: data });
+        }
+
+        $scope.refreshWalkupFiles = function () {
+            refreshWalkupFiles();
+        }
+
+        $scope.tabFullSongsClick = function() {
+            console.log("tabFullSongsClick");
+            if($scope.commonData.fullSongFiles === null){
+                refreshFullSongFiles();
             }
+        }
+
+        $scope.gameSelect = function () {
+            $scope.commonData.isGameSelect = true;
+        }
+
+            
+        var resubscribeServerLogs = function () {
+            console.log("resubscribeServerLogs");
+            if (streamerDetailsSubscribe.timerID && streamerDetailsSubscribe.audioStreamerId) {
+                Service.socket.emit("AudioStreamerAction", { "actionId": getFakeGuid(), "audioStreamerId": streamerDetailsSubscribe.audioStreamerId, "action": "SubscribeStreamerDetails" });
+                streamerDetailsSubscribe.timerID = window.setTimeout(resubscribeStreamerDetails, 10 * 60 * 1000);
+            }
+        }
+    
+        var subscribeServerLogs = function (audioStreamerId) {
+            console.log("subscribeServerLogs");
+            if (streamerDetailsSubscribe.timerID) {
+                unsubscribeStreamerDetails();
+            }
+            streamerDetailsSubscribe.audioStreamerId = audioStreamerId;
+            Service.socket.emit("AudioStreamerAction", { "actionId": getFakeGuid(), "audioStreamerId": streamerDetailsSubscribe.audioStreamerId, "action": "SubscribeStreamerDetails", data: { logLevel: "info" } });
+            streamerDetailsSubscribe.timerID = window.setTimeout(resubscribeStreamerDetails, 10 * 60 * 1000 );
+            
+        }
 
 
            $scope.gameScore = function () {
@@ -311,16 +335,21 @@
 
            }
 
-           $scope.tabWalkupSongsClick = function(){
-                console.log("tabWalkupSongsClick");
-                if($scope.commonData.walkupFiles === null){
-                    refreshWalkupFiles();
-                }
-           }
+            $scope.tabWalkupSongsClick = function(){
+                    console.log("tabWalkupSongsClick");
+                    if($scope.commonData.walkupFiles === null){
+                        refreshWalkupFiles();
+                    }
+            }
 
-           $scope.videoStreamStart = function () {
+            $scope.tabVideoStreamsClick = function(){
+                console.log("tabVideoStreamsClick");
+                refreshVideoStreamSettings();
+            }
+
+            $scope.videoStreamStart = function () {
             //Tell server the inningChanged
-                radarMonitor.sendServerCommand("videoStream", { cmd: "start"});
+                radarMonitor.sendServerCommand("videoStream", { cmd: "start", data: $scope.commonData.videoStreams});
             }
 
             $scope.videoStreamStop= function () {
@@ -330,7 +359,7 @@
 
             $scope.videoStreamYoutubeStart = function () {
                 //Tell server the inningChanged
-                radarMonitor.sendServerCommand("videoStream", { cmd: "youtubeStart", data: { url: $scope.commonData.videoStreams.youtubeRtspUrl, url: $scope.commonData.videoStreams.youtubeRtmpUrl }});
+                radarMonitor.sendServerCommand("videoStream", { cmd: "youtubeStart", data: $scope.commonData.videoStreams});
             }
 
             $scope.videoStreamYoutubeStop= function () {
@@ -340,7 +369,7 @@
 
             $scope.videoStreamGameChangerStart = function () {
             //Tell server the inningChanged
-                radarMonitor.sendServerCommand("videoStream", { cmd: "gamechangerStart", data: { url: $scope.commonData.videoStreams.youtubeRtspUrl, url: $scope.commonData.videoStreams.youtubeRtmpUrl }});
+                radarMonitor.sendServerCommand("videoStream", { cmd: "gamechangerStart", data: $scope.commonData.videoStreams});
             }
 
             $scope.videoStreamGameChangerStop= function () {
@@ -350,7 +379,7 @@
 
             $scope.videoStreamFileStart = function () {
             //Tell server the inningChanged
-                radarMonitor.sendServerCommand("videoStream", { cmd: "fileStart"});
+                radarMonitor.sendServerCommand("videoStream", { cmd: "fileStart",  data: $scope.commonData.videoStreams});
             }
 
             $scope.videoStreamFileStop= function () {
@@ -1019,6 +1048,15 @@
            $scope.showConfig = function () {
                $scope.commonData.showConfig = !$scope.commonData.showConfig;
            }
+
+           $rootScope.$on('videoSteams', function(message){
+                console.log('videoSteams', message);
+                switch(message.cmd){
+                    case "updateSettings":
+                        updateVideoStreamSettings(message.data);
+                        break;
+                }
+           })
 
            $rootScope.$on('gameChanged', function (event, message) {
                // use the data accordingly

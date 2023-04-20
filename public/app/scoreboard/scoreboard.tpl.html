@@ -1169,19 +1169,20 @@
                     </div>
                 </uib-tab>
                 
-                <uib-tab index="16" ng-show="commonData.isGameAdmin">
+                <uib-tab index="16" ng-show="commonData.isGameAdmin" ng-click="tabVideoStreamsClick()">
                     <uib-tab-heading>
                         <i class="fa-solid fa-video"></i> Video Streams
                     </uib-tab-heading>
                     <div>
                         <div class="well well-sm">
                             <div>
-                                <div><label><i class="fa-solid fa-video"></i> Camera</label></div>
+                                <div><label><i class="fa-solid fa-video"></i> Team Names</label></div>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" ng-model="commonData.youtubeRtmpUrl" placeholder="Rtsp Camera Stream URL" />
+                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.teamName" placeholder="Your Team Name" />
+                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.opponentTeamName" placeholder="Opponent Team Name" />
                                     <span class="input-group-btn">
-                                        <button class="btn btn-primary" ng-click="videoStreamStart()">Start Stream</button>
-                                        <button class="btn btn-primary" ng-click="videoStreamStop()">Stop Stream</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamStart()">Start All Streams</button>
+                                        <button class="btn btn-primary" ng-click="videoStreamStop()">Stop All Streams</button>
                                     </span>
                                 </div>
                                 
@@ -1217,7 +1218,7 @@
                                 <div><label><img src="/app/img/GameChanger-icon.svg" style="width:20px" alt="" class="gamechanger-logo"> GameChanger</label></div>
                                 <div class="input-group">
                                     <input type="text" class="form-control" ng-model="commonData.videoStreams.gamechangerRtspUrl" placeholder="Rtsp Camera Stream URL" />
-                                    <input type="text" class="form-control" ng-model="commonData.gamechangerRtmpUrl" placeholder="Gamechanger RTMP URL" />
+                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.gamechangerRtmpUrl" placeholder="Gamechanger RTMP URL" />
                                     <span class="input-group-btn">
                                         <button class="btn btn-primary" ng-click="videoStreamGameChangerStart()">Start Stream</button>
                                         <button class="btn btn-primary" ng-click="videoStreamGameChangerStop()">Stop Stream</button>
@@ -1229,7 +1230,7 @@
                             <div class="well well-sm">
                                 <div><label><i class="fa-solid fa-clapperboard"></i> File</label></div>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.FileName" placeholder="fileName" />
+                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.gamechangerRtspUrl" placeholder="Rtsp Camera Stream URL" />
                                     <span class="input-group-btn">
                                         <button class="btn btn-primary" ng-click="videoStreamFileStart()">Start Stream</button>
                                         <button class="btn btn-primary" ng-click="videoStreamFileStop()">Stop Stream</button>

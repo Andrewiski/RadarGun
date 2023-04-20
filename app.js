@@ -18,6 +18,7 @@ const GpsMonitor = require("./modules/gpsMonitor.js");
 const DataDisplay = require("./modules/dataDisplay.js");
 const RadarDatabase = require("./modules/radarDatabase.js");
 //const FfmpegOverlay = require("./modules/ffmpegOverlay.js");
+const FfmpegRtmp = require("./modules/ffmpegRtmp.js");
 const FfmpegVideoInput = require("./modules/ffmpegVideoInput.js");
 const VideoOverlayParser = require("./modules/videoOverlayParser.js");
 const FFplay = require('./modules/ffplay.js');
@@ -115,7 +116,7 @@ var gpsMonitor = new GpsMonitor(objOptions.gpsMonitor, logUtilHelper);
 var dataDisplay = new DataDisplay(objOptions.dataDisplay, logUtilHelper);
 //var ffmpegOverlay = new FfmpegOverlay(objOptions.ffmpegOverlay, logUtilHelper);
 var videoOverlayParser = new VideoOverlayParser(objOptions.videoOverlayParser, logUtilHelper);
-var ffmpegVideoInput = new FfmpegVideoInput(objOptions.ffmpegVideoInput, videoOverlayParser, logUtilHelper);
+//var ffmpegVideoInput = new FfmpegVideoInput(objOptions.ffmpegVideoInput, videoOverlayParser, logUtilHelper);
 
 var radarDatabase = new RadarDatabase(objOptions.radarDatabase, logUtilHelper, objOptions.dataDirectory);
 
@@ -123,6 +124,12 @@ var commonData = {
     game: null,
     currentRadarSpeedData: null,
     radar: {log:[]}
+}
+
+var videoStreams = {
+    youtube: null,
+    gamechanger: null,
+    file: null
 }
 
 //app.set('views', path.join(__dirname, 'views'));
@@ -319,6 +326,18 @@ routes.put('/data/team', function (req, res) {
 });
 
 
+routes.get('/data/settings/videostreams', function (req, res) {
+    let response = {
+        teamName: objOptions.videoStreams.teamName,
+        opponentTeamName: objOptions.videoStreams.opponentTeamName,
+        youtubeRtspUrl: objOptions.videoStreams.youtube.input,
+        youtubeRtmpUrl: objOptions.videoStreams.youtube.rtmpUrl,
+        gamechangerRtspUrl: objOptions.videoStreams.gamechanger.input,
+        gamechangerRtmpUrl: objOptions.videoStreams.gamechanger.rtmpUrl,
+        fileRtspUrl: objOptions.videoStreams.file.input
+    }
+    res.json(response);
+});
 
 
 app.use('/', routes);
@@ -379,13 +398,205 @@ var audioFileStop = function () {
     }
 }
 
+
+var videoStreamYoutubeStart = function (options) {
+    
+    try{
+        logUtilHelper.log(appLogName, "app", "info",'videoStream', 'videoStreamYoutubeStart');           
+        if(videoStreams.youtube ===null){
+            videoStreams.youtube = new FfmpegRtmp(objOptions.videoStreams.youtube, videoOverlayParser, logUtilHelper);
+            videoStreams.youtube.on("stopped", function(){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube was Stopped');
+                sendToSocketClients("videoStreams", { cmd: "youtubeStopped" });
+            });
+            videoStreams.youtube.on("started", function(){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube was Started');
+                sendToSocketClients("videoStreams", { cmd: "youtubeStarted" });
+            });
+            videoStreams.youtube.on("streamstats", function(data){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube Stream Stats', data);
+                sendToSocketClients("videoStreams", { cmd: "youtubeStreamStats", data: data });
+            });
+        }
+        
+        if(options){
+            let settingsUpdated = false;
+            if(options.teamName != objOptions.videoStreams.teamName){
+                objOptions.videoStreams.teamName = options.teamName;
+                settingsUpdated = true;
+            }
+            if(options.opponetTeamName != objOptions.videoStreams.opponetTeamName){
+                objOptions.videoStreams.opponetTeamName = options.opponetTeamName;
+                settingsUpdated = true;
+            }
+            if(options.youtubeRtmpUrl != objOptions.videoStreams.youtube.rtmpUrl){
+                objOptions.videoStreams.youtube.rtmpUrl = options.youtubeRtmpUrl;
+                settingsUpdated = true;
+            }
+            if(settingsUpdated){
+                sendToSocketClients("videoStreams", { cmd: "settingsUpdated", data: objOptions.videoStreams });
+            }
+        }
+        videoStreams.youtube.streamStart();
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamYoutubeStart', ex);           
+    }
+    
+}
+var videoStreamYoutubeStop = function () {
+    try{
+        logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamYoutubeStop');           
+        if(videoStreams.youtube !==null){
+            videoStreams.youtube.streamStop();    
+        }else{
+            logUtilHelper.log(appLogName, "app", "warning",'videoStream',  'videoStreamYoutubeStop', 'videoStreams.youtube is null' );           
+        }
+        
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamYoutubeStop', ex);           
+    }
+}
+
+var videoStreamGamechangerStart = function (options) {
+    try{
+        logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamGamechangerStart');           
+        if(videoStreams.gamechanger ===null){
+            videoStreams.gamechanger = new FfmpegRtmp(objOptions.videoStreams.gamechanger, videoOverlayParser, logUtilHelper);
+            videoStreams.gamechanger.on("stopped", function(){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Gamechanger was Stopped');
+                sendToSocketClients("videoStreams", { cmd: "gamechangerStopped" });
+            });
+            videoStreams.gamechanger.on("started", function(){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Gamechanger was Started');
+                sendToSocketClients("videoStreams", { cmd: "gamechangerStarted" });
+            });
+            videoStreams.gamechanger.on("streamstats", function(data){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Gamechanger Stream Stats', data);
+                sendToSocketClients("videoStreams", { cmd: "youtubeStopped", data: data });
+            });
+        }
+        if(options){
+            let settingsUpdated = false;
+            if(options.gameChangerRtmpUrl != objOptions.videoStreams.gamechanger.rtmpUrl){
+                objOptions.videoStreams.gamechanger.rtmpUrl = options.gamechangerRtmpUrl;
+                settingsUpdated = true;
+            }
+            if(settingsUpdated){
+                sendToSocketClients("videoStreams", { cmd: "settingsUpdated", data: objOptions.videoStreams });
+            }
+        }
+
+        videoStreams.gamechanger.streamStart();
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamGamechangerStart', ex);           
+    }
+}
+var videoStreamGamechangerStop = function () {
+    try{
+        logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamGamechangerStop');           
+        if(videoStreams.gamechanger !==null){
+            videoStreams.gamechanger.streamStop();    
+        }else{
+            logUtilHelper.log(appLogName, "app", "warning",'videoStream',  'videoStreamGameChangerStop', 'videoStreams.gamechanger is null' );           
+        }
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamGamechangerStop', ex);           
+    }
+}
+
+var getDateFileName = function () {
+    let objectDate = new Date();
+    let hour = objectDate.getHours().toString();
+    let minute = objectDate.getMinutes().toString();
+    let day = objectDate.getDate().toString();
+    let month = (objectDate.getMonth() + 1).toString();
+    let year = objectDate.getFullYear().toString();
+    if (day.length == 1){
+        day = "0" + day;
+    }
+    if (month.length == 1){
+        month = "0" + month;
+    }
+    if (hour.length == 1){
+        hour = "0" + Hour;
+    }
+    if (minute.length == 1){
+        minute = "0" + minute;
+    }
+    return year + month + day + "T" + hour + minute;
+}
+
+var videoStreamFileStart = function (options) {
+    try{
+        logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamFileStart');  
+                 
+        if(videoStreams.file ===null){
+            videoStreams.file = new FfmpegVideoInput(objOptions.videoStreams.file, videoOverlayParser, logUtilHelper);
+            videoStreams.file.on("stopped", function(){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File was Stopped');
+                sendToSocketClients("videoStreams", { cmd: "fileStopped" });
+            });
+            videoStreams.file.on("started", function(){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File was Started');
+                sendToSocketClients("videoStreams", { cmd: "fileStarted" });
+            });
+            videoStreams.file.on("streamstats", function(data){
+                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File Stream Stats', data);
+                sendToSocketClients("videoStreams", { cmd: "fileStreamStats", data: data });
+            });
+        }
+        if (options){
+            var settingsUpdated = false;
+            if(options.teamName != objOptions.videoStreams.teamName){
+                objOptions.videoStreams.teamName = options.teamName;
+                settingsUpdated = true;
+            }
+            if(options.opponentTeamName != objOptions.videoStreams.opponentTeamName){
+                objOptions.videoStreams.opponentTeamName = options.opponentTeamName;
+                settingsUpdated = true;
+            }
+            if(options.fileRtspUrl != objOptions.videoStreams.file.input){
+                objOptions.videoStreams.file.input = options.fileRtspUrl;
+                settingsUpdated = true;
+            }
+            if(settingsUpdated){
+                sendToSocketClients("videoStreams", { cmd: "settingsUpdated", data: objOptions.videoStreams });
+            }
+            let fileName = getDateFileName() + "_" + objOptions.videoStreams.teamName.replace(/[^a-zA-Z0-9]/g,"_") + "_vs_" + objOptions.videoStreams.opponentTeamName.replace(/[^a-zA-Z0-9]/g,"_")  +  ".flv";
+            fileName = path.join(objOptions.videoStreams.videosFolder, fileName);
+            objOptions.videoStreams.file.outputs.ffmpegVideoOutputFile.outputFile = fileName; 
+        }
+        videoStreams.file.streamStart();
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamFileStart', ex);           
+    }
+}
+var videoStreamFileStop = function () {
+    try{
+        logUtilHelper.log(appLogName, "app", "debug",'videoStream',  'videoStreamFileStop');           
+        if(videoStreams.file !==null){
+            videoStreams.file.streamStop();    
+        }else{
+            logUtilHelper.log(appLogName, "app", "warning",'videoStream',  'videoStreamFileStop', 'videoStreams.file is null' );           
+        }
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamFileStop', ex);           
+    }
+}
+
+
+
 var io = require('socket.io')(server, {allowEIO3: true});
 
 
 
 var sendToSocketClients = function (cmd, message, includeArduino){
     if (io) {
-
+        if (includeArduino===true){
+            io.emit(cmd, message);
+        }else{
+            io.emit(cmd, message);
+        }
     }
 }
 
@@ -409,30 +620,32 @@ io.on('connection', function(socket) {
         logUtilHelper.log(appLogName, "socketio", "debug",'videoStream:' + message.cmd + ', client id:' + socket.id);
         switch (message.cmd) {
             case "start":
-                ffmpegVideoInput.streamStart();
+                videoStreamYoutubeStart(message.data);
+                videoStreamGamechangerStart(message.data);
+                videoStreamFileStart(message.data);
                 break;
             case "stop":
-                ffmpegVideoInput.streamStop();
+                videoStreamYoutubeStop();
+                videoStreamGamechangerStop();
+                videoStreamFileStop();
                 break;
             case "youtubeStart":
-                
-                ffmpegVideoInput.streamStart();
+                videoStreamYoutubeStart(message.data);
                 break;
             case "youtubeStop":
-                ffmpegVideoInput.streamStop();
+                videoStreamYoutubeStop();
                 break;
-            
             case "gamechangerStart":
-                ffmpegVideoInput.streamStartRtmp2();
+                videoStreamGamechangerStart(message.data);
                 break;
             case "gamechangerStop":
-                ffmpegVideoInput.streamStopRtmp2();
+                videoStreamGamechangerStop();
                 break;
             case "fileStart":
-                ffmpegVideoInput.streamStartFile();
+                videoStreamFileStart(message.data);
                 break;
             case "fileStop":
-                ffmpegVideoInput.streamStopFile();
+                videoStreamFileStop();
                 break;
             //Was used in cases where local CPU power not enough to encode so started encoding server side encoded and sent rtmp to distination
             // case "startRemote":

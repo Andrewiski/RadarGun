@@ -1,6 +1,6 @@
 {
   "name": "radargunmonitor",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "private": false,
   "license": "Apache-2.0",
   "keywords": [
@@ -11,18 +11,17 @@
     "baseball"
   ],
   "scripts": {
-    "start": "node ./app.js",
-    "stop": "pkill --signal SIGINT RadarGunMonitor"
+    "start": "node ./app.js"
   },
   "bugs": {
-    "url": "https://github.com/Andrewiski/RadarGunMonitor/issues"
+    "url": "https://github.com/Andrewiski/RadarGun/issues"
   },
-  "homepage": "https://github.com/Andrewiski/RadarGunMonitor#readme",
+  "homepage": "https://github.com/Andrewiski/RadarGun#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Andrewiski/RadarGunMonitor.git"
+    "url": "https://github.com/Andrewiski/RadarGun.git"
   },
-  "description": "Digital Example Jetson Nano based Radar Gun ",
+  "description": "Digital Example Linux based Radar Gun Monitor ",
   "main": "app.js",
   "engines": {
     "node": ">= 16.0.0"
