@@ -104,6 +104,7 @@ logUtilHelper.log(appLogName, "app", "info", "Log Directory is " + objOptions.lo
 var audioFileDirectory = path.join(objOptions.dataDirectory, "audioFiles");
 var walkupAudioDirectory = path.join(audioFileDirectory, "walkup");
 var fullSongAudioDirectory = path.join(audioFileDirectory, "fullSongs");
+var videoFileDirectory = path.join(objOptions.dataDirectory, "videos");
 var app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: false }));
@@ -126,10 +127,14 @@ var commonData = {
     radar: {log:[]}
 }
 
-var videoStreams = {
-    youtube: null,
-    gamechanger: null,
-    file: null
+var privateData = {
+    videoStreams : {
+        youtube: null,
+        gamechanger: null,
+        file: null
+    },
+    subscribedSocketIOClients: {}
+    
 }
 
 //app.set('views', path.join(__dirname, 'views'));
@@ -237,9 +242,7 @@ routes.put('/data/scoregame', function (req, res) {
     //    }
     //})
     commonData.game = game;
-    if(ffmpegVideoInput != null){
-       ffmpegVideoInput.updateOverlay({gameData:commonData.game, radarData:commonData.currentRadarSpeedData});
-    }
+    updateOverlays({gameData:commonData.game, radarData:commonData.currentRadarSpeedData});
     io.emit("gameChanged", { cmd: "scoreGame", data: { game: commonData.game } });
     res.json({ game: commonData.game });
     
@@ -292,6 +295,25 @@ routes.get('/data/audioFiles/fullSongs', function (req, res) {
         }
     })    
 });
+
+routes.get('/data/videoFiles', function (req, res) {
+    let videoFiles = [];
+    fs.readdir(videoFileDirectory, function (err, files) {
+        if (err) {
+            logUtilHelper.log(appLogName, "browser", "error", "Error getting avideo directory information.", videoFileDirectory);
+        } else {
+            files.forEach(function (file) {
+                //console.log(file);
+                if (path.extname(file) !== ".txt") {
+                    videoFiles.push({ fileName: file });
+                }
+            })
+            res.json(videoFiles);
+        }
+    })    
+});
+
+
 
 routes.get('/data/game/:id', function (req, res) {
     //res.json(commonData.game);
@@ -348,6 +370,20 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 }); 
 
 
+var updateOverlays = function (data) {
+    //updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
+    
+    if(privateData.videoStreams.youtube != null){
+        rivateData.videoStreams.youtube.updateOverlay();
+    }
+    if(privateData.videoStreams.gamechanger != null){
+        rivateData.videoStreams.gamechanger.updateOverlay();
+    }
+    if(privateData.videoStreams.file != null){
+        rivateData.videoStreams.file.updateOverlay();
+    }
+}
+
 let periodicTimer = null;
 const periodicTimerInterval = 60000;
 
@@ -385,9 +421,7 @@ var audioFilePlay = function (audioFolder, audioFile, options) {
         audioFilePlayer.stop();
         audioFilePlayer = null;
     }
-    
     audioFilePlayer = new FFplay(audioFolder, audioFile.fileName, options, logUtilHelper);
-
     audioFilePlayer.on("stopped", playAudioFileComplete);
 
 }
@@ -398,24 +432,24 @@ var audioFileStop = function () {
     }
 }
 
-
 var videoStreamYoutubeStart = function (options) {
     
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream', 'videoStreamYoutubeStart');           
-        if(videoStreams.youtube ===null){
-            videoStreams.youtube = new FfmpegRtmp(objOptions.videoStreams.youtube, videoOverlayParser, logUtilHelper);
-            videoStreams.youtube.on("stopped", function(){
+        if(privateData.videoStreams.youtube ===null){
+            privateData.videoStreams.youtube = new FfmpegRtmp(objOptions.videoStreams.youtube, videoOverlayParser, logUtilHelper);
+            privateData.videoStreams.youtube.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube was Stopped');
                 sendToSocketClients("videoStreams", { cmd: "youtubeStopped" });
             });
-            videoStreams.youtube.on("started", function(){
+            privateData.videoStreams.youtube.on("started", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube was Started');
                 sendToSocketClients("videoStreams", { cmd: "youtubeStarted" });
             });
-            videoStreams.youtube.on("streamstats", function(data){
-                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube Stream Stats', data);
-                sendToSocketClients("videoStreams", { cmd: "youtubeStreamStats", data: data });
+            privateData.videoStreams.youtube.on("streamStats", function(data){
+                //logUtilHelper.log(appLogName, "app", "debug",'videoStream', 'Youtube Stream Stats', data);
+                //sendToVideoStreamSubscribedSocketClients("videoStreams", { cmd: "youtubeStreamStats", data: data });
+                sendToSubscribedSocketClients("videoStreams", "videoStreams", { cmd: "youtubeStreamStats", data: data });
             });
         }
         
@@ -431,13 +465,14 @@ var videoStreamYoutubeStart = function (options) {
             }
             if(options.youtubeRtmpUrl != objOptions.videoStreams.youtube.rtmpUrl){
                 objOptions.videoStreams.youtube.rtmpUrl = options.youtubeRtmpUrl;
+                privateData.videoStreams.youtube.options.rtmpUrl = options.youtubeRtmpUrl;
                 settingsUpdated = true;
             }
             if(settingsUpdated){
                 sendToSocketClients("videoStreams", { cmd: "settingsUpdated", data: objOptions.videoStreams });
             }
         }
-        videoStreams.youtube.streamStart();
+        privateData.videoStreams.youtube.streamStart();
     }catch(ex){
         logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamYoutubeStart', ex);           
     }
@@ -446,8 +481,8 @@ var videoStreamYoutubeStart = function (options) {
 var videoStreamYoutubeStop = function () {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamYoutubeStop');           
-        if(videoStreams.youtube !==null){
-            videoStreams.youtube.streamStop();    
+        if(privateData.videoStreams.youtube !==null){
+            privateData.videoStreams.youtube.streamStop();    
         }else{
             logUtilHelper.log(appLogName, "app", "warning",'videoStream',  'videoStreamYoutubeStop', 'videoStreams.youtube is null' );           
         }
@@ -460,25 +495,27 @@ var videoStreamYoutubeStop = function () {
 var videoStreamGamechangerStart = function (options) {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamGamechangerStart');           
-        if(videoStreams.gamechanger ===null){
-            videoStreams.gamechanger = new FfmpegRtmp(objOptions.videoStreams.gamechanger, videoOverlayParser, logUtilHelper);
-            videoStreams.gamechanger.on("stopped", function(){
+        if(privateData.videoStreams.gamechanger ===null){
+            privateData.videoStreams.gamechanger = new FfmpegRtmp(objOptions.videoStreams.gamechanger, videoOverlayParser, logUtilHelper);
+            privateData.videoStreams.gamechanger.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Gamechanger was Stopped');
                 sendToSocketClients("videoStreams", { cmd: "gamechangerStopped" });
             });
-            videoStreams.gamechanger.on("started", function(){
+            privateData.videoStreams.gamechanger.on("started", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Gamechanger was Started');
                 sendToSocketClients("videoStreams", { cmd: "gamechangerStarted" });
             });
-            videoStreams.gamechanger.on("streamstats", function(data){
-                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Gamechanger Stream Stats', data);
-                sendToSocketClients("videoStreams", { cmd: "youtubeStopped", data: data });
+            privateData.videoStreams.gamechanger.on("streamStats", function(data){
+                //logUtilHelper.log(appLogName, "app", "debug",'videoStream', 'Gamechanger Stream Stats', data);
+                
+                sendToSubscribedSocketClients("videoStreams", "videoStreams", { cmd: "gamechangerStreamStats", data: data });
             });
         }
         if(options){
             let settingsUpdated = false;
             if(options.gameChangerRtmpUrl != objOptions.videoStreams.gamechanger.rtmpUrl){
                 objOptions.videoStreams.gamechanger.rtmpUrl = options.gamechangerRtmpUrl;
+                privateData.videoStreams.gamechanger.options.rtmpUrl = options.gamechangerRtmpUrl;
                 settingsUpdated = true;
             }
             if(settingsUpdated){
@@ -486,7 +523,7 @@ var videoStreamGamechangerStart = function (options) {
             }
         }
 
-        videoStreams.gamechanger.streamStart();
+        privateData.videoStreams.gamechanger.streamStart();
     }catch(ex){
         logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamGamechangerStart', ex);           
     }
@@ -494,8 +531,8 @@ var videoStreamGamechangerStart = function (options) {
 var videoStreamGamechangerStop = function () {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamGamechangerStop');           
-        if(videoStreams.gamechanger !==null){
-            videoStreams.gamechanger.streamStop();    
+        if(privateData.videoStreams.gamechanger !==null){
+            privateData.videoStreams.gamechanger.streamStop();    
         }else{
             logUtilHelper.log(appLogName, "app", "warning",'videoStream',  'videoStreamGameChangerStop', 'videoStreams.gamechanger is null' );           
         }
@@ -530,19 +567,19 @@ var videoStreamFileStart = function (options) {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamFileStart');  
                  
-        if(videoStreams.file ===null){
-            videoStreams.file = new FfmpegVideoInput(objOptions.videoStreams.file, videoOverlayParser, logUtilHelper);
-            videoStreams.file.on("stopped", function(){
+        if(privateData.videoStreams.file ===null){
+            privateData.videoStreams.file = new FfmpegVideoInput(objOptions.videoStreams.file, videoOverlayParser, logUtilHelper);
+            privateData.videoStreams.file.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File was Stopped');
                 sendToSocketClients("videoStreams", { cmd: "fileStopped" });
             });
-            videoStreams.file.on("started", function(){
+            privateData.videoStreams.file.on("started", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File was Started');
                 sendToSocketClients("videoStreams", { cmd: "fileStarted" });
             });
-            videoStreams.file.on("streamstats", function(data){
-                logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File Stream Stats', data);
-                sendToSocketClients("videoStreams", { cmd: "fileStreamStats", data: data });
+            privateData.videoStreams.file.on("streamStats", function(data){
+                //logUtilHelper.log(appLogName, "app", "debug",'videoStream', 'File Stream Stats', data);
+                sendToSubscribedSocketClients("videoStreams", "videoStreams", { cmd: "fileStreamStats", data: data });
             });
         }
         if (options){
@@ -566,7 +603,7 @@ var videoStreamFileStart = function (options) {
             fileName = path.join(objOptions.videoStreams.videosFolder, fileName);
             objOptions.videoStreams.file.outputs.ffmpegVideoOutputFile.outputFile = fileName; 
         }
-        videoStreams.file.streamStart();
+        privateData.videoStreams.file.streamStart();
     }catch(ex){
         logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'videoStreamFileStart', ex);           
     }
@@ -574,8 +611,8 @@ var videoStreamFileStart = function (options) {
 var videoStreamFileStop = function () {
     try{
         logUtilHelper.log(appLogName, "app", "debug",'videoStream',  'videoStreamFileStop');           
-        if(videoStreams.file !==null){
-            videoStreams.file.streamStop();    
+        if(privateData.videoStreams.file !==null){
+            privateData.videoStreams.file.streamStop();    
         }else{
             logUtilHelper.log(appLogName, "app", "warning",'videoStream',  'videoStreamFileStop', 'videoStreams.file is null' );           
         }
@@ -584,28 +621,82 @@ var videoStreamFileStop = function () {
     }
 }
 
-
-
 var io = require('socket.io')(server, {allowEIO3: true});
 
+var subscribeToSocketClient = function (socket, type) {
+    if(privateData.subscribedSocketIOClients[type] === undefined){
+        privateData.subscribedSocketIOClients[type] = {};
+    }
+    if(privateData.subscribedSocketIOClients[type][socket.id] === undefined){
+        privateData.subscribedSocketIOClients[type][socket.id] = {
+            socket:socket,
+            timestamp: new Date()
+        };
+    }else{
+        privateData.subscribedSocketIOClients[type][socket.id].timestamp = new Date();
+    }
+}
 
+var unsubscribeToSocketClient = function (socket, type) {
+    if(privateData.subscribedSocketIOClients[type] === undefined){
+        privateData.subscribedSocketIOClients[type] = {};
+    }
+    if(privateData.subscribedSocketIOClients[type][socket.id] !== undefined){
+        delete privateData.subscribedSocketIOClients[type][socket.id];
+    }
+}
+
+var sendToSubscribedSocketClients = function(type, cmd, message){
+    if(privateData.subscribedSocketIOClients[type] === undefined){
+        privateData.subscribedSocketIOClients[type] = {};
+    }
+    var socketIds = Object.getOwnPropertyNames(privateData.subscribedSocketIOClients[type]);
+    for(var i=0; i<socketIds.length; i++){
+        var socketId = socketIds[i];
+        var client = privateData.subscribedSocketIOClients[type][socketId];
+        if(client.timestamp < new Date().getTime() - 1000 * 60 * 2){  //older then two minutes
+            delete privateData.subscribedSocketIOClients[type][socketId];
+        }else{
+            if (client && client.socket && client.socket.connected){
+                client.socket.emit(cmd, message);
+            }
+        }
+    }
+}
 
 var sendToSocketClients = function (cmd, message, includeArduino){
     if (io) {
         if (includeArduino===true){
             io.emit(cmd, message);
         }else{
-            io.emit(cmd, message);
+            const sockets = io.fetchSockets().then(sockets => {
+                sockets.forEach(socket => {
+                    if(socket.client.request.headers["origin"] !== "ArduinoSocketIo"){
+                        socket.emit(cmd, message);
+                    }
+                })
+            })
         }
     }
 }
 
-
-
-
 io.on('connection', function(socket) {
     //logUtilHelper.log(appLogName, "socketio", "info", "socket.io client Connection");
     logUtilHelper.logSocketConnection (appLogName, "socketio", "info",  socket, "socket.io client Connection" );
+
+    socket.on('serverSubscribe', function(data) {
+        logUtilHelper.log(appLogName, "socketio", "debug",'serverSubscribe', "action:" + data.action, "type:" + data.type, 'client id:' + socket.id);
+        switch(data.action){
+            case "resubscribe":
+            case "subscribe":
+                subscribeToSocketClient(socket, data.type);
+                break;
+            case "unsubscribe":
+                unsubscribeToSocketClient(socket, data.type);
+                break;
+        }
+    })
+
     socket.on('radarConfigCommand', function(data) {
         logUtilHelper.log(appLogName, "socketio", "debug",'radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
         radarStalker2.radarConfigCommand({ data: data, socket: socket });
@@ -614,8 +705,6 @@ io.on('connection', function(socket) {
         logUtilHelper.log(appLogName, "socketio", "debug",'radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
         radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
     });
-
-
     socket.on('videoStream', function (message) {
         logUtilHelper.log(appLogName, "socketio", "debug",'videoStream:' + message.cmd + ', client id:' + socket.id);
         switch (message.cmd) {
@@ -655,14 +744,9 @@ io.on('connection', function(socket) {
             //     io.emit('stream', message);
             //     break;
         }
-
     });
-
-    
-
     socket.on("audio", function (message) {
         //audioFile: audioFile
-
         logUtilHelper.log(appLogName, "socketio", "debug", 'audio:' + ', message:' + message + ', client id:' + socket.id);
         try {
             switch (message.cmd) {
@@ -679,7 +763,6 @@ io.on('connection', function(socket) {
         } catch (ex) {
             logUtilHelper.log(appLogName, "socketio", 'error', 'audio', ex);
         }
-
     });
 
     socket.on("resetRadarSettings", function (message) {
@@ -694,7 +777,6 @@ io.on('connection', function(socket) {
             commonData.game = {};
         }
         switch (message.cmd) {
-
             case "gameChange":
                 if (message.data.inning !== undefined) {
                     commonData.game.inning = message.data.inning;
@@ -702,7 +784,6 @@ io.on('connection', function(socket) {
                 if (message.data.inningPosition !== undefined) {
                     commonData.game.inningPosition = message.data.inningPosition;
                 }
-
                 if (message.data.score !== undefined) {
                     if (commonData.game.score === undefined) {
                         commonData.game.score = {};
@@ -713,10 +794,7 @@ io.on('connection', function(socket) {
                     if (message.data.score.home !== undefined) {
                         commonData.game.score.home = message.data.score.home;
                     }
-
                 }
-
-
                 if (message.data.guest !== undefined) {
                     if (commonData.game.guest === undefined) {
                         commonData.game.guest = {};
@@ -730,9 +808,7 @@ io.on('connection', function(socket) {
                     if (message.data.guest.batterIndex !== undefined) {
                         commonData.game.guest.batterIndex = message.data.guest.batterIndex;
                     }
-
                 }
-
                 if (message.data.home !== undefined) {
                     if (commonData.game.home === undefined) {
                         commonData.game.home = {};
@@ -746,10 +822,7 @@ io.on('connection', function(socket) {
                     if (message.data.home.batterIndex !== undefined) {
                         commonData.game.home.batterIndex = message.data.home.batterIndex;
                     }
-
                 }
-
-
                 if (message.data.outs !== undefined) {
                     commonData.game.outs = message.data.outs;
                 }
@@ -766,10 +839,9 @@ io.on('connection', function(socket) {
                     commonData.game.batter = message.data.batter;
                 }
                 commonData.gameIsDirty = true;
-                io.emit("gameChanged", { cmd: "gameChanged", data: message.data });      //use io to send it to everyone
-                if(ffmpegVideoInput !== null){
-                    ffmpegVideoInput.updateOverlay({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
-                }
+                sendToSocketClients("gameChanged", { cmd: "gameChanged", data: message.data });      //use io to send it to everyone
+                updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData})
+                
                 break;
         }
         
@@ -818,12 +890,6 @@ io.on('connection', function(socket) {
         
     });
 
-
-    
-
-    
-
-
     if (socket.client.request.headers["origin"] !== "ArduinoSocketIo") {
         //send the current Config to the new client Connections
         socket.emit('radarConfig', radarStalker2.getRadarConfig());
@@ -853,29 +919,27 @@ radarStalker2.on('radarSpeed', function (data) {
         commonData.radar.log.shift()
     } 
     dataDisplay.updateSpeedData(data);
-    io.emit('radarSpeed', data);
+    sendToSocketClients('radarSpeed', data,true);
     commonData.currentRadarSpeedData = data;
     logUtilHelper.log(appLogName, "app", "info", 'radarData', data);
-    if(ffmpegVideoInput !== null){
-        ffmpegVideoInput.updateOverlay({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
-    }
+    updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
 });
 radarStalker2.on('radarTimeout', function (data) {
-    io.emit('radarTimeout', data);
+    sendToSocketClients('radarTimeout', data);
 });
 radarStalker2.on('radarCommand',function(data){
-    io.emit('radarCommand', data);
+    sendToSocketClients('radarCommand', data);
 });
 
 radarStalker2.on('softwareCommand', function (data) {
-    io.emit('softwareCommand', data);
+    sendToSocketClients('softwareCommand', data);
 });
 
 radarStalker2.on('radarConfigProperty', function (data) {
-    io.emit('radarConfigProperty', data);
+    sendToSocketClients('radarConfigProperty', data);
 });
 radarStalker2.on('softwareConfigProperty', function (data) {
-    io.emit('softwareConfigProperty', data);
+    sendToSocketClients('softwareConfigProperty', data);
 });
 
 batteryMonitor.on("batteryVoltage",function(data){

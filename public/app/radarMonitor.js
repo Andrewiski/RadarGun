@@ -93,12 +93,12 @@
            };
 
            Service.socket.on('gameChanged', function (message) {
-               console.log('radarMonitorService received gameChanged', message);
+               //console.log('radarMonitorService received gameChanged', message);
                $rootScope.$emit("gameChanged", message);
            });
 
            Service.socket.on('videoStreams', function (message) {
-                console.log('radarMonitorService received videoStreams', message);
+                //console.log('radarMonitorService received videoStreams', message);
                 $rootScope.$emit("videoStreams", message);
            });
            

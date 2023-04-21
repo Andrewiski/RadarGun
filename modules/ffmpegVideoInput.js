@@ -192,11 +192,11 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
     };
 
     var commandError = function (err, stdout, stderr) {
-        logUtilHelper.log(appLogName, "app", 'error', 'an error happened: ' + err.message, err, stdout, stderr);
+        logUtilHelper.log(appLogName, "app", 'error', 'an error happened: ' + err.message, err); //, stdout, stderr);
         commonData.streamStats.status = "disconnected";
         commonData.streamStats.error = err;
-        commonData.streamStats.stdout = stdout;
-        commonData.streamStats.stderr = stderr;
+        //commonData.streamStats.stdout = stdout;
+        //commonData.streamStats.stderr = stderr;
         self.emit('streamStats', commonData.streamStats);
         if (err && err.message && err.message.startsWith('ffmpeg exited with code') === true) {
             if(commonData.shouldRestartStream === true){

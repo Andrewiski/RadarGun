@@ -393,15 +393,15 @@
         <div class="row">
             <br />
         </div>
-        <div>
+        <div style="min-height: 800px;">
 
            
 
             <uib-tabset active="commonData.activeTabIndex">
 
-                <uib-tab index="2">
+                <uib-tab index="2" ng-click="tabClick('radarHistory')">
                     <uib-tab-heading>
-                        <i class="fa fa-database"></i> History
+                        <i class="fa fa-database"></i>Radar History
                     </uib-tab-heading>
                     <div class="container-fluid ">
                         <div class="row">
@@ -458,7 +458,7 @@
                     </div>
                 </uib-tab>
 
-                <uib-tab index="4" ng-show="commonData.isGameSelected">
+                <uib-tab index="4" ng-show="commonData.isGameSelected" ng-click="tabClick('lineup')">
                     <uib-tab-heading>
                         <i class="fa fa-user"></i> Line Up
                     </uib-tab-heading>
@@ -646,7 +646,7 @@
                         </div>
                     </div>
                 </uib-tab>
-                <uib-tab index="6" ng-show="commonData.isGameSelected">
+                <uib-tab index="6" ng-show="commonData.isGameSelected" ng-click="tabClick('roster')">
                     <uib-tab-heading>
                         <i class="fa fa-bars"></i> Roster
                     </uib-tab-heading>
@@ -910,7 +910,7 @@
                         </div>
                     </div>
                 </uib-tab>
-                <uib-tab index="8">
+                <uib-tab index="8" ng-click="tabClick('teams')">
                     <uib-tab-heading>
                         <i class="fa fa-bars"></i> Teams
                     </uib-tab-heading>
@@ -1057,7 +1057,7 @@
 
 
 
-                <uib-tab index="10" ng-click="tabWalkupSongsClick()">
+                <uib-tab index="10" ng-click="tabClick('walkupSongs')">
                     <uib-tab-heading>
                         <i class="fa fa-music"></i> Walkup Songs
                     </uib-tab-heading>
@@ -1104,7 +1104,7 @@
 
 
 
-                <uib-tab index="12" ng-show="commonData.isGameAdmin" ng-click="tabFullSongsClick()">
+                <uib-tab index="12" ng-show="commonData.isGameAdmin" ng-click="tabClick('fullSongs')">
                     <uib-tab-heading>
                         <i class="fa fa-music"></i> Full Songs
                     </uib-tab-heading>
@@ -1145,7 +1145,7 @@
                     </div>
                 </uib-tab>
 
-                <uib-tab index="14" ng-show="commonData.isGameAdmin">
+                <uib-tab index="14" ng-show="commonData.isGameAdmin" ng-click="tabClick('PracticeMode')">
                     <uib-tab-heading>
                         <i class="fa fa-baseball-bat-ball"></i> Practice Mode
                     </uib-tab-heading>
@@ -1169,78 +1169,178 @@
                     </div>
                 </uib-tab>
                 
-                <uib-tab index="16" ng-show="commonData.isGameAdmin" ng-click="tabVideoStreamsClick()">
+                <uib-tab index="16" ng-show="commonData.isGameAdmin" ng-click="tabClick('videoStreams')">
                     <uib-tab-heading>
                         <i class="fa-solid fa-video"></i> Video Streams
                     </uib-tab-heading>
                     <div>
-                        <div class="well well-sm">
-                            <div>
-                                <div><label><i class="fa-solid fa-video"></i> Team Names</label></div>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.teamName" placeholder="Your Team Name" />
-                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.opponentTeamName" placeholder="Opponent Team Name" />
-                                    <span class="input-group-btn">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="well well-sm">
+                                    <div><label><i class="fa-solid fa-video"></i> Team Names</label></div>
+                                    
+                                    <div class="form-group">
+                                        <label>Our Name</label>
+                                        <input type="text" class="form-control" ng-model="commonData.videoStreams.teamName" placeholder="Your Team Name" />
+                                    </div>
+                                    
+                                
+                                    <div class="form-group">
+                                        <label>Opponent Name</label>
+                                        <input type="text" class="form-control" ng-model="commonData.videoStreams.opponentTeamName" placeholder="Opponent Team Name" />
+                                    </div>
+                                
+                                    <div class="form-group">
                                         <button class="btn btn-primary" ng-click="videoStreamStart()">Start All Streams</button>
                                         <button class="btn btn-primary" ng-click="videoStreamStop()">Stop All Streams</button>
-                                    </span>
-                                </div>
-                                
-                                <!--<div class="btn-group" role="group" aria-label="Buttons">
-                                    <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
-                                    <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
-                                </div>-->
-                            </div>
-                        </div>
-
-                        <div class="well well-sm">
-                            
-                            <div>
-                                <div><label><i class="fa-brands fa-youtube"></i> YouTube</label></div>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.youtubeRtspUrl" placeholder="Rtsp Camera Stream URL" />
-                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.youtubeRtmpUrl" placeholder="YouTube Stream URL" />
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-primary" ng-click="videoStreamYoutubeStart()">Start Stream</button>
-                                        <button class="btn btn-primary" ng-click="videoStreamYoutubeStop()">Stop Stream</button>
-                                    </span>
-                                </div>
-                                
-                                <!--<div class="btn-group" role="group" aria-label="Buttons">
-                                    <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
-                                    <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
-                                </div>-->
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="well well-sm">
-                                <div><label><img src="/app/img/GameChanger-icon.svg" style="width:20px" alt="" class="gamechanger-logo"> GameChanger</label></div>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.gamechangerRtspUrl" placeholder="Rtsp Camera Stream URL" />
-                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.gamechangerRtmpUrl" placeholder="Gamechanger RTMP URL" />
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-primary" ng-click="videoStreamGameChangerStart()">Start Stream</button>
-                                        <button class="btn btn-primary" ng-click="videoStreamGameChangerStop()">Stop Stream</button>
-                                    </span>
+                                    </div>
+                                        
+                                    <!--<div class="btn-group" role="group" aria-label="Buttons">
+                                        <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
+                                        <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
+                                    </div>-->
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <div class="well well-sm">
-                                <div><label><i class="fa-solid fa-clapperboard"></i> File</label></div>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.gamechangerRtspUrl" placeholder="Rtsp Camera Stream URL" />
-                                    <span class="input-group-btn">
+                            <div class="col-lg-6">
+                                <div class="well well-sm">
+                                    <div><label><i class="fa-solid fa-clapperboard"></i> File</label></div>
+                                    <div class="form-group">
+                                        <label>Input:</label>
+                                        <input type="text" readonly="true" class="form-control" ng-model="commonData.videoStreams.gamechangerRtspUrl" placeholder="Rtsp Camera Stream URL" />
+                                    </div>
+                                    
+                                    <div class="form-group-btn">
                                         <button class="btn btn-primary" ng-click="videoStreamFileStart()">Start Stream</button>
                                         <button class="btn btn-primary" ng-click="videoStreamFileStop()">Stop Stream</button>
-                                    </span>
+                                    </div>
+                                    
+                                    <div ng-show="commonData.videoStreamStats.file.info !== undefined">
+                                        <span ng-class="{'text-success': commonData.videoStreamStats.file.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
+                                        <label>status: </label><span ng-bind="commonData.videoStreamStats.file.status"></span>
+                                        <label>time: </label><span ng-bind="commonData.videoStreamStats.file.info.time"></span>
+                                        <label>frame: </label><span ng-bind="commonData.videoStreamStats.file.info.frame"></span>
+                                        <label>size: </label><span ng-bind="commonData.videoStreamStats.file.info.size"></span>
+                                        <label>fps: </label> <span ng-bind="commonData.videoStreamStats.file.info.fps"></span>
+                                        <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.file.info.bitrate"></span>
+                                        <label>speed: </label><span ng-bind="commonData.videoStreamStats.file.info.speed"></span>
+                                        <label ng-show="commonData.videoStreamStats.file.error !== null">error: </label><span ng-show="commonData.videoStreamStats.file.error !== null" ng-bind="commonData.videoStreamStats.file.error"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="well well-sm">
+                                <div><label><i class="fa-brands fa-youtube"></i> YouTube</label></div>
+                                <div class="form-group">
+                                    <label>Input: </label>
+                                    <input type="text" readonly="true" class="form-control" ng-model="commonData.videoStreams.youtubeRtspUrl" placeholder="Rtsp Camera Stream URL" />
+                                </div>
+                                <div class="form-group">
+                                    <label>RTMP: </label>
+                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.youtubeRtmpUrl" placeholder="YouTube Stream URL" />
+                                </div>
+                                <div class="form-group-btn">
+                                    <button class="btn btn-primary" ng-click="videoStreamYoutubeStart()">Start Stream</button>
+                                    <button class="btn btn-primary" ng-click="videoStreamYoutubeStop()">Stop Stream</button>
+                                </div>
+                                <div ng-show="commonData.videoStreamStats.youtube.info !== undefined">
+                                    <span ng-class="{'text-success': commonData.videoStreamStats.youtube.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
+                                    <label>status: </label><span ng-bind="commonData.videoStreamStats.youtube.status"></span>
+                                    <label>time: </label><span ng-bind="commonData.videoStreamStats.youtube.info.time"></span>
+                                    <label>frame: </label><span ng-bind="commonData.videoStreamStats.youtube.info.frame"></span>
+                                    <label>size: </label><span ng-bind="commonData.videoStreamStats.youtube.info.size"></span>
+                                    <label>fps: </label> <span ng-bind="commonData.videoStreamStats.youtube.info.fps"></span>
+                                    <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.youtube.info.bitrate"></span>
+                                    <label>speed: </label><span ng-bind="commonData.videoStreamStats.youtube.info.speed"></span>
+                                    <label ng-show="commonData.videoStreamStats.youtube.error !== null">error: </label><span ng-show="commonData.videoStreamStats.youtube.error !== null" ng-bind="commonData.videoStreamStats.youtube.error"></span>
+                                </div>
+                                <!--<div class="btn-group" role="group" aria-label="Buttons">
+                                    <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
+                                    <button class="btn btn-primary" ng-click="streamStopRemote()">Stop Remote Stream</button>
+                                </div>-->
+                                
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="well well-sm">
+                                <div><label><img src="/app/img/GameChanger-icon.svg" style="width:20px" alt="" class="gamechanger-logo"> GameChanger</label></div>
+                                <div class="form-group">
+                                    <label>Input: </label>
+                                    <input type="text" readonly="true" class="form-control" ng-model="commonData.videoStreams.gamechangerRtspUrl" placeholder="Rtsp Camera Stream URL" />
+                                </div>
+                                <div class="form-group">
+                                    <label>RTMP: </label>
+                                    <input type="text" class="form-control" ng-model="commonData.videoStreams.gamechangerRtmpUrl" placeholder="Gamechanger RTMP URL" />
+                                </div>
+                                <div class="form-group-btn">
+                                    <button class="btn btn-primary" ng-click="videoStreamGameChangerStart()">Start Stream</button>
+                                    <button class="btn btn-primary" ng-click="videoStreamGameChangerStop()">Stop Stream</button>
+                                </div>
+                                <div ng-show="commonData.videoStreamStats.gamechanger.info !== undefined">
+                                    <span ng-class="{'text-success': commonData.videoStreamStats.gamechanger.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
+                                    <label>status: </label><span ng-bind="commonData.videoStreamStats.gamechanger.status"></span>
+                                    <label>time: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.time"></span>
+                                    <label>frame: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.frame"></span>
+                                    <label>size: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.size"></span>
+                                    <label>fps: </label> <span ng-bind="commonData.videoStreamStats.gamechanger.info.fps"></span>
+                                    <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.bitrate"></span>
+                                    <label>speed: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.speed"></span>
+                                    <label ng-show="commonData.videoStreamStats.gamechanger.error !== null">error: </label><span ng-show="commonData.videoStreamStats.gamechanger.error !== null" ng-bind="commonData.videoStreamStats.gamechanger.error"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            
+                        </div>
+                    </div>
                 </uib-tab>
-                <uib-tab index="18" ng-show="commonData.isGameAdmin" ng-click="getServerLogs()">
+                <uib-tab index="17" ng-show="commonData.isGameAdmin" ng-click="tabClick('videoFiles')">
+                    <uib-tab-heading>
+                        <i class="fa-solid fa-clapperboard"></i> Video Files
+                    </uib-tab-heading>
+                    
+                    <div class="col-sm-6">
+                        <div class="input-group-btn">
+                        <button type="button" class="btn" ng-click="refreshVideoFiles()"><i class="fa fa-refresh"></i></button>
+                        </div>
+                        <table class="table table-bordered table-striped">
+                            <thead class="thead-light">
+                                <tr>
+                                    <td><label class="control-label">Filename</label></td>
+                                    <td><label class="control-label">Length</label></td>
+                                    <td><label class="control-label">Action</label></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="(index, videoFile) in (commonData.videoFiles)">
+                                    <td>
+                                        <div class="form-control-sm">
+                                            <span ng-bind="videoFile.fileName"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-control-sm">
+                                            <span ng-bind="videoFile.length"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-control-sm">
+                                            <button type="button" class="btn" ng-click="videoFilePlay(videoFile)" data-toggle="tooltip" data-placement="bottom" title="Play Video"><i class="fa fa-play"></i></button>
+                                            <button type="button" class="btn" ng-click="videoFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Video"><i class="fa fa-stop"></i></button>
+                                            <button type="button" class="btn" ng-click="videoFileDownload()" data-toggle="tooltip" data-placement="bottom" title="Download Video"><i class="fa fa-stop"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </uib-tab>
+
+
+                <uib-tab index="18" ng-show="commonData.isGameAdmin" ng-click="tabClick('serverLogs')">
                     <uib-tab-heading>
                         <i class="fa-regular fa-file-lines"></i> Logs
                     </uib-tab-heading>
@@ -1257,7 +1357,7 @@
                         </div>  
                     </div>
                 </uib-tab>
-                <uib-tab index="9" ng-show="commonData.isGameAdmin">
+                <uib-tab index="9" ng-show="commonData.isGameAdmin" ng-click="tabClick('config')">
                     <uib-tab-heading>
                         <i class="fa-solid fa-gear"></i> Config
                     </uib-tab-heading>
@@ -1273,7 +1373,7 @@
                            
                     </div>
                 </uib-tab>
-                <uib-tab index="20" ng-show="commonData.isGameAdmin">
+                <uib-tab index="20" ng-show="commonData.isGameAdmin" ng-click="tabClick('radarConfig')">
                     <uib-tab-heading>
                         <i class="fa-solid fa-satellite-dish"></i> Radar Config
                     </uib-tab-heading>
