@@ -1071,26 +1071,29 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <td><label class="control-label">Song</label></td>
-                                        <td><label class="control-label">Length</label></td>
-                                        <td><label class="control-label">Action</label></td>
+                                        <td><label class="control-label">Play</label></td>
+                                        <td><label class="control-label">Preview</label></td>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr ng-repeat="(index, walkupFile) in (commonData.walkupFiles)">
                                         <td>
                                             <div class="form-control-sm">
-                                                <span ng-bind="walkupFile.fileName"></span>
+                                                <span ng-bind="filenameWithoutExtension(walkupFile.fileName)" style="white-space: nowrap;"></span>
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="form-control-sm">
-                                                <span ng-bind="walkupFile.length"></span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-control-sm">
+                                            <div class="btn-group btn-group-justified" >
                                                 <button type="button" class="btn" ng-click="audioFilePlayWalkup(walkupFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
                                                 <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-control-sm">
+                                                <audio controls>
+                                                    <source ng-src="{{ audioFileLoadWalkup(walkupFile.fileName) }}" type="audio/mp4">
+                                                    Your browser does not support the audio element.
+                                                </audio>
                                             </div>
                                         </td>
                                     </tr>
@@ -1117,26 +1120,31 @@
                             <thead class="thead-light">
                                 <tr>
                                     <td><label class="control-label">Song</label></td>
-                                    <td><label class="control-label">Length</label></td>
-                                    <td><label class="control-label">Action</label></td>
+                                    <td><label class="control-label">Play</label></td>
+                                    <td><label class="control-label">Preview</label></td> 
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr ng-repeat="(index, fullSongFile) in (commonData.fullSongFiles)">
                                     <td>
                                         <div class="form-control-sm">
-                                            <span ng-bind="fullSongFile.fileName"></span>
+                                            <span ng-bind="filenameWithoutExtension(fullSongFile.fileName)"></span>
                                         </div>
                                     </td>
+
                                     <td>
-                                        <div class="form-control-sm">
-                                            <span ng-bind="fullSongFile.length"></span>
+                                        <div class="btn-group btn-group-justified" >
+                                             <button type="button" class="btn" ng-click="audioFilePlayFullSong(fullSongFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
+                                             <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
                                         </div>
+                                        
                                     </td>
-                                    <td>
+                                     <td>
                                         <div class="form-control-sm">
-                                            <button type="button" class="btn" ng-click="audioFilePlayFullSong(fullSongFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
-                                            <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                            <audio controls>
+                                                <source ng-src="{{ audioFileLoadFullSong(fullSongFile.fileName) }}" type="audio/mp4">
+                                                Your browser does not support the audio element.
+                                            </audio>
                                         </div>
                                     </td>
                                 </tr>

@@ -723,10 +723,19 @@
                radarMonitor.sendServerCommand("gameChange", { cmd: "gameChange",  data: data});               
            }
 
-        //    $scope.audioFilePlay = function (audioFile) {
-        //        radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlay", data: { audioFile: audioFile } });
-        //    }
+           $scope.audioFilePlay = function (audioFile) {
+               radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlay", data: { audioFile: audioFile } });
+           }
 
+           $scope.filenameWithoutExtension = function(fileName){
+            let TrueName = fileName.split(".")[0];
+            return TrueName;
+           }
+
+            $scope.audioFileLoadFullSong = function (fileName) {
+                var filePath = '/audio/fullSongs/';
+                return filePath + fileName;
+            }
 
             $scope.audioFilePlayFullSong = function (audioFile) {
                 radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayFullSong", data: { audioFile: audioFile } });
@@ -734,6 +743,10 @@
 
            $scope.audioFilePlayWalkup = function (audioFile) {
                radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayWalkup", data: { audioFile: audioFile } });
+           }
+           $scope.audioFileLoadWalkup = function (fileName) {
+            var filePath = '/audio/Walkup/';
+            return filePath + fileName;
            }
 
            $scope.audioFileStop = function () {

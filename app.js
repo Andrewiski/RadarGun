@@ -296,6 +296,81 @@ routes.get('/data/audioFiles/fullSongs', function (req, res) {
     })    
 });
 
+
+routes.get('/audio/fullSongs/:filename', (req, res) => {
+    const filePath = `./data/audioFiles/fullSongs/${req.params.filename}`;
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+    
+    // Set the content-type header to indicate that this is an audio file
+    res.setHeader('Content-Type', 'audio/mp4');
+    
+    // If a range header was provided, only send the requested portion of the file
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] 
+        ? parseInt(parts[1], 10)
+        : fileSize-1;
+      const chunksize = (end-start)+1;
+      const file = fs.createReadStream(filePath, {start, end});
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'audio/mp4',
+      };
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      // If no range header was provided, send the entire file
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'audio/mp4',
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(filePath).pipe(res);
+    }
+  });
+
+  routes.get('/audio/Walkup/:filename', (req, res) => {
+    const filePath = `./data/audioFiles/walkup/${req.params.filename}`;
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+    
+    // Set the content-type header to indicate that this is an audio file
+    res.setHeader('Content-Type', 'audio/mp4');
+    
+    // If a range header was provided, only send the requested portion of the file
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] 
+        ? parseInt(parts[1], 10)
+        : fileSize-1;
+      const chunksize = (end-start)+1;
+      const file = fs.createReadStream(filePath, {start, end});
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'audio/mp4',
+      };
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      // If no range header was provided, send the entire file
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'audio/mp4',
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(filePath).pipe(res);
+    }
+  });
+
 routes.get('/data/videoFiles', function (req, res) {
     let videoFiles = [];
     fs.readdir(videoFileDirectory, function (err, files) {
