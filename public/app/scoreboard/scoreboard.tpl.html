@@ -919,13 +919,18 @@
                             <div>
                                 <span>
                                     <div ng-show="commonData.isSelectTeam">
+                                        <select class="form-control" aria-label="Select Team" ng-model="commonData.selectedTeam" ng-change="teamSelected()" ng-options="item.name for item in commonData.teams track by item.id" >
+                                            
+                                        </select>
+                                    </div>
+                                    <!-- <div ng-show="commonData.isSelectTeam">
                                         <ui-select ng-model="commonData.selectedTeam" ng-change="teamSelected()" theme="bootstrap">
                                             <ui-select-match placeholder="Select or search a team in the list...">{{$select.selected.name}}</ui-select-match>
                                             <ui-select-choices repeat="item in commonData.teams | filter: $select.search">
                                                 <div ng-bind-html="item.name | highlight: $select.search"></div>
                                             </ui-select-choices>
                                         </ui-select>
-                                    </div>
+                                    </div> -->
                                 </span>
                                 <span style="float:right">
                                     <div class="btn-group" role="group" aria-label="Buttons">
@@ -1206,7 +1211,7 @@
                                     <div><label><i class="fa-solid fa-clapperboard"></i> File</label></div>
                                     <div class="form-group">
                                         <label>Input:</label>
-                                        <input type="text" readonly="true" class="form-control" ng-model="commonData.videoStreams.gamechangerRtspUrl" placeholder="Rtsp Camera Stream URL" />
+                                        <input type="text" readonly="true" class="form-control" ng-model="commonData.videoStreams.fileRtspUrl" placeholder="Rtsp Camera Stream URL" />
                                     </div>
                                     
                                     <div class="form-group-btn">
