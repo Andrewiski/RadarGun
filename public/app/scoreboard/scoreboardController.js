@@ -904,6 +904,8 @@
             }
             $scope.teamSelected = function () {
                 if ($scope.commonData.selectedTeam && $scope.commonData.selectedTeam.id === '00000000-0000-0000-0000-000000000000') {
+                //if ($scope.commonData.selectedTeamId && $scope.commonData.selectedTeamId === '00000000-0000-0000-0000-000000000000') {
+
                     //this is a new Team
                     $scope.commonData.selectedTeam = JSON.parse(JSON.stringify($scope.commonData.selectedTeam));
                     $scope.commonData.selectedTeam.id = radarMonitor.uuid();
