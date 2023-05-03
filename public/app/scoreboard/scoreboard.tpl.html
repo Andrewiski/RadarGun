@@ -1241,6 +1241,7 @@
                                         <label>fps: </label> <span ng-bind="commonData.videoStreamStats.file.file.info.fps"></span>
                                         <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.file.file.info.bitrate"></span>
                                         <label>speed: </label><span ng-bind="commonData.videoStreamStats.file.file.info.speed"></span>
+                                        <label>filename: </label><span ng-bind="commonData.videoStreamStats.file.file.filename"></span>
                                         <label ng-show="commonData.videoStreamStats.file.file.error !== null">error: </label><span ng-show="commonData.videoStreamStats.file.file.error !== null" ng-bind="commonData.videoStreamStats.file.file.error"></span>
                                     </div>
                                 </div>
@@ -1272,6 +1273,7 @@
                                     <label>fps: </label> <span ng-bind="commonData.videoStreamStats.youtube.info.fps"></span>
                                     <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.youtube.info.bitrate"></span>
                                     <label>speed: </label><span ng-bind="commonData.videoStreamStats.youtube.info.speed"></span>
+                                    <label>output: </label><span ng-bind="commonData.videoStreamStats.youtube.rtmpUrl"></span>
                                     <label ng-show="commonData.videoStreamStats.youtube.error !== null">error: </label><span ng-show="commonData.videoStreamStats.youtube.error !== null" ng-bind="commonData.videoStreamStats.youtube.error"></span>
                                 </div>
                                 <!--<div class="btn-group" role="group" aria-label="Buttons">
@@ -1305,6 +1307,7 @@
                                     <label>fps: </label> <span ng-bind="commonData.videoStreamStats.gamechanger.info.fps"></span>
                                     <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.bitrate"></span>
                                     <label>speed: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.speed"></span>
+                                    <label>output: </label><span ng-bind="commonData.videoStreamStats.gamechanger.rtmpUrl"></span>
                                     <label ng-show="commonData.videoStreamStats.gamechanger.error !== null">error: </label><span ng-show="commonData.videoStreamStats.gamechanger.error !== null" ng-bind="commonData.videoStreamStats.gamechanger.error"></span>
                                 </div>
                             </div>

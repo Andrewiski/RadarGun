@@ -243,6 +243,8 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
             command.kill();
         }
         commonData.streamStats.status = "connected"; 
+        commonData.streamStats.error = null;
+        commonData.streamStats.filename = self.options.outputFile;
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", "info", "file destination", self.options.outputFile)
         command = ffmpeg({ source: incomingTransStream });    

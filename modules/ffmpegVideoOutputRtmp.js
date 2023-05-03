@@ -259,6 +259,8 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
             command.kill();
         }
         commonData.streamStats.status = "connected"; 
+        commonData.streamStats.error = null;
+        commonData.streamStats.rtmpUrl = self.options.rtmpUrl;
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", "info", "RTMP destination", self.options.rtmpUrl)
         command = ffmpeg({ source: incomingTransStream });    
