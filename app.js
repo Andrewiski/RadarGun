@@ -124,7 +124,12 @@ var radarDatabase = new RadarDatabase(objOptions.radarDatabase, logUtilHelper, o
 var commonData = {
     game: null,
     currentRadarSpeedData: null,
-    radar: {log:[]}
+    radar: {log:[]},
+    videoStreamStats : {
+        youtube: null,
+        gamechanger: null,
+        file: null
+    }
 }
 
 var privateData = {
@@ -449,6 +454,7 @@ var videoStreamYoutubeStart = function (options) {
             privateData.videoStreams.youtube.on("streamStats", function(data){
                 //logUtilHelper.log(appLogName, "app", "debug",'videoStream', 'Youtube Stream Stats', data);
                 //sendToVideoStreamSubscribedSocketClients("videoStreams", { cmd: "youtubeStreamStats", data: data });
+                commonData.videoStreamStats.youtube = data;
                 sendToSubscribedSocketClients("videoStreams", "videoStreams", { cmd: "youtubeStreamStats", data: data });
             });
         }
@@ -507,7 +513,7 @@ var videoStreamGamechangerStart = function (options) {
             });
             privateData.videoStreams.gamechanger.on("streamStats", function(data){
                 //logUtilHelper.log(appLogName, "app", "debug",'videoStream', 'Gamechanger Stream Stats', data);
-                
+                commonData.videoStreamStats.gamechanger = data;
                 sendToSubscribedSocketClients("videoStreams", "videoStreams", { cmd: "gamechangerStreamStats", data: data });
             });
         }
@@ -568,6 +574,7 @@ var videoStreamFileStart = function (options) {
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamFileStart');  
                  
         if(privateData.videoStreams.file ===null){
+            
             privateData.videoStreams.file = new FfmpegVideoInput(objOptions.videoStreams.file, videoOverlayParser, logUtilHelper);
             privateData.videoStreams.file.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File was Stopped');
@@ -579,7 +586,9 @@ var videoStreamFileStart = function (options) {
             });
             privateData.videoStreams.file.on("streamStats", function(data){
                 //logUtilHelper.log(appLogName, "app", "debug",'videoStream', 'File Stream Stats', data);
+                commonData.videoStreamStats.file = data;
                 sendToSubscribedSocketClients("videoStreams", "videoStreams", { cmd: "fileStreamStats", data: data });
+                
             });
         }
         if (options){
@@ -601,7 +610,8 @@ var videoStreamFileStart = function (options) {
             }
             let fileName = getDateFileName() + "_" + objOptions.videoStreams.teamName.replace(/[^a-zA-Z0-9]/g,"_") + "_vs_" + objOptions.videoStreams.opponentTeamName.replace(/[^a-zA-Z0-9]/g,"_")  +  ".flv";
             fileName = path.join(objOptions.videoStreams.videosFolder, fileName);
-            objOptions.videoStreams.file.outputs.ffmpegVideoOutputFile.outputFile = fileName; 
+            //objOptions.videoStreams.file.outputs.ffmpegVideoOutputFile.outputFile = fileName; 
+            privateData.videoStreams.file.options.outputs.ffmpegVideoOutputFile.outputFile = fileName;
         }
         privateData.videoStreams.file.streamStart();
     }catch(ex){
@@ -896,6 +906,8 @@ io.on('connection', function(socket) {
         socket.emit('softwareConfig', radarStalker2.getSoftwareConfig());
         socket.emit('radarSpeedDataHistory', radarStalker2.getradarSpeedDataHistory());
         socket.emit('gameChanged', {cmd:"gameChanged", data:commonData.game});
+        socket.emit('videoStreams', {cmd:"allStreamStats", data:commonData.videoStreamStats});
+        
     }
     //send the current Battery Voltage
     socket.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());

@@ -171,6 +171,7 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
             case 'verbose':
                 if (stdOut.values.size) {
                     commonData.streamStats.info = stdOut.values;
+                    self.emit('streamStats', commonData.streamStats);
                     logUtilHelper.log(appLogName, "app", 'trace', self.options.rtmpUrl, 'parsed stdErr: ', stdOut);
                 } else {
                     logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stdErr: ', stdOut);

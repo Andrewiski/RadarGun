@@ -47,7 +47,10 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
                 status: "disconnected",
                 error: null,
                 metadata: {},
-            }
+            },
+            rtmp: null,
+            rtmp2: null,
+            file: null
         },
         shouldRestartStream: false,
         activeMp4Streams: []
@@ -177,7 +180,8 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
             case 'info':
             case 'verbose':
                 if (stdOut.values.size) {
-                    commonData.streamStats.info = stdOut.values;
+                    commonData.streamStats.incoming.info = stdOut.values;
+                    self.emit('streamStats', commonData.streamStats);
                     logUtilHelper.log(appLogName, "app", 'trace', 'parsed stdErr: ', stdOut);
                 } else {
                     logUtilHelper.log(appLogName, "app", 'debug', 'parsed stdErr: ', stdOut);
@@ -193,8 +197,8 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
 
     var commandError = function (err, stdout, stderr) {
         logUtilHelper.log(appLogName, "app", 'error', 'an error happened: ' + err.message, err); //, stdout, stderr);
-        commonData.streamStats.status = "disconnected";
-        commonData.streamStats.error = err;
+        commonData.streamStats.incoming.status = "disconnected";
+        commonData.streamStats.incoming.error = err;
         //commonData.streamStats.stdout = stdout;
         //commonData.streamStats.stderr = stderr;
         self.emit('streamStats', commonData.streamStats);
@@ -207,8 +211,8 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
 
     var commandProgress = function (progress) {
 
-        if (commonData.streamStats.status === "disconnected") {
-            commonData.streamStats.status = "connected";
+        if (commonData.streamStats.incoming.status === "disconnected") {
+            commonData.streamStats.incoming.status = "connected";
             self.emit('streamStats', commonData.streamStats);
         
         }
@@ -216,8 +220,8 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
     };
 
     var commandEnd = function (result) {
-        commonData.streamStats.status = "disconnected";
-        commonData.streamStats.error = "commandEnd Called";
+        commonData.streamStats.incoming.status = "disconnected";
+        commonData.streamStats.incoming.error = "commandEnd Called";
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", 'error', 'Source Stream Closed');
         if(commonData.shouldRestartStream === true){
@@ -300,7 +304,7 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
         if (!(command === null || command === undefined)) {
             command.kill();
         }
-        commonData.streamStats.status = "connected"; 
+        commonData.streamStats.incoming.status = "connected"; 
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", "debug", "Source Video URL", self.options.input, "Rtmp Video URL", self.options.rtmpUrl)
         if(self.options.input.startsWith("libcamera")){
@@ -397,11 +401,17 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
             if (ffmpegVideoOutputRtmp === null) {
                 ffmpegVideoOutputRtmp = new FfmpegVideoOutputRtmp(self.options.outputs.ffmpegVideoOutputRtmp, self.videoOverlayParser, logUtilHelper);
                 ffmpegVideoOutputRtmp.on("streamStart", function (data) {
+                    commonData.streamStats.rtmp = data;
                     self.emit("streamStartRtmp",{});
                 });
                 ffmpegVideoOutputRtmp.on("streamStop", function (data) {
                     self.emit("streamStopRtmp",{});
                 })
+                ffmpegVideoOutputRtmp.on("streamStats", function (data) {
+                    commonData.streamStats.rtmp = data;
+                    self.emit("streamStats", commonData.streamStats);
+                })
+                
             }
             ffmpegVideoOutputRtmp.streamStart(incomingTransStream, throwError);
         }
@@ -416,12 +426,16 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
                 
             if (ffmpegVideoOutputRtmp2 === null) {
                 ffmpegVideoOutputRtmp2 = new FfmpegVideoOutputRtmp(self.options.outputs.ffmpegVideoOutputRtmp2, self.videoOverlayParser, logUtilHelper);
-                ffmpegVideoOutputRtmp.on("streamStart", function (data) {
+                ffmpegVideoOutputRtmp2.on("streamStart", function (data) {
                     self.emit("streamStartRtmp2",{});
                 });
-                ffmpegVideoOutputRtmp.on("streamStop", function (data) {
+                ffmpegVideoOutputRtmp2.on("streamStop", function (data) {
                     self.emit("streamStopRtmp2",{});
                 });
+                ffmpegVideoOutputRtmp2.on("streamStats", function (data) {
+                    commonData.streamStats.rtmp2 = data;
+                    self.emit("streamStats", commonData.streamStats);
+                })
             }
             ffmpegVideoOutputRtmp2.streamStart(incomingTransStream, throwError);
         }
@@ -442,6 +456,11 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
                 ffmpegVideoOutputFile.on("streamStop", function (data) {
                     self.emit("streamStopFile",{});
                 });
+                ffmpegVideoOutputFile.on("streamStats", function (data) {
+                    commonData.streamStats.file = data;
+                    self.emit("streamStats", commonData.streamStats);
+                })
+                
             }
             ffmpegVideoOutputFile.streamStart(incomingTransStream, throwError);
         }

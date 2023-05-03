@@ -1380,6 +1380,11 @@
                     case "updateSettings":
                         updateVideoStreamSettings(message.data);
                         break;
+                    case "allStreamStats":
+                        //$.extend($scope.commonData.videoStreamStats.youtube, message.data);
+                        $scope.commonData.videoStreamStats = message.data;
+                        $scope.$apply();
+                        break;    
                     case "youtubeStreamStats":
                         //$.extend($scope.commonData.videoStreamStats.youtube, message.data);
                         $scope.commonData.videoStreamStats.youtube = message.data;
@@ -1387,9 +1392,11 @@
                         break;
                     case "gamechangerStreamStats":
                         $scope.commonData.videoStreamStats.gamechanger = message.data;
+                        $scope.$apply();
                         break;
                     case "fileStreamStats":
                         $scope.commonData.videoStreamStats.file = message.data;
+                        $scope.$apply();
                         break;
                 }
                 //$scope.$apply();

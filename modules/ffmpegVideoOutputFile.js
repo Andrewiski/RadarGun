@@ -170,6 +170,7 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
             case 'verbose':
                 if (stdOut.values.size) {
                     commonData.streamStats.info = stdOut.values;
+                    self.emit('streamStats', commonData.streamStats);
                     logUtilHelper.log(appLogName, "app", 'trace', 'parsed stdErr: ', stdOut);
                 } else {
                     logUtilHelper.log(appLogName, "app", 'debug', 'parsed stdErr: ', stdOut);
@@ -191,7 +192,7 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
         commonData.streamStats.stderr = stderr;
         self.emit('streamStats', commonData.streamStats);
         if (err && err.message && err.message.startsWith('ffmpeg exited with code') === true) {
-            setTimeout(restartStream, 30000);
+            //setTimeout(restartStream, 30000);
         }
     };
 
