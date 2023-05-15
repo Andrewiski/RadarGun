@@ -22,7 +22,7 @@ function FFplay(folder, file, opts, logUtilHelper) {
 
 	var filePath = path.join(folder, file);
 	// Get custom options or fallback to defaults
-	opts = opts || ['-nodisp', '-autoexit'];
+	opts = opts || ['-hide_banner', '-nodisp', '-autoexit'];
 	opts.unshift(filePath);
 
 	logUtilHelper.log(appLogName, "app", "debug", "playing file", filePath);

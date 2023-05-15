@@ -897,11 +897,28 @@ io.on('connection', function(socket) {
         logUtilHelper.log(appLogName, "socketio", "debug", 'audio:' + ', message:' + message + ', client id:' + socket.id);
         try {
             switch (message.cmd) {
+                case "audioFilePlayFullSongPlaylist":
+                    
+                    let fileStream = fs.createWriteStream(path.join(fullSongAudioDirectory,"playlist.txt"),{flags:"w", encoding:"utf-8", autoClose:true, start:0})        
+                    for(var i=0; i<message.data.audioFiles.length; i++){
+                        let data = "file '" + message.data.audioFiles[i]  + "'\n";
+                        fileStream.write(data);
+                    }
+                    fileStream.end();
+                    fileStream.close();
+                        
+                    if(message.data.loop === true){
+                        //-safe 0 -autoexit -hide_banner -nodisp -f concat  -i data\audiofiles\fullsongs\playlist.txt
+                        audioFilePlay(fullSongAudioDirectory, {fileName: "playlist.txt"}, ['-hide_banner', '-nodisp', "-f", "concat", "-safe", "0", "-loop", "0" ]);
+                    }else{
+                        audioFilePlay(fullSongAudioDirectory, {fileName: "playlist.txt"}, ['-hide_banner', '-nodisp', "-f", "concat", "-safe", "0", '-autoexit']);
+                    }
+                    break;
                 case "audioFilePlayFullSong":
-                    audioFilePlay(fullSongAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5']);
+                    audioFilePlay(fullSongAudioDirectory, message.data.audioFile, ['-hide_banner', '-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5']);
                     break;
                 case "audioFilePlayWalkup":
-                    audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5', "-t", "15"])
+                    audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-hide_banner', '-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5', "-t", "15"])
                     break;
                 case "audioFileStop":
                     audioFileStop();

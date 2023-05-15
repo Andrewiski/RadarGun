@@ -967,6 +967,37 @@
         //    }
 
         
+            var shuffle = function (array) {
+                let currentIndex = array.length,  randomIndex;
+            
+                // While there remain elements to shuffle.
+                while (currentIndex != 0) {
+            
+                // Pick a remaining element.
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+            
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+                }
+            
+                return array;
+            }
+
+            $scope.audioFilePlayFullSongPlaylist = function () {
+                let audioFiles = [];
+                $("input[name=playlistFullSong]:checked").each(function () {
+                    audioFiles.push($(this).val());
+                });
+
+                if(audioFiles.length > 0 && true) {
+                    shuffle(audioFiles);
+                    
+                }
+                radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayFullSongPlaylist", data: { audioFiles: audioFiles } });
+            }
+
 
             $scope.audioFilePlayFullSong = function (audioFile) {
                 radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayFullSong", data: { audioFile: audioFile } });
