@@ -346,13 +346,13 @@ const RadarStalker2 = function (options, logUtilHelper){
                         foundone = true;
                         mybuff = getRadarPacket(radarConfigProperty.id, 0, new Buffer.alloc(1));  //04/24/2022 new Buffer([0])); // new Buffer.alloc(1));
                         radarSerialPort.write(mybuff, function(err) {
-                            if (err === undefined){
-                                configRequestPending = true;
-                                logUtilHelper.log(appLogName, "app", "debug", 'request Radar Config ' + key);
-                            }else{
+                            if (err){
                                 data.success = false;
                                 data.error = err;
                                 logUtilHelper.log(appLogName, "app", "error", 'Serial Port Write Error ' + err);
+                            }else{
+                                configRequestPending = true;
+                                logUtilHelper.log(appLogName, "app", "debug", 'request Radar Config ' + key);
                             }
                         });
                         break;
@@ -507,16 +507,16 @@ const RadarStalker2 = function (options, logUtilHelper){
             }
             mybuff = getRadarPacket(radarConfigProperty.id, 128, myConfigVal);
             radarSerialPort.write(mybuff, function (err) {
-                if (err === undefined) {
+                if (err) {
+                    data.success = false;
+                    data.error = err;
+                    logUtilHelper.log(appLogName, "app", "error", 'Serial Port Write Error ' + err);
+                } else {
                     radarSerialPort.drain(function () {
                         data.success = true;
                         data.error = '';
                         self.emit('radarCommand', data);
                     });
-                } else {
-                    data.success = false;
-                    data.error = err;
-                    logUtilHelper.log(appLogName, "app", "error", 'Serial Port Write Error ' + err);
                 }
             });
         }
@@ -812,10 +812,11 @@ const RadarStalker2 = function (options, logUtilHelper){
         } else {
             self.emit('radarTimeout', { lastSpeedDataTimestamp: commonData.lastSpeedDataTimestamp });
             radarSerialPort.write(getRadarPacket(81, 0, new Buffer.alloc(1)), function (err) {
-                if (err === undefined) {
-                    logUtilHelper.log(appLogName, "app", "debug", 'request Radar Software Version Keep Alive');
+                if (err) {
+                    logUtilHelper.log(appLogName, "app", "error", 'Serial Port Write Error Software Version Keep Alive ' + err);
                 } else {
-                    logUtilHelper.log(appLogName, "app", "error", 'Serial Port Write Error Software Version Keep Alive' + err);
+                    logUtilHelper.log(appLogName, "app", "debug", 'request Radar Software Version Keep Alive');
+                    
                 }
             });
         }
