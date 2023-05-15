@@ -23,6 +23,7 @@ const FfmpegVideoInput = require("./modules/ffmpegVideoInput.js");
 const VideoOverlayParser = require("./modules/videoOverlayParser.js");
 const FFplay = require('./modules/ffplay.js');
 const { v4: uuidv4 } = require('uuid');
+const common = require('mongodb/lib/bulk/common');
 
 var configFileOptions = {
     "configDirectory": "config",
@@ -61,10 +62,20 @@ var objOptions = configHandler.config;
 console.log("Data Directory is " + objOptions.dataDirectory);
 console.log("Log Directory is " + objOptions.logDirectory);
 
+
+var logUnfilteredEventHandler = function(logdata){
+    //This gets called on every log event even if AppLogLevels specificaly stop it so webBrowsers clients can view trace events
+    //console.log("logUnfilteredEventHandler", logdata);
+    if(sendToSubscribedSocketClients){
+        sendToSubscribedSocketClients("serverLogs", "liveLog", logdata);
+    }
+}
+
+
 let logUtilHelper = new LogUtilHelper({
     appLogLevels: objOptions.appLogLevels,
     logEventHandler: null,
-    logUnfilteredEventHandler: null,
+    logUnfilteredEventHandler: logUnfilteredEventHandler,
     logFolder: objOptions.logDirectory,
     logName: appLogName,
     debugUtilEnabled: (process.env.DEBUG ? true : undefined) || false,
@@ -129,6 +140,10 @@ var commonData = {
         youtube: null,
         gamechanger: null,
         file: null
+    },
+    practiceMode: {
+        pitcher: null,
+        batter: null
     }
 }
 
@@ -301,6 +316,80 @@ routes.get('/data/audioFiles/fullSongs', function (req, res) {
     })    
 });
 
+routes.get('/data/audioFiles/fullSongs/:filename', (req, res) => {
+    const filePath = `./data/audioFiles/fullSongs/${req.params.filename}`;
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    // Set the content-type header to indicate that this is an audio file
+    res.setHeader('Content-Type', 'audio/mp4');
+
+    // If a range header was provided, only send the requested portion of the file
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] 
+        ? parseInt(parts[1], 10)
+        : fileSize-1;
+      const chunksize = (end-start)+1;
+      const file = fs.createReadStream(filePath, {start, end});
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'audio/mp4',
+      };
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      // If no range header was provided, send the entire file
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'audio/mp4',
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(filePath).pipe(res);
+    }
+  });
+
+  routes.get('/data/audioFiles/walkup/:filename', (req, res) => {
+    const filePath = `./data/audioFiles/walkup/${req.params.filename}`;
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    // Set the content-type header to indicate that this is an audio file
+    res.setHeader('Content-Type', 'audio/mp4');
+
+    // If a range header was provided, only send the requested portion of the file
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] 
+        ? parseInt(parts[1], 10)
+        : fileSize-1;
+      const chunksize = (end-start)+1;
+      const file = fs.createReadStream(filePath, {start, end});
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'audio/mp4',
+      };
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      // If no range header was provided, send the entire file
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'audio/mp4',
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(filePath).pipe(res);
+    }
+  });
+
 routes.get('/data/videoFiles', function (req, res) {
     let videoFiles = [];
     fs.readdir(videoFileDirectory, function (err, files) {
@@ -365,6 +454,15 @@ routes.get('/data/settings/videostreams', function (req, res) {
     }
     res.json(response);
 });
+
+routes.get("/data/appLogLevels", function (req, res) {
+    res.json(logUtilHelper.options.appLogLevels);
+});
+
+routes.get("/data/serverLogs", function (req, res) {
+    res.json(logUtilHelper.memoryData.logs);
+});
+
 
 
 app.use('/', routes);
@@ -561,7 +659,7 @@ var getDateFileName = function () {
         month = "0" + month;
     }
     if (hour.length == 1){
-        hour = "0" + Hour;
+        hour = "0" + hour;
     }
     if (minute.length == 1){
         minute = "0" + minute;
@@ -633,17 +731,21 @@ var videoStreamFileStop = function () {
 
 var io = require('socket.io')(server, {allowEIO3: true});
 
-var subscribeToSocketClient = function (socket, type) {
+var subscribeToSocketClient = function (socket, type, data) {
     if(privateData.subscribedSocketIOClients[type] === undefined){
         privateData.subscribedSocketIOClients[type] = {};
     }
     if(privateData.subscribedSocketIOClients[type][socket.id] === undefined){
         privateData.subscribedSocketIOClients[type][socket.id] = {
             socket:socket,
-            timestamp: new Date()
+            timestamp: new Date(),
+            data: data
         };
     }else{
         privateData.subscribedSocketIOClients[type][socket.id].timestamp = new Date();
+        if(data){
+            privateData.subscribedSocketIOClients[type][socket.id].data = data;
+        }
     }
 }
 
@@ -668,22 +770,39 @@ var sendToSubscribedSocketClients = function(type, cmd, message){
             delete privateData.subscribedSocketIOClients[type][socketId];
         }else{
             if (client && client.socket && client.socket.connected){
-                client.socket.emit(cmd, message);
+                switch(type){
+                    case "serverLogs":
+                        if(cmd === "liveLog"){
+                            if(client.data && client.data.appLogLevels ){
+                                if(logUtilHelper.shouldLogAppLogLevels(client.data.appLogLevels, message.appName, message.appSubname, message.logLevel)===true){
+                                    client.socket.emit('serverLogs', {cmd: "liveLog", data: message});
+                                }
+                            }
+                        }else{
+                            client.socket.emit(cmd, message);
+                        }
+                        break;
+                    default:
+                        client.socket.emit(cmd, message);
+                }
+                
             }
         }
     }
 }
 
-var sendToSocketClients = function (cmd, message, includeArduino){
+var sendToSocketClients = function (cmd, message, includeArduino, excludeSocketId){
     if (io) {
         if (includeArduino===true){
             io.emit(cmd, message);
         }else{
             const sockets = io.fetchSockets().then(sockets => {
                 sockets.forEach(socket => {
-                    if(socket.client.request.headers["origin"] !== "ArduinoSocketIo"){
-                        socket.emit(cmd, message);
-                    }
+                    if(excludeSocketId !== socket.id){
+                        if(socket.client.request.headers["origin"] !== "ArduinoSocketIo"){
+                            socket.emit(cmd, message);
+                        }
+                    }   
                 })
             })
         }
@@ -694,15 +813,15 @@ io.on('connection', function(socket) {
     //logUtilHelper.log(appLogName, "socketio", "info", "socket.io client Connection");
     logUtilHelper.logSocketConnection (appLogName, "socketio", "info",  socket, "socket.io client Connection" );
 
-    socket.on('serverSubscribe', function(data) {
-        logUtilHelper.log(appLogName, "socketio", "debug",'serverSubscribe', "action:" + data.action, "type:" + data.type, 'client id:' + socket.id);
-        switch(data.action){
+    socket.on('serverSubscribe', function(message) {
+        logUtilHelper.log(appLogName, "socketio", "debug",'serverSubscribe', "cmd:" + message.cmd, "type:" + message.type, 'client id:' + socket.id);
+        switch(message.cmd){
             case "resubscribe":
             case "subscribe":
-                subscribeToSocketClient(socket, data.type);
+                subscribeToSocketClient(socket, message.type, message.data);
                 break;
             case "unsubscribe":
-                unsubscribeToSocketClient(socket, data.type);
+                unsubscribeToSocketClient(socket, message.type);
                 break;
         }
     })
@@ -715,6 +834,24 @@ io.on('connection', function(socket) {
         logUtilHelper.log(appLogName, "socketio", "debug",'radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
         radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
     });
+
+
+    socket.on('practiceMode', function (message) {
+        logUtilHelper.log(appLogName, "socketio", "debug",'practiceMode:' + message.cmd + ', client id:' + socket.id);
+        switch (message.cmd) {
+            case "pitcher":
+                commonData.practiceMode.pitcher = message.data.pitcher;
+                sendToSocketClients("practiceMode", { cmd: "pitcher", data: message.data }, true, socket.id); 
+                break;
+            case "batter":
+                commonData.practiceMode.batter = message.data.batter;
+                sendToSocketClients("practiceMode", { cmd: "batter", data: message.data }, true, socket.id); 
+                break;
+            
+        }
+    });
+
+
     socket.on('videoStream', function (message) {
         logUtilHelper.log(appLogName, "socketio", "debug",'videoStream:' + message.cmd + ', client id:' + socket.id);
         switch (message.cmd) {
@@ -764,7 +901,7 @@ io.on('connection', function(socket) {
                     audioFilePlay(fullSongAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5']);
                     break;
                 case "audioFilePlayWalkup":
-                    audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5'])
+                    audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5', "-t", "15"])
                     break;
                 case "audioFileStop":
                     audioFileStop();
@@ -849,7 +986,7 @@ io.on('connection', function(socket) {
                     commonData.game.batter = message.data.batter;
                 }
                 commonData.gameIsDirty = true;
-                sendToSocketClients("gameChanged", { cmd: "gameChanged", data: message.data });      //use io to send it to everyone
+                sendToSocketClients("gameChanged", { cmd: "gameChanged", data: message.data }, false, socket.id);      //use io to send it to everyone
                 updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData})
                 
                 break;
@@ -895,6 +1032,19 @@ io.on('connection', function(socket) {
             case "getAppLogLevels":
                socket.emit("serverLogs", {cmd:message.cmd, data: logUtilHelper.getLogLevelAppLogLevels} );
                break;
+            case "setAppLogLevels":
+                if(privateData.subscribedSocketIOClients.serverLogs === undefined){
+                    privateData.subscribedSocketIOClients.serverLogs = {};
+                }
+                if(privateData.subscribedSocketIOClients.serverLogs[socket.id] !== undefined){
+                    if(privateData.subscribedSocketIOClients.serverLogs[socket.id].data === undefined){
+                        privateData.subscribedSocketIOClients.serverLogs[socket.id].data = {};
+                    }
+                    privateData.subscribedSocketIOClients.serverLogs[socket.id].data.appLogLevels =  message.data.appLogLevels;
+                }else{
+                    privateData.subscribedSocketIOClients.serverLogs[socket.id] = {socket: socket, timestamp: new Date(), data: message.data};
+                }
+                break;
         }
         
         
@@ -918,14 +1068,21 @@ io.on('connection', function(socket) {
 
 radarStalker2.on('radarSpeed', function (data) {
     if (commonData.game) {
-        data.pitcher = commonData.game.pitcher;
-        data.batter = commonData.game.batter;
+        data.pitcher = commonData.game.pitcher.player;
+        data.batter = commonData.game.batter.player;
         if (commonData.game.log === undefined) {
             commonData.game.log = [];
         }
         commonData.game.log.push(JSON.parse(JSON.stringify(data)));
         commonData.gameIsDirty = true;
-    }   
+    }else if(commonData.practiceMode){
+        if(commonData.practiceMode.pitcher){
+            data.pitcher = commonData.practiceMode.pitcher;
+        }
+        if(commonData.practiceMode.batter){
+            data.batter = commonData.practiceMode.batter;
+        }
+    }  
     commonData.radar.log.push(JSON.parse(JSON.stringify(data)));
     if(commonData.radar.log.length>objOptions.maxRadarLogLength){
         commonData.radar.log.shift()

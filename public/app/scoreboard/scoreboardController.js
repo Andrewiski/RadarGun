@@ -87,7 +87,6 @@
                walkupFiles: null,
                fullSongFiles: null,
                videoFiles: null,
-               serverLogs: [],
                isGameAdmin: false,
                isGameSelect: false,
                isGameSelected: false,
@@ -104,7 +103,12 @@
                radarSpeedDataHistory: [],
                showRadarConfig : true,
                editRadarConfig: false,
-               serverLogsSubscribe: {timer:null,sockets:[]},
+               serverLogsSubscribe: {timer:null,appLogLevels:null},
+               practiceMode: {
+                selectedTeam: null,
+                selectedPitcher: null,
+                selectedBatter: null
+               },
                radarSpeedData: {
                    id: 0,
                    time: new Date(),
@@ -225,8 +229,42 @@
                 then(function (response) {
                     $scope.commonData.videoFiles = response.data;
                 });
-            }
+        }
         
+        var bindControls = function () {
+
+            $("select.appLogName").on("change", function (evt) {
+                var $appLogName = $(evt.target);
+                var $appLogSubname = $appLogName.parent().find('select.appLogSubname');
+                $appLogSubname.empty();
+                $.each($scope.commonData.serverLogsSubscribe.appLogLevels[$appLogName.val()], function (appLogSubnameIndex, appLogSubname) {
+                    $appLogSubname.append($('<option>', {
+                        value: appLogSubnameIndex,
+                        text: appLogSubnameIndex
+                    }));
+
+                })
+                $appLogSubname.trigger("change");
+                //onAppLogSubnameChange({ target: $appLogSubname})
+            });
+            $("select.appLogSubname").on("change", function (evt) {
+                var $appLogSubname = $(evt.target);
+                var $appLogName = $appLogSubname.parent().find('select.appLogName');
+                var $appLogLevelName = $appLogSubname.parent().find('select.appLogLevelName');
+                $appLogLevelName.val($scope.commonData.serverLogsSubscribe.appLogLevels[$appLogName.val()][$appLogSubname.val()]);
+            });
+
+            $("select.appLogLevelName").on("change", function (evt) {
+                let $logLevelName = $(evt.target);
+                let appLogName = $logLevelName.parent().find('select.appLogName').val();
+                let appLogSubname = $logLevelName.parent().find("select.appLogSubname").val();
+                let logLevelName = $logLevelName.val();
+                if($scope.commonData.serverLogsSubscribe.appLogLevels[appLogName][appLogSubname] !== logLevelName){
+                    $scope.commonData.serverLogsSubscribe.appLogLevels[appLogName][appLogSubname] = logLevelName;
+                    radarMonitor.sendServerCommand("serverLogs", { "cmd": "setAppLogLevels", "data": {"appLogLevels": $scope.commonData.serverLogsSubscribe.appLogLevels} });
+                }
+            });
+        }
 
         var initData = function () {
             refreshTeams();
@@ -275,17 +313,19 @@
         var resubscribeServerEvents = function () {
             console.log("resubscribeServerLogs", serverSubscribe.type);
             if (serverSubscribe.timerID && serverSubscribe.type) {
-                radarMonitor.sendServerCommand("serverSubscribe", { "type": serverSubscribe.type, "action": "resubscribe" });
+                if (radarMonitor.socket.connected){
+                    radarMonitor.sendServerCommand("serverSubscribe", { "type": serverSubscribe.type, "cmd": "resubscribe" });
+                }
                 serverSubscribe.timerID = window.setTimeout(resubscribeServerEvents, 1 * 60 * 1000);
             }
         }
     
-        var subscribeServerEvents = function (type) {
+        var subscribeServerEvents = function (type, data) {
             console.log("subscribeServerEvent", type);
             if (serverSubscribe.timerID) {
                 unsubscribeServerEvents();
             }
-            radarMonitor.sendServerCommand("serverSubscribe", {"type": type, "action": "subscribe"});
+            radarMonitor.sendServerCommand("serverSubscribe", {"type": type, "cmd": "subscribe", data: data});
             serverSubscribe.type = type;
             serverSubscribe.timerID = window.setTimeout(resubscribeServerEvents, 1 * 60 * 1000 ); 
         }
@@ -297,8 +337,199 @@
                 serverSubscribe.timerID = null;
             }
             
-            radarMonitor.sendServerCommand("serverSubscribe", {"type": type, "action": "unsubscribe"});
+            radarMonitor.sendServerCommand("serverSubscribe", {"type": type, "cmd": "unsubscribe"});
         }
+
+        var getAppLogLevels = function(){
+            return new Promise(function(resolve, reject) {
+               
+                $.ajax({
+                    url: "/data/appLogLevels",
+                    type: "GET"
+                }).then(
+                    function(data){
+                        console.log("success", "getLogLevels", data);
+                        $scope.commonData.serverLogsSubscribe.appLogLevels = data;
+                        resolve(data);
+                    },
+                    function(ex){
+                        console.error("error", "getLogLevels", ex);
+                        reject(ex);
+                    }
+                );
+               
+            });
+        };
+        var getServerLogs = function(){
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: "/data/serverLogs",
+                    type: "GET"
+                }).then(
+                    function(data){
+                        console.log("success", "getLogs", data);
+                        resolve(data);
+                    },
+                    function(ex){
+                        console.error("error", "getLogs", ex);
+                        reject(ex);
+                    }
+                );
+            });
+        };
+        //var $logsContainer = $('.serverLogs');
+        var updateServerLogs = function(logs){
+            try{
+                if(logs && logs.length > 0){
+                    $('.serverLogs').empty();
+                    $.each(logs, function(index, log){
+                        addLogRow(log, $('.serverLogs'), false);
+                    });
+                }
+            }catch(ex){
+                console.error("error", "updateLogs", ex);
+            }
+        };
+
+        var isObject = function (a) {
+            return (!!a) && (a.constructor === Object);
+        };
+        var $logRowTemplate = $('.templates').find('.logTemplate').find('.logRow');
+        var addLogRow = function (log, $logContainer, doFade) {
+            try {
+                let $logRow = $logRowTemplate.clone();
+                let timestamp = moment(log.timestamp)
+                //$streamerLogRow.find('.logTs').html(timestamp.format('L') + '&nbsp;' + timestamp.format('hh:mm:ss.SSS') + "&nbsp" + timestamp.format('A'));
+                $logRow.find('.logTs').text(moment(log.timestamp).format('YYYY-MM-DD HH:mm:ss.SSS'));
+
+                $logRow.find('.logAppName').text(log.appName);
+                $logRow.find('.logAppSubname').text(log.appSubname);
+                $logRow.find('.logLevel').text(log.logLevel);
+                //$streamerLogRow.find('.logTs').text(moment(log.timestamp).format('YYYY-MM-DD HH:mm:ss.SSS') );
+                let logLevelClass = "";
+                switch (log.logLevel) {
+                    case 'error':
+                    case 'panic':
+                    case 'fatal':
+                        logLevelClass = 'danger';
+                        break;
+                    case 'warning':
+                        logLevelClass = 'warning';
+                        break;
+                    case 'info':
+                            logLevelClass = 'success';
+                            break;
+                    case 'debug':
+                        logLevelClass = 'info';
+                        break;
+                    case 'trace':
+                    case 'verbose':
+                        break;
+                }
+                if(logLevelClass!== ""){
+                    $logRow.addClass(logLevelClass);
+                }
+                $logRow.attr('title', log.logLevel);
+                let logMessage = '';
+                if (log.args) {
+                    $.each(log.args, function (index, item) {
+                        try {
+                            if (logMessage.length > 0) {
+                                logMessage = logMessage + ', ';
+                            }
+                            if (isObject(log.args[index])) {
+                                logMessage = logMessage + JSON.stringify(log.args[index]);
+                            } else {
+                                if (log.args[index] === undefined) {
+                                    logMessage = logMessage + 'undefined';
+                                } else if (log.args[index] === null) {
+                                    logMessage = logMessage + 'null';
+                                }
+                                else {
+                                    logMessage = logMessage + log.args[index].toString();
+                                }
+                            }
+                        } catch (ex) {
+                            console.log('error', 'Error addServerLog args', ex);
+                        }
+                    });
+                }
+                $logRow.find('.logMsg').html(logMessage);
+                
+                if(doFade){
+                    $logRow.hide();
+                    $logContainer.prepend($logRow);
+                    $logRow.fadeIn("slow", function () {
+
+                    });
+                }else{
+                    $logContainer.prepend($logRow);
+                    //$logRow.show();
+                }
+                if ($logContainer.length > 100) {
+                    if(doFade){
+                        $logContainer.last().fadeOut("slow", function () {
+                            $(this).remove();
+                        });
+                    }else{
+                        $logContainer.last().remove();
+                    }
+                }
+            } catch (ex) {
+                console.log('error', 'Error addLogRow', ex);
+            }
+        };
+
+        var updateAppLogNames = function (appLogLevels) {
+            try {
+                var $appLogName = $('select.appLogName');
+                $appLogName.empty();
+                $.each(appLogLevels, function (appLogNameIndex, appLogName) {
+                    $appLogName.append($('<option>', {
+                        value: appLogNameIndex,
+                        text: appLogNameIndex
+                    }));
+                })
+                $appLogName.trigger("change");
+                //onLogNameChange({ target: $appLogName });
+            } catch (ex) {
+                console.log('error', 'Error addStreamerLog', ex);
+            }
+        }
+
+        $("select.appLogName").on("change", function (evt) {
+            var $appLogName = $(evt.target);
+            var $appLogSubname = $appLogName.parent().find('select.appLogSubname');
+            $appLogSubname.empty();
+            $.each($scope.commonData.serverLogsSubscribe.appLogLevels[$appLogName.val()], function (appLogSubnameIndex, appLogSubname) {
+                $appLogSubname.append($('<option>', {
+                    value: appLogSubnameIndex,
+                    text: appLogSubnameIndex
+                }));
+
+            })
+            $appLogSubname.trigger("change");
+            //onAppLogSubnameChange({ target: $appLogSubname})
+        });
+        $("select.appLogSubname").on("change", function (evt) {
+            var $appLogSubname = $(evt.target);
+            var $appLogName = $appLogSubname.parent().find('select.appLogName');
+            var $appLogLevelName = $appLogSubname.parent().find('select.appLogLevelName');
+            $appLogLevelName.val($scope.commonData.serverLogsSubscribe.appLogLevels[$appLogName.val()][$appLogSubname.val()]);
+        });
+
+        $("select.appLogLevelName").on("change", function (evt) {
+
+            let $logLevelName = $(evt.target);
+            let appLogName = $logLevelName.parent().find('select.appLogName').val();
+            let appLogSubname = $logLevelName.parent().find("select.appLogSubname").val();
+            let logLevelName = $logLevelName.val();
+            $scope.commonData.serverLogsSubscribe.appLogLevels[appLogName][appLogSubname] = logLevelName;
+            commonData.socketIo.emit("serverLogs", {
+                "cmd": "setAppLogLevels", "data": {"appLogLevels": $scope.commonData.serverLogsSubscribe.appLogLevels}
+            });
+
+        });
 
 
            $scope.gameScore = function () {
@@ -397,15 +628,25 @@
                         break;
                     case "serverLogs":
                         console.log("tabLogsClick");
-                        subscribeServerEvents("serverLogs");
+                        if($scope.commonData.serverLogsSubscribe.appLogLevels === null){
+                            getAppLogLevels().then(
+                                function (response) {
+                                    $scope.commonData.serverLogsSubscribe.appLogLevels = response;
+                                    updateAppLogNames($scope.commonData.serverLogsSubscribe.appLogLevels);
+                                }
+                            );
+                        }
+                        getServerLogs().then(
+                            function (response) {
+                                updateServerLogs(response);
+                                subscribeServerEvents("serverLogs", {appLogLevels : $scope.commonData.serverLogsSubscribe.appLogLevels});
+                            }
+                        );
+                        
                         break;
                 }
                 $scope.commonData.lastTab = tabName;
             }
-
-           
-
-            
 
             $scope.videoStreamStart = function () {
                 radarMonitor.sendServerCommand("videoStream", { cmd: "start", data: $scope.commonData.videoStreams});
@@ -439,8 +680,6 @@
                 radarMonitor.sendServerCommand("videoStream", { cmd: "fileStop" });
             }
            
-
-
            $scope.batterChange = function () {
                
                let data = {};
@@ -727,6 +966,7 @@
         //        radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlay", data: { audioFile: audioFile } });
         //    }
 
+        
 
             $scope.audioFilePlayFullSong = function (audioFile) {
                 radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayFullSong", data: { audioFile: audioFile } });
@@ -735,6 +975,22 @@
            $scope.audioFilePlayWalkup = function (audioFile) {
                radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayWalkup", data: { audioFile: audioFile } });
            }
+
+           $scope.audioFilePreviewFullSong = function ($event, fileName) {
+                var filePath = '/data/audioFiles/fullSongs/' + fileName;
+                let $audioPreviewControls = $("#audioPreviewControls");
+                $($event.currentTarget).parent().find(".previewControl").append($audioPreviewControls);
+                $audioPreviewControls.attr("src", filePath);
+                $audioPreviewControls.get(0).play();
+            }
+
+            $scope.audioFilePreviewWalkup = function ($event, fileName) {
+                var filePath = '/data/audioFiles/walkup/' + fileName;
+                let $audioPreviewControls = $("#audioPreviewControls");
+                $($event.currentTarget).parent().find(".previewControl").append($audioPreviewControls);
+                $audioPreviewControls.attr("src", filePath);
+                $audioPreviewControls.get(0).play();
+            }
 
            $scope.audioFileStop = function () {
                radarMonitor.sendServerCommand("audio", { cmd: "audioFileStop", });
@@ -822,19 +1078,10 @@
            }
 
            $scope.guestTeamCancel = function () {
-
                $scope.commonData.isGuestTeamEdit = false;
-
-
            }
 
            
-
-           
-
-           $scope.getServerLogs = function() {
-            console.log("getServerLogs")
-           }
 
 
            // Begin Team Tab Functions
@@ -889,6 +1136,22 @@
             $scope.teamSelectCancel = function(){
                 $scope.commonData.isSelectTeam = false;
             }
+
+            $scope.practiceModePitcherSelected = function () {
+                radarMonitor.sendServerCommand("practiceMode", { "cmd": "pitcher", "data": {"pitcher": $scope.commonData.practiceMode.selectedPitcher} });
+            }
+            $scope.practiceModeBatterSelected = function () {
+                radarMonitor.sendServerCommand("practiceMode", { "cmd": "batter", "data": {"batter": $scope.commonData.practiceMode.selectedBatter} });
+            }
+            $scope.practiceModePitcherClear = function () {
+                $scope.commonData.practiceMode.selectedPitcher = null;
+                $scope.practiceModePitcherSelected();
+            }
+            $scope.practiceModeBatterClear = function () {
+                $scope.commonData.practiceMode.selectedBatter = null;
+                $scope.practiceModeBatterSelected();
+            }
+
             $scope.teamSelected = function () {
                 if ($scope.commonData.selectedTeam && $scope.commonData.selectedTeam.id === '00000000-0000-0000-0000-000000000000') {
                 //if ($scope.commonData.selectedTeamId && $scope.commonData.selectedTeamId === '00000000-0000-0000-0000-000000000000') {
@@ -918,7 +1181,6 @@
                 $scope.commonData.isSelectTeam = true;
  
             }
-
 
             // End Team Tab Functions
            var findPitcher = function(lineup){
@@ -1096,12 +1358,9 @@
                $scope.commonData.selectedGame.home.lineup.push(angular.copy($scope.commonData.emptyLineup) )
            }
 
-
            $scope.showConfig = function () {
                $scope.commonData.showConfig = !$scope.commonData.showConfig;
            }
-
-          
 
            $rootScope.$on('gameChanged', function (event, message) {
                // use the data accordingly
@@ -1204,18 +1463,49 @@
            });
 
 
-           $rootScope.$on('serverCommand', function (event, data) {
+           $rootScope.$on('practiceMode', function (event, message) {
+            // use the data accordingly
+                console.log('practiceMode detected');
+                switch(message.cmd){
+                    case "pitcher":
+                        $scope.commonData.pitcher = message.data.pitcher;
+                        break;
+                    case "batter":
+                        $scope.commonData.batter = message.data.batter;
+                        break;
+                }
+            });
+
+           $rootScope.$on('serverLogs', function (event, message) {
+            // use the data accordingly
+                console.log('serverLogs detected');
+                addLogRow(message.data, $('.serverLogs'), true);
+            });
+
+           $rootScope.$on('serverCommand', function (event, message) {
                // use the data accordingly
-               console.log('radarMonitor:reconnect detected');
-               $scope.commonData.isConnected = true;
+               console.log('radarMonitor:serverCommand detected');
                $scope.$apply();
            });
 
+            $rootScope.$on('radarMonitor:connect', function(event, message) {
+                // use the data accordingly
+                console.log('radarMonitor:connect detected');
+                $scope.commonData.isConnected = true;
+                $scope.$apply();
+            });
+
+            $rootScope.$on('radarMonitor:disconnect', function(event, data) {
+                // use the data accordingly
+                console.log('radarMonitor:reconnect detected');
+                $scope.commonData.isConnected = false;
+                $scope.$apply();
+            });
 
             $rootScope.$on('radarMonitor:reconnect', function(event, data) {
                 // use the data accordingly
                 console.log('radarMonitor:reconnect detected');
-                $scope.commonData.isConnected = true;
+                //$scope.commonData.isConnected = true;
                 $scope.$apply();
             });
 
@@ -1510,6 +1800,9 @@
             });
 
            initData();
+           $(function(){
+            bindControls();
+           });
           }
        ]);
 })();

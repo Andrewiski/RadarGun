@@ -36,13 +36,17 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
 
     var commonData = {
            streamStats: {
-            incoming: {
-                chunkCounter: 0,
-                chunkShow: 0,
-                status: "disconnected",
-                error: null,
-                metadata: {},
-            }
+            status: "disconnected",
+            info: null,
+            warning: null,
+            error: null,
+            commandError: null,
+            restarting: null,
+            metadata: {},
+            transChunkCounter: 0,
+            transChunkShow: 0,
+            chunkCounter: 0,
+            chunkShow: 0
         }
     };
 
@@ -163,34 +167,56 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
     };
 
     var commandStdError = function (stderr) {
+        if(stderr.startsWith('[') === true){
+            var stdOut = parseStdOutput(stderr);
 
-        var stdOut = parseStdOutput(stderr);
-
-        switch (stdOut.type) {
-            case 'info':
-            case 'verbose':
-                if (stdOut.values.size) {
-                    commonData.streamStats.info = stdOut.values;
-                    self.emit('streamStats', commonData.streamStats);
-                    logUtilHelper.log(appLogName, "app", 'trace', self.options.rtmpUrl, 'parsed stdErr: ', stdOut);
-                } else {
-                    logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stdErr: ', stdOut);
-                }
-            
-                break;
-            default:
-                logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stderr: ', stdOut);
+            switch (stdOut.type) {
+                case 'info':
+                case 'verbose':
+                    if (stdOut.values.size) {
+                        commonData.streamStats.info = stdOut.values;
+                        if (commonData.streamStats.status !== "connected") {
+                            commonData.streamStats.status = "connected";
+                        }
+                        self.emit('streamStats', commonData.streamStats);
+                        logUtilHelper.log(appLogName, "app", 'trace', self.options.rtmpUrl, 'parsed stdErr: ', stdOut);
+                    } else {
+                        logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stdErr: ', stdOut);
+                    }
+                
+                    break;
+                case 'warning':
+                    if(stdOut.value){
+                        commonData.streamStats.warning = stdOut.value;
+                        self.emit('streamStats', commonData.streamStats);
+                    }
+                    
+                    logUtilHelper.log(appLogName, "app", 'warning', self.options.rtmpUrl, 'parsed stderr:', stdOut);
+                    break;
+                case 'error':
+                    if(stdOut.value){
+                        commonData.streamStats.error = stdOut.value;
+                        self.emit('streamStats', commonData.streamStats);
+                    }
+                    logUtilHelper.log(appLogName, "app", 'error', self.options.rtmpUrl,  'parsed stderr:', stdOut);
+                    break;
+                default:
+                    logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stderr: ', stdOut);
+            }
+        }else{
+            logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'stderr: ', stdOut);
         }
-
     
     };
 
     var commandError = function (err, stdout, stderr) {
         logUtilHelper.log(appLogName, "app", 'error',  self.options.rtmpUrl, 'an error happened: ' + err.message, err, stdout, stderr);
-        commonData.streamStats.status = "disconnected";
-        commonData.streamStats.error = err;
-        commonData.streamStats.stdout = stdout;
-        commonData.streamStats.stderr = stderr;
+        commonData.streamStats.status = "errored";
+        if(err && err.message){
+            commonData.streamStats.commandError = "commandError: " + err.message;
+        }else{
+            commonData.streamStats.commandError = "commandError: " + err;
+        }
         self.emit('streamStats', commonData.streamStats);
         // if (err && err.message && err.message.startsWith('ffmpeg exited with code') === true) {
         //     setTimeout(restartStream, 30000);
@@ -198,35 +224,28 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
     };
 
     var commandProgress = function (progress) {
-
-        if (commonData.streamStats.status === "disconnected") {
+        if (commonData.streamStats.status !== "connected") {
             commonData.streamStats.status = "connected";
             self.emit('streamStats', commonData.streamStats);
-        
         }
-        //proc_count++;
     };
 
     var commandEnd = function (result) {
-        commonData.streamStats.status = "disconnected";
-        commonData.streamStats.error = "commandEnd Called";
+        commonData.streamStats.status = "ended";
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", 'error',  self.options.rtmpUrl, 'Source Stream Closed');
     };
 
-    
-
     var incomingTransStream = null;
-    var incomingTransStreamChunkCounter = 0;
-    var incomingTransStreamChunkShow = 0;
     incomingTransStream = new Stream.Transform({highWaterMark: 1638400});
     incomingTransStream._transform = function (chunk, encoding, done) {
         try {
-            if(incomingTransStreamChunkCounter >= incomingTransStreamChunkShow ){
-                logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, '[' + incomingTransStreamChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
-                incomingTransStreamChunkShow = incomingTransStreamChunkShow + 50;
+            if(commonData.streamStats.transChunkCounter >= commonData.streamStats.transChunkShow ){
+                logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, '[' + commonData.streamStats.transChunkCounter + '] transform stream chunk length: ' + chunk.length + ', highwater: ' + this.readableHighWaterMark);
+                commonData.streamStats.transChunkShow = commonData.streamStats.transChunkShow + 100;
+                self.emit('streamStats', commonData.streamStats);
             }
-            incomingTransStreamChunkCounter++;
+            commonData.streamStats.transChunkCounter++;
             this.push(chunk);
             return done();
         } catch (ex) {
@@ -234,40 +253,46 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
         }
     };
 
-    // // Start incomingMonitor Stream 
-    // // Read from the source stream, to keeps it alive and flowing
-    // var incomingMonitorStream = new Stream.Writable({});
-    // // Consume the stream
-    // incomingMonitorStream._write = (chunk, encoding, next) => {
-        
-    //     commonData.streamStats.incoming.chunkCounter++;
-    //     if (commonData.streamStats.incoming.chunkCounter >= commonData.streamStats.incoming.chunkShow) {
-    //         logUtilHelper.log(appLogName, "app", 'trace', "incomingMonitorStream", "chunks processed: " + commonData.streamStats.incoming.chunkCounter);
-    //         commonData.streamStats.incoming.chunkShow = commonData.streamStats.incoming.chunkShow + 50;
-    //         self.emit('streamStats', commonData.streamStats, false);
-    //     }
-        
-    //     next();
-    // };
+    // Start incomingMonitor Stream 
+    // Read from the source stream, to keeps it alive and flowing
+    var incomingMonitorStream = new Stream.Writable({});
+    // Consume the stream
+    incomingMonitorStream._write = (chunk, encoding, next) => {
+        commonData.streamStats.chunkCounter++;
+        if (commonData.streamStats.chunkCounter >= commonData.streamStats.chunkShow) {
+            logUtilHelper.log(appLogName, "app", 'trace', "incomingMonitorStream", "chunks processed: " + commonData.streamStats.chunkCounter);
+            commonData.streamStats.chunkShow = commonData.streamStats.chunkShow + 100;
+        }
+        next();
+    };
 
-    // incomingTransStream.pipe(incomingMonitorStream);
-
+    incomingTransStream.pipe(incomingMonitorStream);
 
     var startIncomingStream = function (sourceStream) {
-    
+        commonData.shouldRestartStream = true;
         if (!(command === null || command === undefined)) {
             command.kill();
         }
-        commonData.streamStats.status = "connected"; 
+        commonData.streamStats.status = "starting"; 
+        commonData.streamStats.info = null;
+        commonData.streamStats.warning = null;
         commonData.streamStats.error = null;
+        commonData.streamStats.commandError = null;
+        commonData.streamStats.restarting = null;
+        commonData.streamStats.chunkCounter = 0;
+        commonData.streamStats.chunkShow = 0;
+        commonData.streamStats.transChunkCounterCounter = 0;
+        commonData.streamStats.transChunkShow = 0;
         commonData.streamStats.rtmpUrl = self.options.rtmpUrl;
+        commonData.streamStats.rtmpUrl2 = self.options.rtmpUrl2;
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", "info", "RTMP destination", self.options.rtmpUrl)
         command = ffmpeg({ source: incomingTransStream });    
         //command = ffmpeg({ source: sourceStream });    
         command.inputOptions(self.options.inputOptions)
         
-        command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info            
+        command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info    
+        command.addOption('-hide_banner'); // hide the banner info        
         command.on('error', commandError)
         command.on('progress', commandProgress)
         command.on('stderr', commandStdError)
@@ -285,7 +310,7 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
             }
         }
         command.run();
-        
+        commonData.shouldRestartStream = true;
         logUtilHelper.log(appLogName, "app", "info", self.options.rtmpUrl, "ffmpeg Started");
     };
 
@@ -311,8 +336,7 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
         logUtilHelper.log(appLogName, "app", 'warning', self.options.rtmpUrl, 'streamKill command');
         try {
             sourceStream.unpipe(incomingTransStream);
-            commonData.streamStats.status = "disconnected";
-            commonData.streamStats.error = "commandEnd Called";
+            commonData.streamStats.status = "killed";
             if (!(command === null || command === undefined)) {
                 command.kill();
             }

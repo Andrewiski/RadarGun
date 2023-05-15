@@ -418,10 +418,10 @@
                                     <tbody>
                                         <tr ng-repeat="rsdItem in commonData.radarSpeedDataHistory">
                                             <td>{{rsdItem.time | date : 'M/d/yy hh:mm:ss'}}</td>
-                                            <td>#{{rsdItem.pitcher.player.jerseyNumber }} {{rsdItem.pitcher.player.firstName}} {{rsdItem.pitcher.player.lastName}}</td>
+                                            <td>#{{rsdItem.pitcher.jerseyNumber }} {{rsdItem.pitcher.firstName}} {{rsdItem.pitcher.lastName}}</td>
                                             <td>{{rsdItem.inMaxSpeed}}</td>
                                             <td>{{rsdItem.inMinSpeed}}</td>
-                                            <td>#{{rsdItem.batter.player.jerseyNumber }} {{rsdItem.batter.player.firstName}} {{rsdItem.batter.player.lastName}}</td>
+                                            <td>#{{rsdItem.batter.jerseyNumber }} {{rsdItem.batter.firstName}} {{rsdItem.batter.lastName}}</td>
                                             <td>{{rsdItem.outMaxSpeed}}</td>
                                             <td>{{rsdItem.outMinSpeed}}</td>
                                             <td>
@@ -917,21 +917,16 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <div>
-                                <span>
+                                <div style="display:inline-block">
                                     <div ng-show="commonData.isSelectTeam">
-                                        <select class="form-control" aria-label="Select Team" ng-model="commonData.selectedTeam" ng-change="teamSelected()" ng-options="item.name for item in commonData.teams track by item.id" >
-                                            
-                                        </select>
-                                    </div>
-                                    <!-- <div ng-show="commonData.isSelectTeam">
                                         <ui-select ng-model="commonData.selectedTeam" ng-change="teamSelected()" theme="bootstrap">
                                             <ui-select-match placeholder="Select or search a team in the list...">{{$select.selected.name}}</ui-select-match>
                                             <ui-select-choices repeat="item in commonData.teams | filter: $select.search">
                                                 <div ng-bind-html="item.name | highlight: $select.search"></div>
                                             </ui-select-choices>
                                         </ui-select>
-                                    </div> -->
-                                </span>
+                                    </div>
+                                </div>
                                 <span style="float:right">
                                     <div class="btn-group" role="group" aria-label="Buttons">
                                         <button type="button" class="btn btn-primary" ng-hide="commonData.isGameAdmin && (commonData.isTeamEdit == true || commonData.isSelectTeam == true) " ng-click="teamEdit()">Edit</button>
@@ -956,6 +951,9 @@
                                             <td><label class="control-label">#</label></td>
                                             <td><label class="control-label">First Name</label></td>
                                             <td><label class="control-label">Last Name</label></td>
+                                            <td><label class="control-label">Walkup</label></td>
+                                            <td><label class="control-label">Play</label></td>
+                                            <td><label class="control-label">Preview</label></td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -978,8 +976,19 @@
                                             <td>
                                                 <div class="form-control-sm">
                                                     <span ng-bind="player.walkupFile.fileName"></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-control-sm">
                                                     <button type="button" class="btn" ng-show="player.walkupFile !== undefined && player.walkupFile !== null" ng-click="audioFilePlayWalkup(player.walkupFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
                                                     <button type="button" class="btn" ng-show="player.walkupFile !== undefined && player.walkupFile !== null" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-control-sm">
+                                                    <button type="button" class="btn" ng-show="player.walkupFile !== undefined && player.walkupFile !== null" ng-click="audioFilePreviewWalkup($event, player.walkupFile.fileName)" data-toggle="tooltip" data-placement="bottom" title="Preview Walkup"><i class="fa fa-play"></i></button>
+                                                    <div class="previewControl">
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -1011,8 +1020,7 @@
                                             <td><label class="control-label">Walkup</label><button type="button" class="btn" ng-click="refreshWalkupFiles()"><i class="fa fa-refresh"></i></button></td>
 
                                             <td>&nbsp;</td>
-                                            <!--<td><label class="control-label">Fielding</label></td>
-                                <td><label class="control-label">Batting</label></td>-->
+                                            
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1077,7 +1085,8 @@
                                     <tr>
                                         <td><label class="control-label">Song</label></td>
                                         <td><label class="control-label">Length</label></td>
-                                        <td><label class="control-label">Action</label></td>
+                                        <td><label class="control-label">Play</label></td>
+                                        <td><label class="control-label">Preview</label></td>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1096,6 +1105,13 @@
                                             <div class="form-control-sm">
                                                 <button type="button" class="btn" ng-click="audioFilePlayWalkup(walkupFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
                                                 <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-control-sm">
+                                                <button type="button" class="btn" ng-click="audioFilePreviewWalkup($event, walkupFile.fileName)" data-toggle="tooltip" data-placement="bottom" title="Preview Walkup"><i class="fa fa-play"></i></button>
+                                                <div class="previewControl">
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -1123,7 +1139,8 @@
                                 <tr>
                                     <td><label class="control-label">Song</label></td>
                                     <td><label class="control-label">Length</label></td>
-                                    <td><label class="control-label">Action</label></td>
+                                    <td><label class="control-label">Play</label></td>
+                                    <td><label class="control-label">Preview</label></td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1140,8 +1157,15 @@
                                     </td>
                                     <td>
                                         <div class="form-control-sm">
-                                            <button type="button" class="btn" ng-click="audioFilePlayFullSong(fullSongFile)" data-toggle="tooltip" data-placement="bottom" title="Play Walkup"><i class="fa fa-play"></i></button>
+                                            <button type="button" class="btn" ng-click="audioFilePlayFullSong(fullSongFile)" data-toggle="tooltip" data-placement="bottom" title="Play FullSong"><i class="fa fa-play"></i></button>
                                             <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-control-sm">
+                                            <button type="button" class="btn" ng-click="audioFilePreviewFullSong($event, fullSongFile.fileName)" data-toggle="tooltip" data-placement="bottom" title="Preview FullSong"><i class="fa fa-play"></i></button>
+                                            <div class="previewControl">
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -1155,22 +1179,52 @@
                         <i class="fa fa-baseball-bat-ball"></i> Practice Mode
                     </uib-tab-heading>
                     <div>
-                        <div class="player" >
-                            <div>Name: {{commonData.player.lastName}}, {{commonData.player.firstName}} </div>
-                            <div class="btn-group" role="group" aria-label="Buttons">
-                                <button type="button" class="btn btn-secondary" ng-click="playerShowDone()">Done</button>
-                                <button type="button" class="btn btn-primary" ng-click="playerEdit()">Edit</button>
-                            </div>
+
+                        
+                        <div>
+                            <ui-select ng-model="commonData.practiceMode.selectedTeam" ng-change="practiceModeTeamSelected()" theme="bootstrap">
+                                <ui-select-match placeholder="Select or search a team in the list...">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item in commonData.teams | filter: $select.search">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        
+
+                        <div class="form-group" ng-show="commonData.practiceMode.selectedTeam !== null">
+                            <label class="control-label">Pitcher</label>
+                            <ui-select ng-model="commonData.practiceMode.selectedPitcher" ng-change="practiceModePitcherSelected()" theme="bootstrap">
+                                <ui-select-match placeholder="Select or search a pitcher in the list...">{{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
+                                <ui-select-choices repeat="player in commonData.practiceMode.selectedTeam.roster | filter: $select.search">
+                                    <div ng-bind-html="'#' + player.jerseyNumber + ' ' + player.firstName + ' ' + player.lastName | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <span class="input-group-btn">
+                                <button type="button" ng-click="practiceModePitcherClear()" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </span>
                         </div>
 
-                        <div class="playerEdit" >
-                            <div>First Name:<input style="width:45px" type="number" ng-model="commonData.player.firstName" /></div>
-                            <div>Last Name:<input style="width:45px" type="number" ng-model="commonData.player.lastName" /></div>
-                            <div class="btn-group" role="group" aria-label="Buttons">
-                                <button type="button" class="btn btn-secondary" ng-click="playerEditCancel()">Cancel</button>
-                                <button type="button" class="btn btn-primary" ng-click="playerEditSave()">Save</button>
-                            </div>
+                        
+                        <div ng-show="commonData.practiceMode.selectedTeam !== null">
+                            
+                            <label class="control-label">Batter</label>
+                            <ui-select ng-model="commonData.practiceMode.selectedBatter" ng-change="practiceModeBatterSelected()" theme="bootstrap">
+                                <ui-select-match placeholder="Select or search a batter in the list...">{{$select.selected.firstName}} {{$select.selected.lastName}}</ui-select-match>
+                                <ui-select-choices repeat="player in commonData.practiceMode.selectedTeam.roster | filter: $select.search">
+                                    <div ng-bind-html="'#' + player.jerseyNumber + ' ' + player.firstName + ' ' + player.lastName | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                            <span class="input-group-btn">
+                                <button type="button" ng-click="practiceModeBatterClear()" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </span>
+                            
                         </div>
+
+                        
                     </div>
                 </uib-tab>
                 
@@ -1219,30 +1273,60 @@
                                         <button class="btn btn-primary" ng-click="videoStreamFileStop()">Stop Stream</button>
                                     </div>
                                     
-                                    <div ng-show="commonData.videoStreamStats.file !== null && commonData.videoStreamStats.file.incoming !== null">
-                                        <label>Incoming:</label>
-                                        <span ng-class="{'text-success': commonData.videoStreamStats.file.incoming.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
-                                        <label>status: </label><span ng-bind="commonData.videoStreamStats.file.incoming.status"></span>
-                                        <label>time: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.time"></span>
-                                        <label>frame: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.frame"></span>
-                                        <label>size: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.size"></span>
-                                        <label>fps: </label> <span ng-bind="commonData.videoStreamStats.file.incoming.info.fps"></span>
-                                        <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.bitrate"></span>
-                                        <label>speed: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.speed"></span>
-                                        <label ng-show="commonData.videoStreamStats.file.incoming.error !== null">error: </label><span ng-show="commonData.videoStreamStats.file.incoming.error !== null" ng-bind="commonData.videoStreamStats.file.incoming.error"></span>
-                                    </div>
-                                    <div ng-show="commonData.videoStreamStats.file !== null && commonData.videoStreamStats.file.file !== null">
-                                        <label>File:</label>
-                                        <span ng-class="{'text-success': commonData.videoStreamStats.file.file.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
-                                        <label>status: </label><span ng-bind="commonData.videoStreamStats.file.file.status"></span>
-                                        <label>time: </label><span ng-bind="commonData.videoStreamStats.file.file.info.time"></span>
-                                        <label>frame: </label><span ng-bind="commonData.videoStreamStats.file.file.info.frame"></span>
-                                        <label>size: </label><span ng-bind="commonData.videoStreamStats.file.file.info.size"></span>
-                                        <label>fps: </label> <span ng-bind="commonData.videoStreamStats.file.file.info.fps"></span>
-                                        <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.file.file.info.bitrate"></span>
-                                        <label>speed: </label><span ng-bind="commonData.videoStreamStats.file.file.info.speed"></span>
-                                        <label>filename: </label><span ng-bind="commonData.videoStreamStats.file.file.filename"></span>
-                                        <label ng-show="commonData.videoStreamStats.file.file.error !== null">error: </label><span ng-show="commonData.videoStreamStats.file.file.error !== null" ng-bind="commonData.videoStreamStats.file.file.error"></span>
+                                    <div ng-show="commonData.videoStreamStats.file">
+                                        <div ng-show="commonData.videoStreamStats.file.incoming">
+                                            <label>Incoming:</label>
+                                            <span ng-class="{'text-success': commonData.videoStreamStats.file.incoming.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
+                                            <label>status: </label><span ng-bind="commonData.videoStreamStats.file.incoming.status"></span>
+                                            <div ng-show="commonData.videoStreamStats.file.incoming.info">
+                                                <label>time: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.time"></span>
+                                                <label>frame: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.frame"></span>
+                                                <label>size: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.size"></span>
+                                                <label>fps: </label> <span ng-bind="commonData.videoStreamStats.file.incoming.info.fps"></span>
+                                                <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.bitrate"></span>
+                                                <label>speed: </label><span ng-bind="commonData.videoStreamStats.file.incoming.info.speed"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.incoming.warning">
+                                                <label>warning: </label><span ng-bind="commonData.videoStreamStats.file.incoming.warning"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.incoming.error">
+                                                <label>error: </label><span ng-bind="commonData.videoStreamStats.file.incoming.error"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.incoming.commandError">
+                                                <label>exit error: </label><span ng-bind="commonData.videoStreamStats.file.incoming.commandError"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.incoming.restarting">
+                                                <label>restarting: </label><span ng-bind="commonData.videoStreamStats.file.incoming.restarting"></span>
+                                            </div>
+                                        </div>
+                                        <div ng-show="commonData.videoStreamStats.file.file">
+                                            <label>File:</label>
+                                            <span ng-class="{'text-success': commonData.videoStreamStats.file.file.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
+                                            <label>status: </label><span ng-bind="commonData.videoStreamStats.file.file.status"></span>
+                                            <div>
+                                                <label>filename: </label><span ng-bind="commonData.videoStreamStats.file.file.filename"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.file.info">
+                                                <label>time: </label><span ng-bind="commonData.videoStreamStats.file.file.info.time"></span>
+                                                <label>frame: </label><span ng-bind="commonData.videoStreamStats.file.file.info.frame"></span>
+                                                <label>size: </label><span ng-bind="commonData.videoStreamStats.file.file.info.size"></span>
+                                                <label>fps: </label> <span ng-bind="commonData.videoStreamStats.file.file.info.fps"></span>
+                                                <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.file.file.info.bitrate"></span>
+                                                <label>speed: </label><span ng-bind="commonData.videoStreamStats.file.file.info.speed"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.file.warning">
+                                                <label >warning: </label><span ng-bind="commonData.videoStreamStats.file.file.warning"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.file.error">
+                                                <label >error: </label><span ng-bind="commonData.videoStreamStats.file.file.error"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.file.commandError">
+                                                <label>exit error: </label><span ng-bind="commonData.videoStreamStats.file.file.commandError"></span>
+                                            </div>
+                                            <div ng-show="commonData.videoStreamStats.file.file.restarting">
+                                                <label>restarting: </label><span ng-bind="commonData.videoStreamStats.file.file.restarting"></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1264,17 +1348,35 @@
                                     <button class="btn btn-primary" ng-click="videoStreamYoutubeStart()">Start Stream</button>
                                     <button class="btn btn-primary" ng-click="videoStreamYoutubeStop()">Stop Stream</button>
                                 </div>
-                                <div ng-show="commonData.videoStreamStats.youtube !== null">
-                                    <span ng-class="{'text-success': commonData.videoStreamStats.youtube.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
-                                    <label>status: </label><span ng-bind="commonData.videoStreamStats.youtube.status"></span>
-                                    <label>time: </label><span ng-bind="commonData.videoStreamStats.youtube.info.time"></span>
-                                    <label>frame: </label><span ng-bind="commonData.videoStreamStats.youtube.info.frame"></span>
-                                    <label>size: </label><span ng-bind="commonData.videoStreamStats.youtube.info.size"></span>
-                                    <label>fps: </label> <span ng-bind="commonData.videoStreamStats.youtube.info.fps"></span>
-                                    <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.youtube.info.bitrate"></span>
-                                    <label>speed: </label><span ng-bind="commonData.videoStreamStats.youtube.info.speed"></span>
-                                    <label>output: </label><span ng-bind="commonData.videoStreamStats.youtube.rtmpUrl"></span>
-                                    <label ng-show="commonData.videoStreamStats.youtube.error !== null">error: </label><span ng-show="commonData.videoStreamStats.youtube.error !== null" ng-bind="commonData.videoStreamStats.youtube.error"></span>
+                                <div>
+                                    <div>
+                                        <span ng-class="{'text-success': commonData.videoStreamStats.youtube.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
+                                        <label>status: </label><span ng-bind="commonData.videoStreamStats.youtube.status"></span>
+                                    </div>
+                                    <div>
+                                        <label>output: </label><span ng-bind="commonData.videoStreamStats.youtube.rtmpUrl"></span>
+                                    </div>
+                                    <div ng-show="commonData.videoStreamStats.youtube.info">
+                                        <label>time: </label><span ng-bind="commonData.videoStreamStats.youtube.info.time"></span>
+                                        <label>frame: </label><span ng-bind="commonData.videoStreamStats.youtube.info.frame"></span>
+                                        <label>size: </label><span ng-bind="commonData.videoStreamStats.youtube.info.size"></span>
+                                        <label>fps: </label> <span ng-bind="commonData.videoStreamStats.youtube.info.fps"></span>
+                                        <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.youtube.info.bitrate"></span>
+                                        <label>speed: </label><span ng-bind="commonData.videoStreamStats.youtube.info.speed"></span>
+                                    </div>
+                                    
+                                    <div ng-show="commonData.videoStreamStats.youtube.warning">
+                                        <label>warning: </label><span ng-bind="commonData.videoStreamStats.youtube.warning"></span>
+                                    </div>
+                                    <div ng-show="commonData.videoStreamStats.youtube.error">
+                                        <label>error: </label><span ng-bind="commonData.videoStreamStats.youtube.error"></span>
+                                    </div>
+                                    <div ng-show="commonData.videoStreamStats.youtube.commandError">
+                                        <label>exit error: </label><span ng-bind="commonData.videoStreamStats.youtube.commandError"></span>
+                                    </div>
+                                    <div ng-show="commonData.videoStreamStats.youtube.restarting">
+                                        <label>restarting: </label><span ng-bind="commonData.videoStreamStats.youtube.restarting"></span>
+                                    </div>
                                 </div>
                                 <!--<div class="btn-group" role="group" aria-label="Buttons">
                                     <button class="btn btn-primary" ng-click="streamStartRemote()">Start Remote Stream</button>
@@ -1298,17 +1400,35 @@
                                     <button class="btn btn-primary" ng-click="videoStreamGameChangerStart()">Start Stream</button>
                                     <button class="btn btn-primary" ng-click="videoStreamGameChangerStop()">Stop Stream</button>
                                 </div>
-                                <div ng-show="commonData.videoStreamStats.gamechanger !== null">
-                                    <span ng-class="{'text-success': commonData.videoStreamStats.gamechanger.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
-                                    <label>status: </label><span ng-bind="commonData.videoStreamStats.gamechanger.status"></span>
-                                    <label>time: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.time"></span>
-                                    <label>frame: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.frame"></span>
-                                    <label>size: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.size"></span>
-                                    <label>fps: </label> <span ng-bind="commonData.videoStreamStats.gamechanger.info.fps"></span>
-                                    <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.bitrate"></span>
-                                    <label>speed: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.speed"></span>
-                                    <label>output: </label><span ng-bind="commonData.videoStreamStats.gamechanger.rtmpUrl"></span>
-                                    <label ng-show="commonData.videoStreamStats.gamechanger.error !== null">error: </label><span ng-show="commonData.videoStreamStats.gamechanger.error !== null" ng-bind="commonData.videoStreamStats.gamechanger.error"></span>
+                                <div>
+                                    <div>
+                                        <span ng-class="{'text-success': commonData.videoStreamStats.gamechanger.status=='connected'}"><i class="fa-solid fa-cloud"></i></span>
+                                        <label>status: </label><span ng-bind="commonData.videoStreamStats.gamechanger.status"></span>
+                                    </div>
+                                    <div>
+                                        <label>output: </label><span ng-bind="commonData.videoStreamStats.gamechanger.rtmpUrl"></span>
+                                    </div>
+                                    <div ng-show="commonData.videoStreamStats.gamechanger.info">
+                                        <label>time: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.time"></span>
+                                        <label>frame: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.frame"></span>
+                                        <label>size: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.size"></span>
+                                        <label>fps: </label> <span ng-bind="commonData.videoStreamStats.gamechanger.info.fps"></span>
+                                        <label>bitrate: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.bitrate"></span>
+                                        <label>speed: </label><span ng-bind="commonData.videoStreamStats.gamechanger.info.speed"></span>
+                                    </div>
+                                    
+                                    <div ng-show="commonData.videoStreamStats.gamechanger.warning">
+                                        <label>warning: </label><span ng-bind="commonData.videoStreamStats.gamechanger.warning"></span>
+                                    </div>
+                                    <div ng-show="commonData.videoStreamStats.gamechanger.error">
+                                        <label>error: </label><span ng-bind="commonData.videoStreamStats.gamechanger.error"></span>
+                                    </div>
+                                    <div ng-show="commonData.videoStreamStats.gamechanger.commandError">
+                                        <label>exit error: </label><span ng-bind="commonData.videoStreamStats.gamechanger.commandError"></span>
+                                    </div>
+                                    <div ng-show="commonData.videoStreamStats.gamechanger.restarting">
+                                        <label>restarting: </label><span ng-bind="commonData.videoStreamStats.gamechanger.restarting"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1366,7 +1486,11 @@
                         <i class="fa-regular fa-file-lines"></i> Logs
                     </uib-tab-heading>
                     <div>
-                        <div><i class="fa-solid fa-arrows-rotate"></i><select class="appLogName"></select><select class="appLogSubname"></select><select class="appLogLevelName"><option>error</option><option>warning</option><option>info</option><option>debug</option><option>trace</option></select></div>
+                        <div>
+                            <select class="appLogName"></select>
+                            <select class="appLogSubname"></select>
+                            <select class="appLogLevelName"><option>error</option><option>warning</option><option>info</option><option>debug</option><option>trace</option></select>
+                        </div>
                         <div class="container-fluid ">
                             <table class="table table-condensed">
                                 <thead>
@@ -1449,4 +1573,17 @@
             </uib-tabset>
         </div>
     </div>
-</div>   
+</div>  
+<div class="templates" style="display:none">
+    <div class="logTemplate">
+        <table>
+            <tr class="logRow"><td class="logTs"></td><td class="logAppName"></td><td class="logAppSubname"></td><td class="logLevel"></td><td class="logMsg"></td></tr>
+        </table>
+
+    </div>
+    <div class="audioPreview">
+        <audio controls id="audioPreviewControls" src="">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+</div> 

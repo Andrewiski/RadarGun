@@ -8,14 +8,14 @@
            var Service = { socket: io.connect()};
             // Create our socket.io object and connect it to express
             
-           Service.socket.on('Connected', function(message) {
-                console.log('radarMonitorService Connected Data', message);
-                 $rootScope.$emit("radarMonitor:Connected", message);
+           Service.socket.on('connect', function() {
+                console.log('radarMonitorService connect' );
+                 $rootScope.$emit("radarMonitor:connect");
             });
 
-           Service.socket.on('Disconnect', function (message) {
-                console.log('radarMonitorService Disconnect',);
-                $rootScope.$emit("radarMonitor:Disconnect", message);
+           Service.socket.on('disconnect', function () {
+                console.log('radarMonitorService disconnect',);
+                $rootScope.$emit("radarMonitor:disconnect");
            });
 
            Service.socket.on('reconnecting', function (message) {
@@ -89,7 +89,11 @@
                Service.socket.emit('resetRadarSettings', {cmd: "resetRadarSettings"});
            }
            Service.sendServerCommand = function (cmd, data) {
-               Service.socket.emit(cmd, data );
+                
+                Service.socket.emit(cmd, data );
+                if(Service.socket.connected === false){
+                    console.error("Socket.IO not Connected to server");
+                }
            };
 
            Service.socket.on('gameChanged', function (message) {
@@ -101,6 +105,16 @@
                 //console.log('radarMonitorService received videoStreams', message);
                 $rootScope.$emit("videoStreams", message);
            });
+
+            Service.socket.on('practiceMode', function (message) {
+                $rootScope.$emit("practiceMode", message);
+            });
+
+           Service.socket.on('serverLogs', function (message) {
+                //console.log('radarMonitorService received videoStreams', message);
+                $rootScope.$emit("serverLogs", message);
+           });
+           
            
            /** Generate a guid / uuid  --  682db637-0f31-4847-9cdf-25ba9613a75c
             */

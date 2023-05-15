@@ -42,11 +42,17 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
    
         streamStats: {
             incoming: {
-                chunkCounter: 0,
-                chunkShow: 0,
                 status: "disconnected",
+                info: null,
+                warning: null,
                 error: null,
+                commandError: null,
+                restarting: null,
                 metadata: {},
+                transChunkCounter: 0,
+                transChunkShow: 0,
+                chunkCounter: 0,
+                chunkShow: 0
             },
             rtmp: null,
             rtmp2: null,
@@ -174,82 +180,121 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
 
     var commandStdError = function (stderr) {
 
-        var stdOut = parseStdOutput(stderr);
+        if(stderr.startsWith('[') === true){
+            var stdOut = parseStdOutput(stderr);
 
-        switch (stdOut.type) {
-            case 'info':
-            case 'verbose':
-                if (stdOut.values.size) {
-                    commonData.streamStats.incoming.info = stdOut.values;
-                    self.emit('streamStats', commonData.streamStats);
-                    logUtilHelper.log(appLogName, "app", 'trace', 'parsed stdErr: ', stdOut);
-                } else {
-                    logUtilHelper.log(appLogName, "app", 'debug', 'parsed stdErr: ', stdOut);
-                }
-            
-                break;
-            default:
-                logUtilHelper.log(appLogName, "app", 'debug', 'parsed stderr: ', stdOut);
+            switch (stdOut.type) {
+                case 'info':
+                case 'verbose':
+                    if (stdOut.values.size) {
+                        commonData.streamStats.incoming.info = stdOut.values;
+                        if (commonData.streamStats.incoming.status !== "connected") {
+                            commonData.streamStats.incoming.status = "connected";
+                        }
+                        self.emit('streamStats', commonData.streamStats);
+                        logUtilHelper.log(appLogName, "app", 'trace', self.options.rtmpUrl,  'parsed stdErr:', stdOut);
+                    } else {
+                        logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stdErr:', stdOut);
+                    }
+                    break;
+                case 'warning':
+                    if(stdOut.value){
+                        commonData.streamStats.incoming.warning = stdOut.value;
+                        self.emit('streamStats', commonData.streamStats);
+                    }
+                    
+                    logUtilHelper.log(appLogName, "app", 'warning', self.options.rtmpUrl, 'parsed stderr:', stdOut);
+                    break;
+                case 'error':
+                    if(stdOut.value){
+                        commonData.streamStats.incoming.error = stdOut.value;
+                        self.emit('streamStats', commonData.streamStats);
+                    }
+                    logUtilHelper.log(appLogName, "app", 'error', self.options.rtmpUrl, 'parsed stderr:', stdOut);
+                    break;
+                default:
+                    logUtilHelper.log(appLogName, "app", 'info', self.options.rtmpUrl, 'parsed stderr:', stdOut);
+            }
+        }else{
+            logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'stderr:', stderr);
         }
-
-    
     };
 
     var commandError = function (err, stdout, stderr) {
         logUtilHelper.log(appLogName, "app", 'error', 'an error happened: ' + err.message, err); //, stdout, stderr);
-        commonData.streamStats.incoming.status = "disconnected";
-        commonData.streamStats.incoming.error = err;
+        commonData.streamStats.incoming.status = "errored";
+        if(err && err.message){
+            commonData.streamStats.incoming.commandError = "commandError: " + err.message;
+        }else{
+            commonData.streamStats.incoming.commandError = "commandError: " + err;
+        }
         //commonData.streamStats.stdout = stdout;
         //commonData.streamStats.stderr = stderr;
         self.emit('streamStats', commonData.streamStats);
         if (err && err.message && err.message.startsWith('ffmpeg exited with code') === true) {
             if(commonData.shouldRestartStream === true){
-                setTimeout(restartStream, 30000);
+                startRestartTimer();
             }
         }
     };
 
     var commandProgress = function (progress) {
 
-        if (commonData.streamStats.incoming.status === "disconnected") {
+        if (commonData.streamStats.incoming.status !== "connected") {
             commonData.streamStats.incoming.status = "connected";
             self.emit('streamStats', commonData.streamStats);
-        
         }
         //proc_count++;
     };
 
     var commandEnd = function (result) {
-        commonData.streamStats.incoming.status = "disconnected";
-        commonData.streamStats.incoming.error = "commandEnd Called";
+        commonData.streamStats.incoming.status = "ended";
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", 'error', 'Source Stream Closed');
         if(commonData.shouldRestartStream === true){
-            setTimeout(restartStream, 30000);
+            startRestartTimer();
         }
     };
+
+    var clearRestartTimer = function () {
+        if (commonData.restartTimer) {
+            commonData.streamStats.restarting = null;
+            clearTimeout(commonData.restartTimer);
+            commonData.restartTimer = null;
+        }
+    }
+
+    var startRestartTimer = function () {
+        clearRestartTimer();
+        if(commonData.shouldRestart === true){
+            commonData.streamStats.status = "restarting";
+            commonData.streamStats.restarting = "Restarting at " + new Date().toISOString();
+            self.emit('streamStats', commonData.streamStats);
+            commonData.restartTimer = setTimeout(restartStream, 30000);
+        }
+    }
 
     var restartStream = function () {
         //this is where we would play a local file until we get reconnected to internet.
         logUtilHelper.log(appLogName, "app", 'error', 'Restarting incoming Stream because it was Closed');
+        commonData.streamStats.restarting = null;
         if(commonData.shouldRestartStream === true){
             startIncomingStream();
         }
     };
 
     var incomingTransStream = null;
-    var first100 = false;
+    
     // incoming and backup transtream pipe to this depending on active source  to transform stream
-    commonData.streamStats.incoming.incomingChunkCounter = 0;
-    commonData.streamStats.incoming.incomingChunkShow = 0;
+    
     incomingTransStream = new Stream.Transform({highWaterMark: 1638400});
     incomingTransStream._transform = function (chunk, encoding, done) {
         try {
-            if (commonData.streamStats.incoming.incomingChunkCounter >= commonData.streamStats.incoming.incomingChunkShow) {
-                logUtilHelper.log(appLogName, "app", 'trace', "incomingTransStream", "chunks processed: " + commonData.streamStats.incoming.incomingChunkShow);
-                commonData.streamStats.incoming.incomingChunkShow = commonData.streamStats.incoming.incomingChunkShow + 100;
+            if (commonData.streamStats.incoming.transChunkCounter >= commonData.streamStats.incoming.transChunkShow) {
+                logUtilHelper.log(appLogName, "app", 'trace', "incomingTransStream", "chunks processed: " + commonData.streamStats.incoming.transChunkShow);
+                commonData.streamStats.incoming.transChunkShow = commonData.streamStats.incoming.transChunkShow + 100;
             }
-            commonData.streamStats.incoming.incomingChunkCounter++;
+            commonData.streamStats.incoming.transChunkCounter++;
             this.push(chunk);
             return done();
         } catch (ex) {
@@ -267,7 +312,7 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
         //commonData.streamStats.chunkCounter++; //remove after new Management Server
         if (commonData.streamStats.incoming.chunkCounter >= commonData.streamStats.incoming.chunkShow) {
             logUtilHelper.log(appLogName, "app", 'trace', "incomingMonitorStream", "chunks processed: " + commonData.streamStats.incoming.chunkCounter);
-            commonData.streamStats.incoming.chunkShow = commonData.streamStats.incoming.chunkShow + 50;
+            commonData.streamStats.incoming.chunkShow = commonData.streamStats.incoming.chunkShow + 100;
         }
         // CircularChunkArray.push(new Buffer.from(chunk));
         // if (CircularChunkArray.length > 100) {
@@ -300,11 +345,21 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
 
     
     var startIncomingStream = function () {
+        clearRestartTimer();
         commonData.shouldRestartStream =false;
         if (!(command === null || command === undefined)) {
             command.kill();
         }
-        commonData.streamStats.incoming.status = "connected"; 
+        commonData.streamStats.incoming.status = "starting"; 
+        commonData.streamStats.incoming.info = null;
+        commonData.streamStats.incoming.warning = null;
+        commonData.streamStats.incoming.error = null;
+        commonData.streamStats.incoming.restarting = null;
+        commonData.streamStats.incoming.commandError = null;
+        commonData.streamStats.incoming.chunkCounter = 0;
+        commonData.streamStats.incoming.chunkShow = 0;
+        commonData.streamStats.incoming.transChunkCounterCounter = 0;
+        commonData.streamStats.incoming.transChunkShow = 0;
         self.emit('streamStats', commonData.streamStats);
         logUtilHelper.log(appLogName, "app", "debug", "Source Video URL", self.options.input, "Rtmp Video URL", self.options.rtmpUrl)
         if(self.options.input.startsWith("libcamera")){
@@ -329,7 +384,8 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
             command = ffmpeg({ source: self.options.input });    
             command.inputOptions(self.options.inputOptions)
             command.outputOptions(self.options.outputOptions)
-            command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info            
+            command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info     
+            command.addOption('-hide_banner'); //Hide the banner       
             command.on('error', commandError)
             //command.on('progress', commandProgress)
             command.on('stderr', commandStdError)
@@ -366,11 +422,14 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
         streamStopFile();
         try {
             if (!(command === null || command === undefined || command.ffmpegProc === null || command.ffmpegProc === undefined || command.ffmpegProc.stdin === null || command.ffmpegProc.stdin === undefined)) {
+                commonData.streamStats.incoming.status = "stopping";
+                self.emit("streamStats", commonData.streamStats);
                 command.ffmpegProc.stdin.write('q');
             }else{
                 streamKill(throwError);
             }
-            self.emit("streamStopped",{});
+            commonData.streamStats.incoming.status = "stopped";
+            self.emit("streamStats", commonData.streamStats);
         } catch (ex) {
             logUtilHelper.log(appLogName, "app", 'error', 'Error Stopping Video Stream ', ex);
             if (throwError === true) {
@@ -384,9 +443,10 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
         logUtilHelper.log(appLogName, "app", 'warning', 'streamKill command');
         try {
             if (!(command === null || command === undefined)) {
+                commonData.streamStats.incoming.status = "killing";
+                self.emit("streamStats", commonData.streamStats);
                 command.kill();
             }
-            self.emit("streamStopped",{});
         } catch (ex) {
             logUtilHelper.log(appLogName, "app", 'error', 'Error Killing Video Stream ', ex);
             if (throwError === true) {
