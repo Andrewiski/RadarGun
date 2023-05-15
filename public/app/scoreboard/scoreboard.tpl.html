@@ -1137,7 +1137,7 @@
                         <table class="table table-bordered table-striped">
                             <thead class="thead-light">
                                 <tr>
-                                    <td><label class="control-label">Playlist</label></td>
+                                    
                                     <td><label class="control-label">Song</label></td>
                                     <td><label class="control-label">Length</label></td>
                                     <td><label class="control-label">Play</label></td>
@@ -1146,11 +1146,7 @@
                             </thead>
                             <tbody>
                                 <tr ng-repeat="(index, fullSongFile) in (commonData.fullSongFiles)">
-                                    <td>
-                                        <div class="form-control-sm">
-                                            <input type="checkbox" value="{{fullSongFile.fileName}}" name="playlistFullSong">
-                                        </div>
-                                    </td>
+                                    
                                     <td>
                                         <div class="form-control-sm">
                                             <span ng-bind="fullSongFile.fileName"></span>
@@ -1178,18 +1174,62 @@
                             </tbody>
                         </table>
                     </div>
+                </uib-tab>
+
+                <uib-tab index="13" ng-show="commonData.isGameAdmin" ng-click="tabClick('playlists')">
+                    <uib-tab-heading>
+                        <i class="fa fa-music"></i> Playlists
+                    </uib-tab-heading>
+                    
                     <div class="col-sm-6">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">Playlist</div>
-                            <div class="panel-body">
-                                <div class="input-group-btn">
-                                    <button type="button" class="btn" ng-click="audioFilePlayFullSongPlaylist()" data-toggle="tooltip" data-placement="bottom" title="Play PLaylist"><i class="fa fa-play"></i></button>
-                                    <button type="button" class="btn" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
-                                </div>
-                                <div style="display: inline-block;"><input type="checkbox" value="true" name="playlistFullSongLoop" checked="checked"/> <span>Loop</span></div>
+                        
+                        <div style="display: inline-block;">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn" ng-click="refreshFullSongFiles()"><i class="fa fa-refresh"></i></button>
+                                <button type="button" class="btn btn-success" ng-click="audioFilePlayFullSongPlaylist()" data-toggle="tooltip" data-placement="bottom" title="Play Playlist"><i class="fa fa-play"></i></button>
+                                <button type="button" class="btn btn-danger" ng-click="audioFileStop()" data-toggle="tooltip" data-placement="bottom" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                <button type="button" class="btn btn-info" ng-click="audioFileSaveFullSongPlaylist()" data-toggle="tooltip" data-placement="bottom" title="Save PlayList"><i class="fa-solid fa-floppy-disk"></i></button>
                             </div>
                         </div>
+                        <div style="display: inline-block;"><input type="checkbox" value="true" id="playlistFullSongLoop" checked="checked"/> <span>Loop</span></div>
+                        <table class="table table-bordered table-striped">
+                            <thead class="thead-light">
+                                <tr>
+                                    <td><label class="control-label">Playlist</label></td>
+                                    <td><label class="control-label">Song</label></td>
+                                    <td><label class="control-label">Length</label></td>
+                                    <td><label class="control-label">Preview</label></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="(index, fullSongFile) in (commonData.fullSongFiles)">
+                                    <td>
+                                        <div class="form-control-sm">
+                                            <input type="checkbox" value="{{fullSongFile.fileName}}" name="playlistFullSong">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-control-sm">
+                                            <span ng-bind="fullSongFile.fileName"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-control-sm">
+                                            <span ng-bind="fullSongFile.length"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-control-sm">
+                                            <button type="button" class="btn" ng-click="audioFilePreviewFullSong($event, fullSongFile.fileName)" data-toggle="tooltip" data-placement="bottom" title="Preview FullSong"><i class="fa fa-play"></i></button>
+                                            <div class="previewControl">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+                    
                 </uib-tab>
 
                 <uib-tab index="14" ng-show="commonData.isGameAdmin" ng-click="tabClick('PracticeMode')">

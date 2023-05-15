@@ -615,6 +615,12 @@
                             refreshFullSongFiles();
                         }
                         break;
+                    case "playlists":
+                        console.log("tabPlaylistsClick");
+                        if($scope.commonData.fullSongFiles === null){
+                            refreshFullSongFiles();
+                        }
+                        break;
                     case "videoFiles":
                         console.log("tabVideoFilesClick");
                         //if($scope.commonData.videoFiles === null){
@@ -985,7 +991,8 @@
                 return array;
             }
 
-            $scope.audioFilePlayFullSongPlaylist = function () {
+            
+            $scope.audioFileSaveFullSongPlaylist = function () {
                 let audioFiles = [];
                 $("input[name=playlistFullSong]:checked").each(function () {
                     audioFiles.push($(this).val());
@@ -995,7 +1002,12 @@
                     shuffle(audioFiles);
                     
                 }
-                radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayFullSongPlaylist", data: { audioFiles: audioFiles } });
+                radarMonitor.sendServerCommand("audio", { cmd: "audioFileSaveFullSongPlaylist", data: { fileName:"playlist.txt", audioFiles: audioFiles } });
+            }
+
+            $scope.audioFilePlayFullSongPlaylist = function () {
+                let shouldLoop = $("#playlistFullSongLoop").prop( "checked");
+                radarMonitor.sendServerCommand("audio", { cmd: "audioFilePlayFullSongPlaylist", data: { fileName:"playlist.txt", loop: shouldLoop } });
             }
 
 
