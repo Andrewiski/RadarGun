@@ -24,6 +24,7 @@ const VideoOverlayParser = require("./modules/videoOverlayParser.js");
 const FFplay = require('./modules/ffplay.js');
 const { v4: uuidv4 } = require('uuid');
 const common = require('mongodb/lib/bulk/common');
+const { re } = require('mathjs');
 
 var configFileOptions = {
     "configDirectory": "config",
@@ -64,10 +65,18 @@ console.log("Log Directory is " + objOptions.logDirectory);
 
 
 var logUnfilteredEventHandler = function(logdata){
-    //This gets called on every log event even if AppLogLevels specificaly stop it so webBrowsers clients can view trace events
-    //console.log("logUnfilteredEventHandler", logdata);
-    if(sendToSubscribedSocketClients){
-        sendToSubscribedSocketClients("serverLogs", "liveLog", logdata);
+    try{
+        //This gets called on every log event even if AppLogLevels specificaly stop it so webBrowsers clients can view trace events
+        //console.log("logUnfilteredEventHandler", logdata);
+        if(sendToSubscribedSocketClients){
+            sendToSubscribedSocketClients("serverLogs", "liveLog", logdata);
+        }
+    }catch(ex){
+        try{
+            logUtilHelper.log(appLogName, "app", "error", "logUnfilteredEventHandler", ex);
+        }catch(ex){
+            console.log("error","logUnfilteredEventHandler", ex);
+        }
     }
 }
 
@@ -193,11 +202,16 @@ app.use(favicon(__dirname + '/public/favicon.ico'));
 //app.use(express.json());
 //app.use(express.urlencoded({ extended: false }));
 app.use(function (req, res, next) {
+    try{
     var connInfo = logUtilHelper.getRequestConnectionInfo(req);
     logUtilHelper.logRequestConnectionInfo(appLogName, "browser", "debug", req);
     //logUtilHelper.log(appLogName, "browser", 'debug',  "url:" + req.originalUrl + ", ip:" + connInfo.ip + ", port:" + connInfo.port + ", ua:" + connInfo.ua);
     next();
     return;
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error logging request connection info.", err);
+        next();
+    }
 })
 
 app.use(cookieParser());
@@ -209,250 +223,334 @@ var routes = express.Router();
 
 /* GET home page. */
 routes.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, 'public/index.htm'));
+    try{
+        res.sendFile(path.join(__dirname, 'public/index.htm'));
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting index.htm.", err);
+        res.json(500, { err: err });
+    }
 });
 
 routes.get('/data/teams', function (req, res) {
-    radarDatabase.team_getAll(function (err, response) {
-        if (err) {
-            res.json(500, {err:err})
-        } else {
-            res.json(response);
-        }
-    })  
+    try{
+        radarDatabase.team_getAll(function (err, response) {
+            if (err) {
+                res.json(500, {err:err})
+            } else {
+                res.json(response);
+            }
+        })  
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting teams.", err);
+        res.json(500, { err: err });
+    }
 });
 
 routes.put('/data/team', function (req, res) {
-    radarDatabase.team_upsert(req.body, function (err, response) {
-        if (err) {
-            res.json(500, { err: err })
-        } else {
-            res.json(response);
-        }
-    })
+    try{
+        radarDatabase.team_upsert(req.body, function (err, response) {
+            if (err) {
+                res.json(500, { err: err })
+            } else {
+                res.json(response);
+            }
+        })
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error upserting team.", err);
+        res.json(500, { err: err });
+    }
 });
 
 routes.delete('/data/team/:id', function (req, res) {
-    radarDatabase.team_delete(req.params.id, function (err, response) {
-        if (err) {
-            res.json(500, { err: err })
-        } else {
-            res.json(response);
-        }
-    })
+    try{
+        radarDatabase.team_delete(req.params.id, function (err, response) {
+            if (err) {
+                res.json(500, { err: err })
+            } else {
+                res.json(response);
+            }
+        })
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error deleting team.", err);
+        res.json(500, { err: err });
+    }
 });
 
 routes.put('/data/uuidv4', function (req, res) {
-    
-    res.json({ id: uuidv4()});
+    try{
+        res.json({ id: uuidv4()});
+    }catch(err){    
+        logUtilHelper.log(appLogName, "browser", "error", "Error generating uuidv4.", err);
+        res.json(500, { err: err });
+    }
     
     
 });
 
 
 routes.put('/data/scoregame', function (req, res) {
-    var game = req.body;
+    try{
+        var game = req.body;
 
-    //radarDatabase.game_upsert(game, function (err, response) {
-    //    if (err) {
-    //        res.json(500, { err: err })
-    //    } else {
-            
-    //        res.json(response);
-    //    }
-    //})
-    commonData.game = game;
-    updateOverlays({gameData:commonData.game, radarData:commonData.currentRadarSpeedData});
-    io.emit("gameChanged", { cmd: "scoreGame", data: { game: commonData.game } });
-    res.json({ game: commonData.game });
+        //radarDatabase.game_upsert(game, function (err, response) {
+        //    if (err) {
+        //        res.json(500, { err: err })
+        //    } else {
+                
+        //        res.json(response);
+        //    }
+        //})
+        commonData.game = game;
+        updateOverlays({gameData:commonData.game, radarData:commonData.currentRadarSpeedData});
+        io.emit("gameChanged", { cmd: "scoreGame", data: { game: commonData.game } });
+        res.json({ game: commonData.game });
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "Error scoring game.", err);
+        res.json(500, { err: err });
+    }
     
 });
 
 routes.get('/data/games', function (req, res) {
-    radarDatabase.game_getAll(function (err, response) {
-        if (err) {
-            res.json(500, { err: err })
-        } else {
-            res.json(response);
-        }
-    })
+    try{
+        radarDatabase.game_getAll(function (err, response) {
+            if (err) {
+                res.json(500, { err: err })
+            } else {
+                res.json(response);
+            }
+        })
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting games.", err);
+        res.json(500, { err: err })
+    }
 });
 
 routes.get('/data/game', function (req, res) {
-    res.json(commonData.game);
+    try{
+        res.json(commonData.game);
+    } catch (err) {
+        res.json(500, { err: err })
+    }
 });
 
 routes.get('/data/audioFiles/walkup', function (req, res) {
-    let walkupFiles = [];
-    fs.readdir(walkupAudioDirectory, function (err, files) {
-        if (err) {
-            logUtilHelper.log(appLogName, "browser", "error", "Error getting walkup directory information.", walkupAudioDirectory);
-        } else {
-            files.forEach(function (file) {
-                //console.log(file);
-                if (path.extname(file) !== ".txt") {
-                    walkupFiles.push({ fileName: file });
-                }
-            })
-            res.json(walkupFiles);
-        }
-    })
+    try{
+        let walkupFiles = [];
+        fs.readdir(walkupAudioDirectory, function (err, files) {
+            if (err) {
+                logUtilHelper.log(appLogName, "browser", "error", "Error getting walkup directory information.", walkupAudioDirectory);
+            } else {
+                files.forEach(function (file) {
+                    //console.log(file);
+                    if (path.extname(file) !== ".txt") {
+                        walkupFiles.push({ fileName: file });
+                    }
+                })
+                res.json(walkupFiles);
+            }
+        })
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting walkup directory information.", walkupAudioDirectory);
+        res.json(500, { err: err });
+    }
 });
 
 routes.get('/data/audioFiles/fullSongs', function (req, res) {
-    let fullsongFiles = [];
-    fs.readdir(fullSongAudioDirectory, function (err, files) {
-        if (err) {
-            logUtilHelper.log(appLogName, "browser", "error", "Error getting audio directory information.", fullSongAudioDirectory);
-        } else {
-            files.forEach(function (file) {
-                //console.log(file);
-                if (path.extname(file) !== ".txt") {
-                    fullsongFiles.push({ fileName: file });
-                }
-            })
-            res.json(fullsongFiles);
-        }
-    })    
+    try{
+        let fullsongFiles = [];
+        fs.readdir(fullSongAudioDirectory, function (err, files) {
+            if (err) {
+                logUtilHelper.log(appLogName, "browser", "error", "Error getting audio directory information.", fullSongAudioDirectory);
+            } else {
+                files.forEach(function (file) {
+                    //console.log(file);
+                    if (path.extname(file) !== ".txt") {
+                        fullsongFiles.push({ fileName: file });
+                    }
+                })
+                res.json(fullsongFiles);
+            }
+        })   
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting audio directory information.", fullSongAudioDirectory);
+        res.json(500, { err: err });
+    } 
 });
 
 routes.get('/data/audioFiles/fullSongs/:filename', (req, res) => {
-    const filePath = `./data/audioFiles/fullSongs/${req.params.filename}`;
-    const stat = fs.statSync(filePath);
-    const fileSize = stat.size;
-    const range = req.headers.range;
+    try {
+        const filePath = `./data/audioFiles/fullSongs/${req.params.filename}`;
+        const stat = fs.statSync(filePath);
+        const fileSize = stat.size;
+        const range = req.headers.range;
 
-    // Set the content-type header to indicate that this is an audio file
-    res.setHeader('Content-Type', 'audio/mp4');
+        // Set the content-type header to indicate that this is an audio file
+        res.setHeader('Content-Type', 'audio/mp4');
 
-    // If a range header was provided, only send the requested portion of the file
-    if (range) {
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] 
-        ? parseInt(parts[1], 10)
-        : fileSize-1;
-      const chunksize = (end-start)+1;
-      const file = fs.createReadStream(filePath, {start, end});
-      const head = {
-        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunksize,
-        'Content-Type': 'audio/mp4',
-      };
-      res.writeHead(206, head);
-      file.pipe(res);
-    } else {
-      // If no range header was provided, send the entire file
-      const head = {
-        'Content-Length': fileSize,
-        'Content-Type': 'audio/mp4',
-      };
-      res.writeHead(200, head);
-      fs.createReadStream(filePath).pipe(res);
+        // If a range header was provided, only send the requested portion of the file
+        if (range) {
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] 
+            ? parseInt(parts[1], 10)
+            : fileSize-1;
+        const chunksize = (end-start)+1;
+        const file = fs.createReadStream(filePath, {start, end});
+        const head = {
+            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunksize,
+            'Content-Type': 'audio/mp4',
+        };
+        res.writeHead(206, head);
+        file.pipe(res);
+        } else {
+        // If no range header was provided, send the entire file
+        const head = {
+            'Content-Length': fileSize,
+            'Content-Type': 'audio/mp4',
+        };
+        res.writeHead(200, head);
+        fs.createReadStream(filePath).pipe(res);
+        }
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting audio file.", req.params.filename);
+        res.sendStatus(500);
     }
   });
 
   routes.get('/data/audioFiles/walkup/:filename', (req, res) => {
-    const filePath = `./data/audioFiles/walkup/${req.params.filename}`;
-    const stat = fs.statSync(filePath);
-    const fileSize = stat.size;
-    const range = req.headers.range;
+    try{
+        const filePath = `./data/audioFiles/walkup/${req.params.filename}`;
+        const stat = fs.statSync(filePath);
+        const fileSize = stat.size;
+        const range = req.headers.range;
 
-    // Set the content-type header to indicate that this is an audio file
-    res.setHeader('Content-Type', 'audio/mp4');
+        // Set the content-type header to indicate that this is an audio file
+        res.setHeader('Content-Type', 'audio/mp4');
 
-    // If a range header was provided, only send the requested portion of the file
-    if (range) {
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] 
-        ? parseInt(parts[1], 10)
-        : fileSize-1;
-      const chunksize = (end-start)+1;
-      const file = fs.createReadStream(filePath, {start, end});
-      const head = {
-        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunksize,
-        'Content-Type': 'audio/mp4',
-      };
-      res.writeHead(206, head);
-      file.pipe(res);
-    } else {
-      // If no range header was provided, send the entire file
-      const head = {
-        'Content-Length': fileSize,
-        'Content-Type': 'audio/mp4',
-      };
-      res.writeHead(200, head);
-      fs.createReadStream(filePath).pipe(res);
+        // If a range header was provided, only send the requested portion of the file
+        if (range) {
+            const parts = range.replace(/bytes=/, "").split("-");
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] 
+                ? parseInt(parts[1], 10)
+                : fileSize-1;
+            const chunksize = (end-start)+1;
+            const file = fs.createReadStream(filePath, {start, end});
+            const head = {
+                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunksize,
+                'Content-Type': 'audio/mp4',
+            };
+            res.writeHead(206, head);
+            file.pipe(res);
+        } else {
+            // If no range header was provided, send the entire file
+            const head = {
+                'Content-Length': fileSize,
+                'Content-Type': 'audio/mp4',
+            };
+            res.writeHead(200, head);
+            fs.createReadStream(filePath).pipe(res);
+        }
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting audio file.", filePath);
+        res.json(500, { err: err });
     }
+
   });
 
 routes.get('/data/videoFiles', function (req, res) {
-    let videoFiles = [];
-    fs.readdir(videoFileDirectory, function (err, files) {
-        if (err) {
-            logUtilHelper.log(appLogName, "browser", "error", "Error getting avideo directory information.", videoFileDirectory);
-        } else {
-            files.forEach(function (file) {
-                //console.log(file);
-                if (path.extname(file) !== ".txt") {
-                    videoFiles.push({ fileName: file });
-                }
-            })
-            res.json(videoFiles);
-        }
-    })    
+    try{
+        let videoFiles = [];
+        fs.readdir(videoFileDirectory, function (err, files) {
+            if (err) {
+                logUtilHelper.log(appLogName, "browser", "error", "Error getting avideo directory information.", videoFileDirectory);
+            } else {
+                files.forEach(function (file) {
+                    //console.log(file);
+                    if (path.extname(file) !== ".txt") {
+                        videoFiles.push({ fileName: file });
+                    }
+                })
+                res.json(videoFiles);
+            }
+        })
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting video directory information.", videoFileDirectory);
+        res.json(500, { err: err });
+    } 
 });
 
 
 
 routes.get('/data/game/:id', function (req, res) {
+    try{
     //res.json(commonData.game);
-    radarDatabase.game_get(req.params.id, function (err, response) {
-        if (err) {
-            res.json(500, { err: err })
-        } else {
-            res.json(response);
-        }
-    })
+        radarDatabase.game_get(req.params.id, function (err, response) {
+            if (err) {
+                res.json(500, { err: err })
+            } else {
+                res.json(response);
+            }
+        })
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting game.", err);
+        res.json(500, { err: err })
+    }
 });
 
 routes.put('/data/game', function (req, res) {
-    radarDatabase.game_upsert(req.body, function (err, response) {
-        if (err) {
-            res.json(500, { err: err })
-        } else {
-            res.json(response);
-        }
-    })
+    try{
+        radarDatabase.game_upsert(req.body, function (err, response) {
+            if (err) {
+                res.json(500, { err: err })
+            } else {
+                res.json(response);
+            }
+        })
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error upserting game.", err);
+        res.json(500, { err: err })
+    }
 });
 
 
 routes.put('/data/team', function (req, res) {
-    radarDatabase.team_upsert(req.body, function (err, response) {
-        if (err) {
-            res.json(500, { err: err })
-        } else {
-            res.json(response);
-        }
-    })
+    try{
+        radarDatabase.team_upsert(req.body, function (err, response) {
+            if (err) {
+                res.json(500, { err: err })
+            } else {
+                res.json(response);
+            }
+        })
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error upserting team.", err);
+        res.json(500, { err: err })
+    }
 });
 
 
 routes.get('/data/settings/videostreams', function (req, res) {
-    let response = {
-        teamName: objOptions.videoStreams.teamName,
-        opponentTeamName: objOptions.videoStreams.opponentTeamName,
-        youtubeRtspUrl: objOptions.videoStreams.youtube.input,
-        youtubeRtmpUrl: objOptions.videoStreams.youtube.rtmpUrl,
-        gamechangerRtspUrl: objOptions.videoStreams.gamechanger.input,
-        gamechangerRtmpUrl: objOptions.videoStreams.gamechanger.rtmpUrl,
-        fileRtspUrl: objOptions.videoStreams.file.input
+    try{
+        let response = {
+            teamName: objOptions.videoStreams.teamName,
+            opponentTeamName: objOptions.videoStreams.opponentTeamName,
+            youtubeRtspUrl: objOptions.videoStreams.youtube.input,
+            youtubeRtmpUrl: objOptions.videoStreams.youtube.rtmpUrl,
+            gamechangerRtspUrl: objOptions.videoStreams.gamechanger.input,
+            gamechangerRtmpUrl: objOptions.videoStreams.gamechanger.rtmpUrl,
+            fileRtspUrl: objOptions.videoStreams.file.input
+        }
+        res.json(response);
+    }catch(err){
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting video stream settings.", err);
+        res.json(500, { err: err })
     }
-    res.json(response);
 });
 
 routes.get("/data/appLogLevels", function (req, res) {
@@ -475,15 +573,18 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 
 var updateOverlays = function (data) {
     //updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
-    
-    if(privateData.videoStreams.youtube != null){
-        rivateData.videoStreams.youtube.updateOverlay();
-    }
-    if(privateData.videoStreams.gamechanger != null){
-        rivateData.videoStreams.gamechanger.updateOverlay();
-    }
-    if(privateData.videoStreams.file != null){
-        rivateData.videoStreams.file.updateOverlay();
+    try{
+        if(privateData.videoStreams.youtube != null){
+            privateData.videoStreams.youtube.updateOverlay();
+        }
+        if(privateData.videoStreams.gamechanger != null){
+            privateData.videoStreams.gamechanger.updateOverlay();
+        }
+        if(privateData.videoStreams.file != null){
+            privateData.videoStreams.file.updateOverlay();
+        }
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", "Error updating overlays.", ex);
     }
 }
 
@@ -515,23 +616,30 @@ var StopPeriodicTimerEvent = function () {
 var audioFilePlayer = null;
 
 var playAudioFileComplete = function (audioFile) {
-    io.emit("audio", { cmd: "audioPlayComplete", data: { audioFile: audioFile } });
+    sendToSocketClients("audio", { cmd: "audioPlayComplete", data: { audioFile: audioFile } });
 }
 
 var audioFilePlay = function (audioFolder, audioFile, options) {
-
-    if (audioFilePlayer !== null) {
-        audioFilePlayer.stop();
-        audioFilePlayer = null;
+    try{
+        if (audioFilePlayer !== null) {
+            audioFilePlayer.stop();
+            audioFilePlayer = null;
+        }
+        audioFilePlayer = new FFplay(audioFolder, audioFile.fileName, options, logUtilHelper);
+        audioFilePlayer.on("stopped", playAudioFileComplete);
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", "Error playing audio file.", ex);
     }
-    audioFilePlayer = new FFplay(audioFolder, audioFile.fileName, options, logUtilHelper);
-    audioFilePlayer.on("stopped", playAudioFileComplete);
 
 }
 var audioFileStop = function () {
-    if (audioFilePlayer !== null) {
-        audioFilePlayer.stop();
-        audioFilePlayer = null;
+    try{
+        if (audioFilePlayer !== null) {
+            audioFilePlayer.stop();
+            audioFilePlayer = null;
+        }
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", "Error stopping audio file.", ex);
     }
 }
 
@@ -646,25 +754,30 @@ var videoStreamGamechangerStop = function () {
 }
 
 var getDateFileName = function () {
-    let objectDate = new Date();
-    let hour = objectDate.getHours().toString();
-    let minute = objectDate.getMinutes().toString();
-    let day = objectDate.getDate().toString();
-    let month = (objectDate.getMonth() + 1).toString();
-    let year = objectDate.getFullYear().toString();
-    if (day.length == 1){
-        day = "0" + day;
+    try{
+        let objectDate = new Date();
+        let hour = objectDate.getHours().toString();
+        let minute = objectDate.getMinutes().toString();
+        let day = objectDate.getDate().toString();
+        let month = (objectDate.getMonth() + 1).toString();
+        let year = objectDate.getFullYear().toString();
+        if (day.length == 1){
+            day = "0" + day;
+        }
+        if (month.length == 1){
+            month = "0" + month;
+        }
+        if (hour.length == 1){
+            hour = "0" + hour;
+        }
+        if (minute.length == 1){
+            minute = "0" + minute;
+        }
+        return year + month + day + "T" + hour + minute;
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'videoStream', 'getDateFileName', ex);           
+        return "InvalidDateFileName"
     }
-    if (month.length == 1){
-        month = "0" + month;
-    }
-    if (hour.length == 1){
-        hour = "0" + hour;
-    }
-    if (minute.length == 1){
-        minute = "0" + minute;
-    }
-    return year + month + day + "T" + hour + minute;
 }
 
 var videoStreamFileStart = function (options) {
@@ -732,384 +845,428 @@ var videoStreamFileStop = function () {
 var io = require('socket.io')(server, {allowEIO3: true});
 
 var subscribeToSocketClient = function (socket, type, data) {
-    if(privateData.subscribedSocketIOClients[type] === undefined){
-        privateData.subscribedSocketIOClients[type] = {};
-    }
-    if(privateData.subscribedSocketIOClients[type][socket.id] === undefined){
-        privateData.subscribedSocketIOClients[type][socket.id] = {
-            socket:socket,
-            timestamp: new Date(),
-            data: data
-        };
-    }else{
-        privateData.subscribedSocketIOClients[type][socket.id].timestamp = new Date();
-        if(data){
-            privateData.subscribedSocketIOClients[type][socket.id].data = data;
+    try{
+        if(privateData.subscribedSocketIOClients[type] === undefined){
+            privateData.subscribedSocketIOClients[type] = {};
         }
+        if(privateData.subscribedSocketIOClients[type][socket.id] === undefined){
+            privateData.subscribedSocketIOClients[type][socket.id] = {
+                socket:socket,
+                timestamp: new Date(),
+                data: data
+            };
+        }else{
+            privateData.subscribedSocketIOClients[type][socket.id].timestamp = new Date();
+            if(data){
+                privateData.subscribedSocketIOClients[type][socket.id].data = data;
+            }
+        }
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'subscribeToSocketClient', ex);
     }
 }
 
 var unsubscribeToSocketClient = function (socket, type) {
-    if(privateData.subscribedSocketIOClients[type] === undefined){
-        privateData.subscribedSocketIOClients[type] = {};
-    }
-    if(privateData.subscribedSocketIOClients[type][socket.id] !== undefined){
-        delete privateData.subscribedSocketIOClients[type][socket.id];
+    try{
+        if(privateData.subscribedSocketIOClients[type] === undefined){
+            privateData.subscribedSocketIOClients[type] = {};
+        }
+        if(privateData.subscribedSocketIOClients[type][socket.id] !== undefined){
+            delete privateData.subscribedSocketIOClients[type][socket.id];
+        }
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'unsubscribeToSocketClient', ex);
     }
 }
 
 var sendToSubscribedSocketClients = function(type, cmd, message){
-    if(privateData.subscribedSocketIOClients[type] === undefined){
-        privateData.subscribedSocketIOClients[type] = {};
-    }
-    var socketIds = Object.getOwnPropertyNames(privateData.subscribedSocketIOClients[type]);
-    for(var i=0; i<socketIds.length; i++){
-        var socketId = socketIds[i];
-        var client = privateData.subscribedSocketIOClients[type][socketId];
-        if(client.timestamp < new Date().getTime() - 1000 * 60 * 2){  //older then two minutes
-            delete privateData.subscribedSocketIOClients[type][socketId];
-        }else{
-            if (client && client.socket && client.socket.connected){
-                switch(type){
-                    case "serverLogs":
-                        if(cmd === "liveLog"){
-                            if(client.data && client.data.appLogLevels ){
-                                if(logUtilHelper.shouldLogAppLogLevels(client.data.appLogLevels, message.appName, message.appSubname, message.logLevel)===true){
-                                    client.socket.emit('serverLogs', {cmd: "liveLog", data: message});
+    try{
+        if(privateData.subscribedSocketIOClients[type] === undefined){
+            privateData.subscribedSocketIOClients[type] = {};
+        }
+        var socketIds = Object.getOwnPropertyNames(privateData.subscribedSocketIOClients[type]);
+        for(var i=0; i<socketIds.length; i++){
+            var socketId = socketIds[i];
+            var client = privateData.subscribedSocketIOClients[type][socketId];
+            if(client.timestamp < new Date().getTime() - 1000 * 60 * 2){  //older then two minutes
+                delete privateData.subscribedSocketIOClients[type][socketId];
+            }else{
+                if (client && client.socket && client.socket.connected){
+                    switch(type){
+                        case "serverLogs":
+                            if(cmd === "liveLog"){
+                                if(client.data && client.data.appLogLevels ){
+                                    if(logUtilHelper.shouldLogAppLogLevels(client.data.appLogLevels, message.appName, message.appSubname, message.logLevel)===true){
+                                        client.socket.emit('serverLogs', {cmd: "liveLog", data: message});
+                                    }
                                 }
+                            }else{
+                                client.socket.emit(cmd, message);
                             }
-                        }else{
+                            break;
+                        default:
                             client.socket.emit(cmd, message);
-                        }
-                        break;
-                    default:
-                        client.socket.emit(cmd, message);
+                    }
+                    
                 }
-                
             }
         }
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'sendToSubscribedSocketClients', ex);
     }
 }
 
 var sendToSocketClients = function (cmd, message, includeArduino, excludeSocketId){
-    if (io) {
-        if (includeArduino===true){
-            io.emit(cmd, message);
-        }else{
-            const sockets = io.fetchSockets().then(sockets => {
-                sockets.forEach(socket => {
-                    if(excludeSocketId !== socket.id){
-                        if(socket.client.request.headers["origin"] !== "ArduinoSocketIo"){
-                            socket.emit(cmd, message);
-                        }
-                    }   
+    try{
+        if (io) {
+            if (includeArduino===true){
+                io.emit(cmd, message);
+            }else{
+                const sockets = io.fetchSockets().then(sockets => {
+                    sockets.forEach(socket => {
+                        if(excludeSocketId !== socket.id){
+                            if(socket.client.request.headers["origin"] !== "ArduinoSocketIo"){
+                                socket.emit(cmd, message);
+                            }
+                        }   
+                    })
                 })
-            })
+            }
         }
+    }catch(ex){
+        logUtilHelper.log(appLogName, "app", "error", 'sendToSocketClients', ex);
     }
 }
 
 io.on('connection', function(socket) {
-    //logUtilHelper.log(appLogName, "socketio", "info", "socket.io client Connection");
-    logUtilHelper.logSocketConnection (appLogName, "socketio", "info",  socket, "socket.io client Connection" );
+    try{
+        //logUtilHelper.log(appLogName, "socketio", "info", "socket.io client Connection");
+        logUtilHelper.logSocketConnection (appLogName, "socketio", "info",  socket, "socket.io client Connection" );
 
-    socket.on('serverSubscribe', function(message) {
-        logUtilHelper.log(appLogName, "socketio", "debug",'serverSubscribe', "cmd:" + message.cmd, "type:" + message.type, 'client id:' + socket.id);
-        switch(message.cmd){
-            case "resubscribe":
-            case "subscribe":
-                subscribeToSocketClient(socket, message.type, message.data);
-                break;
-            case "unsubscribe":
-                unsubscribeToSocketClient(socket, message.type);
-                break;
-        }
-    })
+        socket.on('serverSubscribe', function(message) {
+            try{
+                logUtilHelper.log(appLogName, "socketio", "debug",'serverSubscribe', "cmd:" + message.cmd, "type:" + message.type, 'client id:' + socket.id);
+                switch(message.cmd){
+                    case "resubscribe":
+                    case "subscribe":
+                        subscribeToSocketClient(socket, message.type, message.data);
+                        break;
+                    case "unsubscribe":
+                        unsubscribeToSocketClient(socket, message.type);
+                        break;
+                }
+            }catch(ex){
+                logUtilHelper.log(appLogName, "socketio", "error",'serverSubscribe', ex);
+            }
+        })
 
-    socket.on('radarConfigCommand', function(data) {
-        logUtilHelper.log(appLogName, "socketio", "debug",'radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
-        radarStalker2.radarConfigCommand({ data: data, socket: socket });
-    });
-    socket.on('radarEmulatorCommand', function(data) {
-        logUtilHelper.log(appLogName, "socketio", "debug",'radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
-        radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
-    });
-
-
-    socket.on('practiceMode', function (message) {
-        logUtilHelper.log(appLogName, "socketio", "debug",'practiceMode:' + message.cmd + ', client id:' + socket.id);
-        switch (message.cmd) {
-            case "pitcher":
-                commonData.practiceMode.pitcher = message.data.pitcher;
-                sendToSocketClients("practiceMode", { cmd: "pitcher", data: message.data }, true, socket.id); 
-                break;
-            case "batter":
-                commonData.practiceMode.batter = message.data.batter;
-                sendToSocketClients("practiceMode", { cmd: "batter", data: message.data }, true, socket.id); 
-                break;
-            
-        }
-    });
+        socket.on('radarConfigCommand', function(data) {
+            try{
+                logUtilHelper.log(appLogName, "socketio", "debug",'radarConfigCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
+                radarStalker2.radarConfigCommand({ data: data, socket: socket });
+            }catch(ex){
+                logUtilHelper.log(appLogName, "socketio", "error",'radarConfigCommand:', ex);
+            }
+        });
+        socket.on('radarEmulatorCommand', function(data) {
+            try{
+                logUtilHelper.log(appLogName, "socketio", "debug",'radarEmulatorCommand:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
+                radarStalker2.radarEmulatorCommand({ data: data, socket: socket });
+            }catch(ex){
+                logUtilHelper.log(appLogName, "socketio", "error",'radarEmulatorCommand:', ex);
+            }
+        });
 
 
-    socket.on('videoStream', function (message) {
-        logUtilHelper.log(appLogName, "socketio", "debug",'videoStream:' + message.cmd + ', client id:' + socket.id);
-        switch (message.cmd) {
-            case "start":
-                videoStreamYoutubeStart(message.data);
-                videoStreamGamechangerStart(message.data);
-                videoStreamFileStart(message.data);
-                break;
-            case "stop":
-                videoStreamYoutubeStop();
-                videoStreamGamechangerStop();
-                videoStreamFileStop();
-                break;
-            case "youtubeStart":
-                videoStreamYoutubeStart(message.data);
-                break;
-            case "youtubeStop":
-                videoStreamYoutubeStop();
-                break;
-            case "gamechangerStart":
-                videoStreamGamechangerStart(message.data);
-                break;
-            case "gamechangerStop":
-                videoStreamGamechangerStop();
-                break;
-            case "fileStart":
-                videoStreamFileStart(message.data);
-                break;
-            case "fileStop":
-                videoStreamFileStop();
-                break;
-            //Was used in cases where local CPU power not enough to encode so started encoding server side encoded and sent rtmp to distination
-            // case "startRemote":
-            //     io.emit('stream', message);
-            //     break;
-            // case "stopRemote":
-            //     io.emit('stream', message);
-            //     break;
-        }
-    });
-    socket.on("audio", function (message) {
-        //audioFile: audioFile
-        logUtilHelper.log(appLogName, "socketio", "debug", 'audio:' + ', message:' + message + ', client id:' + socket.id);
-        try {
-            switch (message.cmd) {
-                case "audioFileSaveFullSongPlaylist":
-                    let fileStream = fs.createWriteStream(path.join(fullSongAudioDirectory, message.data.fileName),{flags:"w", encoding:"utf-8", autoClose:true, start:0})        
-                    for(var i=0; i<message.data.audioFiles.length; i++){
-                        let data = "file '" + message.data.audioFiles[i]  + "'\n";
-                        fileStream.write(data);
-                    }
-                    fileStream.end();
-                    fileStream.close();
-                    break;
-                case "audioFilePlayFullSongPlaylist":
+        socket.on('practiceMode', function (message) {
+            try{
+                logUtilHelper.log(appLogName, "socketio", "debug",'practiceMode:' + message.cmd + ', client id:' + socket.id);
+                switch (message.cmd) {
+                    case "pitcher":
+                        commonData.practiceMode.pitcher = message.data.pitcher;
+                        sendToSocketClients("practiceMode", { cmd: "pitcher", data: message.data }, true, socket.id); 
+                        break;
+                    case "batter":
+                        commonData.practiceMode.batter = message.data.batter;
+                        sendToSocketClients("practiceMode", { cmd: "batter", data: message.data }, true, socket.id); 
+                        break;
                     
-                    if(message.data.loop === true){
-                        //-safe 0 -autoexit -hide_banner -nodisp -f concat  -i data\audiofiles\fullsongs\playlist.txt
-                        audioFilePlay(fullSongAudioDirectory, {fileName: message.data.fileName}, ['-hide_banner', '-nodisp', "-f", "concat", "-safe", "0", "-loop", "0" ]);
-                    }else{
-                        audioFilePlay(fullSongAudioDirectory, {fileName: message.data.fileName}, ['-hide_banner', '-nodisp', "-f", "concat", "-safe", "0", '-autoexit']);
+                }
+            }catch(ex){
+                logUtilHelper.log(appLogName, "socketio", "error",'practiceMode:', ex);
+            }
+        });
+
+
+        socket.on('videoStream', function (message) {
+            try{
+                logUtilHelper.log(appLogName, "socketio", "debug",'videoStream:' + message.cmd + ', client id:' + socket.id);
+                switch (message.cmd) {
+                    case "start":
+                        videoStreamYoutubeStart(message.data);
+                        videoStreamGamechangerStart(message.data);
+                        videoStreamFileStart(message.data);
+                        break;
+                    case "stop":
+                        videoStreamYoutubeStop();
+                        videoStreamGamechangerStop();
+                        videoStreamFileStop();
+                        break;
+                    case "youtubeStart":
+                        videoStreamYoutubeStart(message.data);
+                        break;
+                    case "youtubeStop":
+                        videoStreamYoutubeStop();
+                        break;
+                    case "gamechangerStart":
+                        videoStreamGamechangerStart(message.data);
+                        break;
+                    case "gamechangerStop":
+                        videoStreamGamechangerStop();
+                        break;
+                    case "fileStart":
+                        videoStreamFileStart(message.data);
+                        break;
+                    case "fileStop":
+                        videoStreamFileStop();
+                        break;
+                    //Was used in cases where local CPU power not enough to encode so started encoding server side encoded and sent rtmp to distination
+                    // case "startRemote":
+                    //     io.emit('stream', message);
+                    //     break;
+                    // case "stopRemote":
+                    //     io.emit('stream', message);
+                    //     break;
+                }
+            }catch(ex){
+                logUtilHelper.log(appLogName, "socketio", "error", 'videoStream', ex);
+            }
+        });
+        socket.on("audio", function (message) {
+            
+            //audioFile: audioFile
+            
+            try {
+                logUtilHelper.log(appLogName, "socketio", "debug", 'audio:' + ', message:' + message + ', client id:' + socket.id);
+                switch (message.cmd) {
+                    case "audioFileSaveFullSongPlaylist":
+                        let fileStream = fs.createWriteStream(path.join(fullSongAudioDirectory, message.data.fileName),{flags:"w", encoding:"utf-8", autoClose:true, start:0})        
+                        for(var i=0; i<message.data.audioFiles.length; i++){
+                            let data = "file '" + message.data.audioFiles[i]  + "'\n";
+                            fileStream.write(data);
+                        }
+                        fileStream.end();
+                        fileStream.close();
+                        break;
+                    case "audioFilePlayFullSongPlaylist":
+                        
+                        if(message.data.loop === true){
+                            //-safe 0 -autoexit -hide_banner -nodisp -f concat  -i data\audiofiles\fullsongs\playlist.txt
+                            audioFilePlay(fullSongAudioDirectory, {fileName: message.data.fileName}, ['-hide_banner', '-nodisp', "-f", "concat", "-safe", "0", "-loop", "0" ]);
+                        }else{
+                            audioFilePlay(fullSongAudioDirectory, {fileName: message.data.fileName}, ['-hide_banner', '-nodisp', "-f", "concat", "-safe", "0", '-autoexit']);
+                        }
+                        break;
+                    case "audioFilePlayFullSong":
+                        audioFilePlay(fullSongAudioDirectory, message.data.audioFile, ['-hide_banner', '-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5']);
+                        break;
+                    case "audioFilePlayWalkup":
+                        audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-hide_banner', '-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5', "-t", "15"])
+                        break;
+                    case "audioFileStop":
+                        audioFileStop();
+                        break;
+                }
+            } catch (ex) {
+                logUtilHelper.log(appLogName, "socketio", 'error', 'audio', ex);
+            }
+        });
+
+        socket.on("resetRadarSettings", function (message) {
+            logUtilHelper.log(appLogName, "socketio", "debug", 'resetRadarSettings:' + ', message:' + message + ', client id:' + socket.id);
+            radarStalker2.resetRadarSettings();
+        })
+
+        socket.on("gameChange", function (message) {
+            logUtilHelper.log(appLogName, "socketio", "debug", 'gameChange:' + ', message:' + message + ', client id:' + socket.id);
+            if (commonData.game === null) {
+                commonData.game = {};
+            }
+            switch (message.cmd) {
+                case "gameChange":
+                    if (message.data.inning !== undefined) {
+                        commonData.game.inning = message.data.inning;
                     }
-                    break;
-                case "audioFilePlayFullSong":
-                    audioFilePlay(fullSongAudioDirectory, message.data.audioFile, ['-hide_banner', '-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5']);
-                    break;
-                case "audioFilePlayWalkup":
-                    audioFilePlay(walkupAudioDirectory, message.data.audioFile, ['-hide_banner', '-nodisp', '-autoexit', '-af', 'afade=t=in:st=0:d=5,afade=t=out:st=10:d=5', "-t", "15"])
-                    break;
-                case "audioFileStop":
-                    audioFileStop();
+                    if (message.data.inningPosition !== undefined) {
+                        commonData.game.inningPosition = message.data.inningPosition;
+                    }
+                    if (message.data.score !== undefined) {
+                        if (commonData.game.score === undefined) {
+                            commonData.game.score = {};
+                        }
+                        if (message.data.score.guest !== undefined) {
+                            commonData.game.score.guest = message.data.score.guest;
+                        }
+                        if (message.data.score.home !== undefined) {
+                            commonData.game.score.home = message.data.score.home;
+                        }
+                    }
+                    if (message.data.guest !== undefined) {
+                        if (commonData.game.guest === undefined) {
+                            commonData.game.guest = {};
+                        }
+                        if (message.data.guest.team !== undefined) {
+                            commonData.game.guest.team = message.data.guest.team;
+                        }
+                        if (message.data.guest.lineup !== undefined) {
+                            commonData.game.guest.lineup = message.data.guest.lineup;
+                        }
+                        if (message.data.guest.batterIndex !== undefined) {
+                            commonData.game.guest.batterIndex = message.data.guest.batterIndex;
+                        }
+                    }
+                    if (message.data.home !== undefined) {
+                        if (commonData.game.home === undefined) {
+                            commonData.game.home = {};
+                        }
+                        if (message.data.home.team !== undefined) {
+                            commonData.game.home.team = message.data.home.team;
+                        }
+                        if (message.data.home.lineup !== undefined) {
+                            commonData.game.home.lineup = message.data.home.lineup;
+                        }
+                        if (message.data.home.batterIndex !== undefined) {
+                            commonData.game.home.batterIndex = message.data.home.batterIndex;
+                        }
+                    }
+                    if (message.data.outs !== undefined) {
+                        commonData.game.outs = message.data.outs;
+                    }
+                    if (message.data.strikes !== undefined) {
+                        commonData.game.strikes = message.data.strikes;
+                    }
+                    if (message.data.balls !== undefined) {
+                        commonData.game.balls = message.data.balls;
+                    }
+                    if (message.data.pitcher !== undefined) {
+                        commonData.game.pitcher = message.data.pitcher;
+                    }
+                    if (message.data.batter !== undefined) {
+                        commonData.game.batter = message.data.batter;
+                    }
+                    commonData.gameIsDirty = true;
+                    sendToSocketClients("gameChanged", { cmd: "gameChanged", data: message.data }, false, socket.id);      //use io to send it to everyone
+                    updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData})
+                    
                     break;
             }
-        } catch (ex) {
-            logUtilHelper.log(appLogName, "socketio", 'error', 'audio', ex);
-        }
-    });
+            
+        })
 
-    socket.on("resetRadarSettings", function (message) {
-        logUtilHelper.log(appLogName, "socketio", "debug", 'resetRadarSettings:' + ', message:' + message + ', client id:' + socket.id);
-        radarStalker2.resetRadarSettings();
+        //socket.on("pitcher", function (data) {
+        //    debug('pitcher:'  + ', value:' + data.data + ', client id:' + socket.id);
+        //    radarStalker2.pitcher({ data: data, socket: socket });
+        //})
 
-    })
+        //socket.on("batter", function (data) {
+        //    debug('batter:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
+        //    radarStalker2.batter({ data: data, socket: socket });
+        //})
 
-    socket.on("gameChange", function (message) {
-        logUtilHelper.log(appLogName, "socketio", "debug", 'gameChange:' + ', message:' + message + ', client id:' + socket.id);
-        if (commonData.game === null) {
-            commonData.game = {};
-        }
-        switch (message.cmd) {
-            case "gameChange":
-                if (message.data.inning !== undefined) {
-                    commonData.game.inning = message.data.inning;
-                }
-                if (message.data.inningPosition !== undefined) {
-                    commonData.game.inningPosition = message.data.inningPosition;
-                }
-                if (message.data.score !== undefined) {
-                    if (commonData.game.score === undefined) {
-                        commonData.game.score = {};
-                    }
-                    if (message.data.score.guest !== undefined) {
-                        commonData.game.score.guest = message.data.score.guest;
-                    }
-                    if (message.data.score.home !== undefined) {
-                        commonData.game.score.home = message.data.score.home;
-                    }
-                }
-                if (message.data.guest !== undefined) {
-                    if (commonData.game.guest === undefined) {
-                        commonData.game.guest = {};
-                    }
-                    if (message.data.guest.team !== undefined) {
-                        commonData.game.guest.team = message.data.guest.team;
-                    }
-                    if (message.data.guest.lineup !== undefined) {
-                        commonData.game.guest.lineup = message.data.guest.lineup;
-                    }
-                    if (message.data.guest.batterIndex !== undefined) {
-                        commonData.game.guest.batterIndex = message.data.guest.batterIndex;
-                    }
-                }
-                if (message.data.home !== undefined) {
-                    if (commonData.game.home === undefined) {
-                        commonData.game.home = {};
-                    }
-                    if (message.data.home.team !== undefined) {
-                        commonData.game.home.team = message.data.home.team;
-                    }
-                    if (message.data.home.lineup !== undefined) {
-                        commonData.game.home.lineup = message.data.home.lineup;
-                    }
-                    if (message.data.home.batterIndex !== undefined) {
-                        commonData.game.home.batterIndex = message.data.home.batterIndex;
-                    }
-                }
-                if (message.data.outs !== undefined) {
-                    commonData.game.outs = message.data.outs;
-                }
-                if (message.data.strikes !== undefined) {
-                    commonData.game.strikes = message.data.strikes;
-                }
-                if (message.data.balls !== undefined) {
-                    commonData.game.balls = message.data.balls;
-                }
-                if (message.data.pitcher !== undefined) {
-                    commonData.game.pitcher = message.data.pitcher;
-                }
-                if (message.data.batter !== undefined) {
-                    commonData.game.batter = message.data.batter;
-                }
-                commonData.gameIsDirty = true;
-                sendToSocketClients("gameChanged", { cmd: "gameChanged", data: message.data }, false, socket.id);      //use io to send it to everyone
-                updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData})
-                
+        socket.on("pitch", function (message) {
+            logUtilHelper.log(appLogName, "socketio", "debug", 'pitch:' + message.cmd + ', value:' + message.data + ', client id:' + socket.id);
+            radarStalker2.pitch({ data: message, socket: socket });
+        })
+
+        socket.on('ping', function(data) {
+            logUtilHelper.log(appLogName, "socketio", "debug", 'ping: client id:' + socket.id);
+        });
+
+
+        socket.on('config', function(message) {
+            logUtilHelper.log(appLogName, "socketio", "debug", 'config:' + message.cmd + ' client id:' + socket.id);
+            switch(message.cmd){
+                case "get":
+                    break;
+
+            }
+        });
+
+        socket.on('serverLogs', function(message) {
+            logUtilHelper.log(appLogName, "socketio", "debug", 'serverLogs:' + message.cmd + ' client id:' + socket.id);
+            switch(message.cmd){
+                case "getServerLogs":
+                    socket.emit("serverLogs", {cmd:message.cmd, data: logUtilHelper.memoryData} )
+                    break;
+                case "getAppLogLevels":
+                socket.emit("serverLogs", {cmd:message.cmd, data: logUtilHelper.getLogLevelAppLogLevels} );
                 break;
-        }
-        
-    })
-
-    //socket.on("pitcher", function (data) {
-    //    debug('pitcher:'  + ', value:' + data.data + ', client id:' + socket.id);
-    //    radarStalker2.pitcher({ data: data, socket: socket });
-    //})
-
-    //socket.on("batter", function (data) {
-    //    debug('batter:' + data.cmd + ', value:' + data.data + ', client id:' + socket.id);
-    //    radarStalker2.batter({ data: data, socket: socket });
-    //})
-
-    socket.on("pitch", function (message) {
-        logUtilHelper.log(appLogName, "socketio", "debug", 'pitch:' + message.cmd + ', value:' + message.data + ', client id:' + socket.id);
-        radarStalker2.pitch({ data: message, socket: socket });
-    })
-
-    socket.on('ping', function(data) {
-        logUtilHelper.log(appLogName, "socketio", "debug", 'ping: client id:' + socket.id);
-    });
-
-
-    socket.on('config', function(message) {
-        logUtilHelper.log(appLogName, "socketio", "debug", 'config:' + message.cmd + ' client id:' + socket.id);
-        switch(message.cmd){
-            case "get":
-                break;
-
-        }
-    });
-
-    socket.on('serverLogs', function(message) {
-        logUtilHelper.log(appLogName, "socketio", "debug", 'serverLogs:' + message.cmd + ' client id:' + socket.id);
-        switch(message.cmd){
-            case "getServerLogs":
-                socket.emit("serverLogs", {cmd:message.cmd, data: logUtilHelper.memoryData} )
-                break;
-            case "getAppLogLevels":
-               socket.emit("serverLogs", {cmd:message.cmd, data: logUtilHelper.getLogLevelAppLogLevels} );
-               break;
-            case "setAppLogLevels":
-                if(privateData.subscribedSocketIOClients.serverLogs === undefined){
-                    privateData.subscribedSocketIOClients.serverLogs = {};
-                }
-                if(privateData.subscribedSocketIOClients.serverLogs[socket.id] !== undefined){
-                    if(privateData.subscribedSocketIOClients.serverLogs[socket.id].data === undefined){
-                        privateData.subscribedSocketIOClients.serverLogs[socket.id].data = {};
+                case "setAppLogLevels":
+                    if(privateData.subscribedSocketIOClients.serverLogs === undefined){
+                        privateData.subscribedSocketIOClients.serverLogs = {};
                     }
-                    privateData.subscribedSocketIOClients.serverLogs[socket.id].data.appLogLevels =  message.data.appLogLevels;
-                }else{
-                    privateData.subscribedSocketIOClients.serverLogs[socket.id] = {socket: socket, timestamp: new Date(), data: message.data};
-                }
-                break;
-        }
-        
-        
-    });
+                    if(privateData.subscribedSocketIOClients.serverLogs[socket.id] !== undefined){
+                        if(privateData.subscribedSocketIOClients.serverLogs[socket.id].data === undefined){
+                            privateData.subscribedSocketIOClients.serverLogs[socket.id].data = {};
+                        }
+                        privateData.subscribedSocketIOClients.serverLogs[socket.id].data.appLogLevels =  message.data.appLogLevels;
+                    }else{
+                        privateData.subscribedSocketIOClients.serverLogs[socket.id] = {socket: socket, timestamp: new Date(), data: message.data};
+                    }
+                    break;
+            }
+            
+            
+        });
 
-    if (socket.client.request.headers["origin"] !== "ArduinoSocketIo") {
-        //send the current Config to the new client Connections
-        socket.emit('radarConfig', radarStalker2.getRadarConfig());
-        socket.emit('softwareConfig', radarStalker2.getSoftwareConfig());
-        socket.emit('radarSpeedDataHistory', radarStalker2.getradarSpeedDataHistory());
-        socket.emit('gameChanged', {cmd:"gameChanged", data:commonData.game});
-        socket.emit('videoStreams', {cmd:"allStreamStats", data:commonData.videoStreamStats});
-        
+        if (socket.client.request.headers["origin"] !== "ArduinoSocketIo") {
+            //send the current Config to the new client Connections
+            socket.emit('radarConfig', radarStalker2.getRadarConfig());
+            socket.emit('softwareConfig', radarStalker2.getSoftwareConfig());
+            socket.emit('radarSpeedDataHistory', radarStalker2.getradarSpeedDataHistory());
+            socket.emit('gameChanged', {cmd:"gameChanged", data:commonData.game});
+            socket.emit('videoStreams', {cmd:"allStreamStats", data:commonData.videoStreamStats});
+            
+        }
+        //send the current Battery Voltage
+        socket.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
+        //console.log("gpsState", gpsMonitor.getGpsState())
+    }catch(ex){
+        logUtilHelper.log(appLogName, "socketio", "error", "socketio.onConnection: " + ex);
     }
-    //send the current Battery Voltage
-    socket.emit('batteryVoltage', batteryMonitor.getBatteryVoltage());
-    //console.log("gpsState", gpsMonitor.getGpsState())
-
     
 });
 
 radarStalker2.on('radarSpeed', function (data) {
-    if (commonData.game) {
-        data.pitcher = commonData.game.pitcher.player;
-        data.batter = commonData.game.batter.player;
-        if (commonData.game.log === undefined) {
-            commonData.game.log = [];
-        }
-        commonData.game.log.push(JSON.parse(JSON.stringify(data)));
-        commonData.gameIsDirty = true;
-    }else if(commonData.practiceMode){
-        if(commonData.practiceMode.pitcher){
-            data.pitcher = commonData.practiceMode.pitcher;
-        }
-        if(commonData.practiceMode.batter){
-            data.batter = commonData.practiceMode.batter;
-        }
-    }  
-    commonData.radar.log.push(JSON.parse(JSON.stringify(data)));
-    if(commonData.radar.log.length>objOptions.maxRadarLogLength){
-        commonData.radar.log.shift()
-    } 
-    dataDisplay.updateSpeedData(data);
-    sendToSocketClients('radarSpeed', data,true);
-    commonData.currentRadarSpeedData = data;
-    logUtilHelper.log(appLogName, "app", "info", 'radarData', data);
-    updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
+    try{
+        if (commonData.game) {
+            data.pitcher = commonData.game.pitcher.player;
+            data.batter = commonData.game.batter.player;
+            if (commonData.game.log === undefined) {
+                commonData.game.log = [];
+            }
+            commonData.game.log.push(JSON.parse(JSON.stringify(data)));
+            commonData.gameIsDirty = true;
+        }else if(commonData.practiceMode){
+            if(commonData.practiceMode.pitcher){
+                data.pitcher = commonData.practiceMode.pitcher;
+            }
+            if(commonData.practiceMode.batter){
+                data.batter = commonData.practiceMode.batter;
+            }
+        }  
+        commonData.radar.log.push(JSON.parse(JSON.stringify(data)));
+        if(commonData.radar.log.length>objOptions.maxRadarLogLength){
+            commonData.radar.log.shift()
+        } 
+        dataDisplay.updateSpeedData(data);
+        sendToSocketClients('radarSpeed', data,true);
+        commonData.currentRadarSpeedData = data;
+        logUtilHelper.log(appLogName, "app", "info", 'radarData', data);
+        updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
+    }catch(ex){
+        logUtilHelper.log(appLogName, "socketio", "error", "radarStalker2.onRadarSpeed: " + ex);
+    }
 });
 radarStalker2.on('radarTimeout', function (data) {
     sendToSocketClients('radarTimeout', data);
@@ -1130,7 +1287,7 @@ radarStalker2.on('softwareConfigProperty', function (data) {
 });
 
 batteryMonitor.on("batteryVoltage",function(data){
-    io.emit("batteryVoltage", data)
+    sendToSocketClients("batteryVoltage", data)
 })
 
 
