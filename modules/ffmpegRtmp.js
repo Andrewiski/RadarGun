@@ -33,6 +33,7 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
     }
    
     self.options = extend({}, defaultOptions, options);
+    self.videoOverlayParser = videoOverlayParser;
 
     if (process.platform === 'win32' && (process.env.FFMPEG_PATH === undefined || process.env.FFMPEG_PATH === '')) {
         process.env.FFMPEG_PATH = path.join(__dirname, '..', 'ffmpeg', 'ffmpeg.exe');
@@ -376,7 +377,7 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
 
     var updateOverlay= function (options) {
         try {
-            if(self.videoOverlayParser !== null){
+            if(self.videoOverlayParser && self.videoOverlayParser.getOverlayText){
                 var overlayText = self.videoOverlayParser.getOverlayText(options)
                 if(self.options.overlayFileName != null ){
                     var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);

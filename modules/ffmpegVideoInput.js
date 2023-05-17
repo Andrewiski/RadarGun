@@ -534,7 +534,7 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
 
     var updateOverlay= function (options) {
         try {
-            if(self.videoOverlayParser !== null){
+            if(self.videoOverlayParser && self.videoOverlayParser.getOverlayText ){
                 var overlayText = self.videoOverlayParser.getOverlayText(options)
                 if(self.options.overlayFileName != null ){
                     var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);

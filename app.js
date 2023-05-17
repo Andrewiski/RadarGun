@@ -390,29 +390,29 @@ routes.get('/data/audioFiles/fullSongs/:filename', (req, res) => {
 
         // If a range header was provided, only send the requested portion of the file
         if (range) {
-        const parts = range.replace(/bytes=/, "").split("-");
-        const start = parseInt(parts[0], 10);
-        const end = parts[1] 
-            ? parseInt(parts[1], 10)
-            : fileSize-1;
-        const chunksize = (end-start)+1;
-        const file = fs.createReadStream(filePath, {start, end});
-        const head = {
-            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-            'Accept-Ranges': 'bytes',
-            'Content-Length': chunksize,
-            'Content-Type': 'audio/mp4',
-        };
-        res.writeHead(206, head);
-        file.pipe(res);
+            const parts = range.replace(/bytes=/, "").split("-");
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] 
+                ? parseInt(parts[1], 10)
+                : fileSize-1;
+            const chunksize = (end-start)+1;
+            const file = fs.createReadStream(filePath, {start, end});
+            const head = {
+                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunksize,
+                'Content-Type': 'audio/mp4',
+            };
+            res.writeHead(206, head);
+            file.pipe(res);
         } else {
-        // If no range header was provided, send the entire file
-        const head = {
-            'Content-Length': fileSize,
-            'Content-Type': 'audio/mp4',
-        };
-        res.writeHead(200, head);
-        fs.createReadStream(filePath).pipe(res);
+            // If no range header was provided, send the entire file
+            const head = {
+                'Content-Length': fileSize,
+                'Content-Type': 'audio/mp4',
+            };
+            res.writeHead(200, head);
+            fs.createReadStream(filePath).pipe(res);
         }
     } catch (err) {
         logUtilHelper.log(appLogName, "browser", "error", "Error getting audio file.", req.params.filename);
