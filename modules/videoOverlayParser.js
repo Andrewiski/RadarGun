@@ -122,7 +122,7 @@ var videoOverlayParser = function (options, logUtilHelper) {
                     overlayText += " ".padEnd(22);
                 }
             }
-            if(filterOverlay.showRadarHittingVelocity === true){
+            if(overlayFilters.showRadarHittingVelocity === true){
                 if (radarData) {
                     overlayText += " EV: " + radarData.outMaxSpeed.toFixed(1).toString().padStart(4, "0") + " MPH   ";
                 } else {
@@ -135,7 +135,7 @@ var videoOverlayParser = function (options, logUtilHelper) {
                 }
             }
     
-            logUtilHelper.log(appLogName, "app", "trace", "updateOverlayText", OverlayText);
+            logUtilHelper.log(appLogName, "app", "trace", "updateOverlayText", overlayText);
     
             return overlayText;
         } catch (ex) {

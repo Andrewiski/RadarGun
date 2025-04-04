@@ -571,17 +571,17 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 }); 
 
 
-var updateOverlays = function (data) {
+var updateOverlays = function (options) {
     //updateOverlays({gameData: commonData.game, radarData: commonData.currentRadarSpeedData});
     try{
         if(privateData.videoStreams.youtube != null){
-            privateData.videoStreams.youtube.updateOverlay();
+            privateData.videoStreams.youtube.updateOverlay(options);
         }
         if(privateData.videoStreams.gamechanger != null){
-            privateData.videoStreams.gamechanger.updateOverlay();
+            privateData.videoStreams.gamechanger.updateOverlay(options);
         }
         if(privateData.videoStreams.file != null){
-            privateData.videoStreams.file.updateOverlay();
+            privateData.videoStreams.file.updateOverlay(options);
         }
     }catch(ex){
         logUtilHelper.log(appLogName, "app", "error", "Error updating overlays.", ex);
