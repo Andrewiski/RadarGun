@@ -51,6 +51,8 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
 
     var command = null;
 
+    var overlayFileNameFullPath =  path.join(__dirname, '..', self.options.overlayFileName);
+
     var parseStdOutput = function (stderr) {
 
         //assumes // Assumes .outputOptions('-loglevel level')  so loglevel proceeds information
@@ -178,9 +180,9 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
                             commonData.streamStats.status = "connected";
                         }
                         self.emit('streamStats', commonData.streamStats);
-                        logUtilHelper.log(appLogName, "app", 'trace', 'parsed stdErr: ', stdOut);
+                        logUtilHelper.log(appLogName, "app", 'trace', self.options.outputFile, 'parsed stdErr: ', stdOut);
                     } else {
-                        logUtilHelper.log(appLogName, "app", 'debug', 'parsed stdErr: ', stdOut);
+                        logUtilHelper.log(appLogName, "app", 'debug', self.options.outputFile, 'parsed stdErr: ', stdOut);
                     }
                     break;
                 case 'warning':
@@ -189,20 +191,20 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
                         self.emit('streamStats', commonData.streamStats);
                     }
                     
-                    logUtilHelper.log(appLogName, "app", 'warning', 'parsed stderr:', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'warning', self.options.outputFile, 'parsed stderr:', stdOut);
                     break;
                 case 'error':
                     if(stdOut.value){
                         commonData.streamStats.error = stdOut.value;
                         self.emit('streamStats', commonData.streamStats);
                     }
-                    logUtilHelper.log(appLogName, "app", 'error',  'parsed stderr:', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'error', self.options.outputFile, 'parsed stderr:', stdOut);
                     break;
                 default:
-                    logUtilHelper.log(appLogName, "app", 'debug', 'parsed stderr: ', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'debug', self.options.outputFile, 'parsed stderr: ', stdOut);
             }
         }else{
-            logUtilHelper.log(appLogName, "app", 'debug',  'stderr:', stderr);
+            logUtilHelper.log(appLogName, "app", 'debug', self.options.outputFile, 'stderr:', stderr);
         }
     };
 
@@ -231,7 +233,7 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
     var commandEnd = function (result) {
         commonData.streamStats.status = "ended";
         self.emit('streamStats', commonData.streamStats);
-        logUtilHelper.log(appLogName, "app", 'error', 'Source Stream Closed');
+        logUtilHelper.log(appLogName, "app", 'warning', 'Source Stream Closed');
         
     };
 
@@ -289,18 +291,30 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
         logUtilHelper.log(appLogName, "app", "info", "file destination", self.options.outputFile)
         command = ffmpeg({ source: incomingTransStream });    
         command.inputOptions(self.options.inputOptions)
-        command.outputOptions(self.options.outputOptions)
+        
         command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info 
         command.addOption('-hide_banner'); //Hide the banner           
         command.on('error', commandError)
         command.on('progress', commandProgress)
         command.on('stderr', commandStdError)
         command.on('end', commandEnd);
-        
-        if (self.options.videoFilters) {
-            command.videoFilters(self.options.videoFilters);
+        command.outputOptions(self.options.outputOptions)
+        if ( self.options.videoFilters) {
+            
+            let excapedOverlayFileName = overlayFileNameFullPath;
+            
+            excapedOverlayFileName = excapedOverlayFileName.replace(/\\/g, "\\\\"); // escape backslashes for windows paths
+            excapedOverlayFileName = excapedOverlayFileName.replace(/:/g, "\\:"); // escape colons for windows paths
+            let videoFilters = self.options.videoFilters.replace(/{{overlayFileName}}/g,excapedOverlayFileName)
+           
+            logUtilHelper.log(appLogName, "app", 'info', 'videoFilters', videoFilters);
+            command.videoFilters(videoFilters);
+            //command.addOutputOption("-vf " + videoFilters);
         }
-        command.output(self.options.outputFile)
+        command.output(self.options.outputFile);
+
+
+        //logUtilHelper.log(appLogName, "app","info", "ffmpeg command", command.g);
         command.run();
         commonData.shouldRestartStream = true;
         logUtilHelper.log(appLogName, "app","info", "ffmpeg Started");
@@ -328,6 +342,9 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
             //commonData.streamStats.error = "commandEnd Called q sent";
             if (!(command === null || command === undefined || command.ffmpegProc === null || command.ffmpegProc === undefined || command.ffmpegProc.stdin === null || command.ffmpegProc.stdin === undefined)) {
                 command.ffmpegProc.stdin.write('q');
+                command.ffmpegProc.stdin.write('q');
+                command.ffmpegProc.stdin.write('q');
+                
             }else{
                 streamKill(sourceStream,throwError);
             }
@@ -365,9 +382,9 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
             if(self.videoOverlayParser){
                 var overlayText = self.videoOverlayParser.getOverlayText(options)
                 if(self.options.overlayFileName != null ){
-                    var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
+                   
                     try {
-                        fs.writeFileSync(overlayFilePath, overlayText);
+                        fs.writeFileSync(overlayFileNameFullPath, overlayText);
 
                     } catch (ex) {
                         logUtilHelper.log(appLogName, "app", "error", "Error Writing OverlayText File", ex);

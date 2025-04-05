@@ -192,9 +192,9 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
                             commonData.streamStats.incoming.status = "connected";
                         }
                         self.emit('streamStats', commonData.streamStats);
-                        logUtilHelper.log(appLogName, "app", 'trace', self.options.rtmpUrl,  'parsed stdErr:', stdOut);
+                        logUtilHelper.log(appLogName, "app", 'trace', self.options.input,  'parsed stdErr:', stdOut);
                     } else {
-                        logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'parsed stdErr:', stdOut);
+                        logUtilHelper.log(appLogName, "app", 'debug', self.options.input, 'parsed stdErr:', stdOut);
                     }
                     break;
                 case 'warning':
@@ -203,20 +203,20 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
                         self.emit('streamStats', commonData.streamStats);
                     }
                     
-                    logUtilHelper.log(appLogName, "app", 'warning', self.options.rtmpUrl, 'parsed stderr:', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'warning', self.options.input, 'parsed stderr:', stdOut);
                     break;
                 case 'error':
                     if(stdOut.value){
                         commonData.streamStats.incoming.error = stdOut.value;
                         self.emit('streamStats', commonData.streamStats);
                     }
-                    logUtilHelper.log(appLogName, "app", 'error', self.options.rtmpUrl, 'parsed stderr:', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'error', self.options.input, 'parsed stderr:', stdOut);
                     break;
                 default:
-                    logUtilHelper.log(appLogName, "app", 'info', self.options.rtmpUrl, 'parsed stderr:', stdOut);
+                    logUtilHelper.log(appLogName, "app", 'info', self.options.input, 'parsed stderr:', stdOut);
             }
         }else{
-            logUtilHelper.log(appLogName, "app", 'debug', self.options.rtmpUrl, 'stderr:', stderr);
+            logUtilHelper.log(appLogName, "app", 'debug', self.options.input, 'stderr:', stderr);
         }
     };
 
@@ -349,6 +349,7 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
         commonData.shouldRestartStream =false;
         if (!(command === null || command === undefined)) {
             command.kill();
+            command = null;
         }
         commonData.streamStats.incoming.status = "starting"; 
         commonData.streamStats.incoming.info = null;
@@ -381,7 +382,8 @@ var FfmpegVideoInput = function (options, videoOverlayParser, logUtilHelper) {
                 //console.log(executeResult.message)
             });
         }else{
-            command = ffmpeg({ source: self.options.input });    
+            
+            command = ffmpeg({ source: self.options.input });   
             command.inputOptions(self.options.inputOptions)
             command.outputOptions(self.options.outputOptions)
             command.addOption('-loglevel level+info')       //added by Andy so we can parse out stream info     

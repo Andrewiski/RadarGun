@@ -51,6 +51,7 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
     };
 
     var command = null;
+    var overlayFileNameFullPath =  path.join(__dirname, '..', self.options.overlayFileName);
 
     var parseStdOutput = function (stderr) {
 
@@ -272,6 +273,7 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
         commonData.shouldRestartStream = true;
         if (!(command === null || command === undefined)) {
             command.kill();
+            command = null;
         }
         commonData.streamStats.status = "starting"; 
         commonData.streamStats.info = null;
@@ -298,11 +300,22 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
         command.on('stderr', commandStdError)
         command.on('end', commandEnd);
         
-        if (self.options.videoFilters) {
-            command.videoFilters(self.options.videoFilters);
+        
+        command.output(self.options.rtmpUrl);
+        command.outputOptions(self.options.outputOptions);
+        if ( self.options.videoFilters) {
+            
+            let excapedOverlayFileName = overlayFileNameFullPath;
+            
+            excapedOverlayFileName = excapedOverlayFileName.replace(/\\/g, "\\\\"); // escape backslashes for windows paths
+            excapedOverlayFileName = excapedOverlayFileName.replace(/:/g, "\\:"); // escape colons for windows paths
+            let videoFilters = self.options.videoFilters.replace(/{{overlayFileName}}/g,excapedOverlayFileName)
+           
+            logUtilHelper.log(appLogName, "app", 'info', 'videoFilters', videoFilters);
+            command.videoFilters(videoFilters);
+            //command.addOutputOption("-vf " + videoFilters);
         }
-        command.output(self.options.rtmpUrl)
-        command.outputOptions(self.options.outputOptions)
+        
         if(self.options.rtmpUrl2){
             command.output(self.options.rtmpUrl2)
             if(self.options.outputOptions2){
@@ -376,9 +389,9 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
             if(self.videoOverlayParser){
                 var overlayText = self.videoOverlayParser.getOverlayText(options)
                 if(self.options.overlayFileName != null ){
-                    var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
+                    //var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
                     try {
-                        fs.writeFileSync(overlayFilePath, overlayText);
+                        fs.writeFileSync(overlayFileNameFullPath, overlayText);
 
                     } catch (ex) {
                         logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error Writing OverlayText File", ex);
