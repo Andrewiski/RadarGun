@@ -40,7 +40,11 @@ sudo systemctl enable radar
 
 #Test Config do this as Radar after su radar
 # DEBUG=app,dataDisplay,radar,adafruitLedBackpack,gpsMonitor,radarEmulato CONFIGDIRECTORY=/opt/de/appdata/radar/config DATADIRECTORY=/opt/de/appdata/radar/data LOGDIRECTORY=/opt/de/appdata/radar/logs npm start
-sudo nmcli device wifi hotspot ssid "DE Radar" password "radarradar"
+
+
+#Enable Wireless Hotspot on Raspberry Pi
+# Before you start, ensure your Raspberry Pi has a Wi-Fi adapter that supports AP mode. Most modern Raspberry Pi models do.
+#sudo nmcli device wifi hotspot ssid "DERadar" password "radarradar"
 #To disable the hotspot network and resume use of your Pi as a wireless client, run the following command:
 #sudo nmcli device disconnect wlan0
 #sudo nmcli device up wlan0
@@ -49,6 +53,6 @@ sudo nmcli device wifi hotspot ssid "DE Radar" password "radarradar"
 #sudo nmcli connection add type bridge con-name 'Bridge' ifname bridge0
 #sudo nmcli connection modify 'Hotspot' master bridge0
 #Now that you’ve configured your bridge, it’s time to activate it. Run the following command to activate the bridge:
-#sudo nmcli connection add con-name 'Hotspot' ifname wlan0 type wifi slave-type bridge master bridge0  wifi.mode ap wifi.ssid "DE Radar" wifi-sec.key-mgmt wpa-psk  wifi-sec.proto rsn wifi-sec.pairwise ccmp wifi-sec.psk "radarradar"
+#sudo nmcli connection add con-name 'Hotspot' ifname wlan0 type wifi slave-type bridge master bridge0  wifi.mode ap wifi.ssid "DERadar" wifi-sec.key-mgmt wpa-psk  wifi-sec.proto rsn wifi-sec.pairwise ccmp wifi-sec.psk "radarradar"
 #And run the following command to start hosting your wireless network:
 #sudo nmcli connection up Bridge

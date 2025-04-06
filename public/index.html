@@ -21,6 +21,7 @@
     <link href="/javascript/jsoneditor/jsoneditor.min.css" rel="stylesheet" type="text/css">
     
     <link href="/stylesheets/style.css" rel="stylesheet" />
+    <script src="https://widgets.gc.com/static/js/sdk.v1.js"></script>
 
     <script type="text/javascript">
 
@@ -83,15 +84,19 @@
     <script src="/app/scoreboard/scoreboardViewController.js"></script>
     <script src="/app/radarMonitor.js"></script>
     <script src="/app/errorHandlerProvider.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyADf2Ss5DEZdZMFEJ0f8fmi1KcYRZMYLZI&callback=initMap" async defer></script>
+    
+    
+    
     <script>
-        var googleIsInited = false;
-        function initMap() {
-            googleIsInited = true;
-            console.log("initMap Complete");
-        }
+        // var googleIsInited = false;
+        // function initMap() {
+        //     googleIsInited = true;
+        //     console.log("initMap Complete");
+        // }
+        
 
-    </script>
+    </script> 
+    
     <style>
 
 
@@ -123,7 +128,7 @@
     <div class="container-fluid">
         <div id="errormsg"></div>
         <form name="radarmonitor" id="radarmonitor" class="sb">
-            <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2025</div>
+            <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2023</div>
             <div data-ng-cloak class="barsandmain">
                 <div class="main">
                     <div data-ui-view>                    

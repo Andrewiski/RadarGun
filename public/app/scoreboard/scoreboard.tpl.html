@@ -39,7 +39,7 @@
             <i class="fa fa-battery-empty" aria-hidden="true"></i>-->
             <span> | {{commonData.gpsPosition.lat}} / {{commonData.gpsPosition.lon}} </span>
             <span> | {{commonData.lastSpeedDataTimestamp}}</span>
-
+            <span> | {{commonData.serverInfo.version}}</span>
 
         </div>
     </div>
@@ -457,6 +457,8 @@
                         </div>
                     </div>
                 </uib-tab>
+
+                
 
                 <uib-tab index="4" ng-show="commonData.isGameSelected" ng-click="tabClick('lineup')">
                     <uib-tab-heading>
@@ -1581,53 +1583,74 @@
                         <i class="fa-solid fa-satellite-dish"></i> Radar Config
                     </uib-tab-heading>
                     <div>
-                            <div class="radarConfig" ng-show="commonData.showRadarConfig">
-                                <div>
-                                    <div ng-show="commonData.radarConfig.TransmiterControl.value !== 1"><a class="btn btn-sm btn-danger" ng-click="radarCommand('TransmiterControl',1)">Off</a>(Click to Turn On)</div>
-                                    <div ng-hide="commonData.radarConfig.TransmiterControl.value !== 1"><a class="btn btn-sm btn-success" ng-click="radarCommand('TransmiterControl',0)">On</a> (Click to Turn Off)</div>
-                                    <!--<div data-toggle-switch data-model="radarPower"></div>-->
-                                    <img ng-hide="!commonData.isradarCommandPending" src="app/img/spinner.gif" ng-style='{"margin-left":"8px"}' width="24" height="24" alt="" />
-                                </div>
+                        <div class="radarConfig" ng-show="commonData.showRadarConfig">
+                            <div>
+                                <div ng-show="commonData.radarConfig.TransmiterControl.value !== 1"><a class="btn btn-sm btn-danger" ng-click="radarCommand('TransmiterControl',1)">Off</a>(Click to Turn On)</div>
+                                <div ng-hide="commonData.radarConfig.TransmiterControl.value !== 1"><a class="btn btn-sm btn-success" ng-click="radarCommand('TransmiterControl',0)">On</a> (Click to Turn Off)</div>
+                                <!--<div data-toggle-switch data-model="radarPower"></div>-->
+                                <img ng-hide="!commonData.isradarCommandPending" src="app/img/spinner.gif" ng-style='{"margin-left":"8px"}' width="24" height="24" alt="" />
+                            </div>
 
-                                <div ng-hide="commonData.editRadarConfig == true">
-                                    <div>Radar Model: {{commonData.radarConfig.ProductID.value}}</div>
-                                    <div>Low Speed Threshold:{{commonData.radarConfig.LowSpeedThreshold.value}}</div>
-                                    <div>High Speed Threshold:{{commonData.radarConfig.HighSpeedThreshold.value}}</div>
+                            <div ng-hide="commonData.editRadarConfig == true">
+                                <div>Radar Model: {{commonData.radarConfig.ProductID.value}}</div>
+                                <div>Low Speed Threshold:{{commonData.radarConfig.LowSpeedThreshold.value}}</div>
+                                <div>High Speed Threshold:{{commonData.radarConfig.HighSpeedThreshold.value}}</div>
 
-                                    <div>Left Right Angle:{{commonData.radarConfig.CosignAngle1.value}}</div>
-                                    <div>Up Down Angle:{{commonData.radarConfig.CosignAngle2.value}}</div>
-                                    <div>Range:{{commonData.radarConfig.Range.value}}</div>
-                                    <div>Message Period:{{commonData.radarConfig.MessagePeriod.value}}</div>
-                                    <div>Auto Clear Delay:{{commonData.radarConfig.AutoClearDelay.value}}</div>
-                                    <div>Hit Speed Enable:{{commonData.radarConfig.HitSpeedEnable.value}}</div>
-                                    <div>Target Direction:{{commonData.radarConfig.TargetDirection.value}}</div>
-                                    <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="commonData.editRadarConfig = true">edit</a></div>
-                                </div>
-                                <div ng-show="commonData.editRadarConfig == true">
+                                <div>Left Right Angle:{{commonData.radarConfig.CosignAngle1.value}}</div>
+                                <div>Up Down Angle:{{commonData.radarConfig.CosignAngle2.value}}</div>
+                                <div>Range:{{commonData.radarConfig.Range.value}}</div>
+                                <div>Message Period:{{commonData.radarConfig.MessagePeriod.value}}</div>
+                                <div>Auto Clear Delay:{{commonData.radarConfig.AutoClearDelay.value}}</div>
+                                <div>Hit Speed Enable:{{commonData.radarConfig.HitSpeedEnable.value}}</div>
+                                <div>Target Direction:{{commonData.radarConfig.TargetDirection.value}}</div>
+                                <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="commonData.editRadarConfig = true">edit</a></div>
+                            </div>
+                            <div ng-show="commonData.editRadarConfig == true">
 
 
-                                    <div>{{commonData.radarConfig.ProductID.value}}</div>
-                                    <div>Low Speed Threshold:<input style="width:45px" type="number" ng-model="commonData.radarConfig.LowSpeedThreshold.value" ng-change="commonData.radarConfig.LowSpeedThreshold.isDirty = true" /></div>
-                                    <div>High Speed Threshold:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HighSpeedThreshold.value" ng-change="commonData.radarConfig.HighSpeedThreshold.isDirty = true" /></div>
-                                    <div>Left Right Angle:<input style="width:45px" type="number" ng-model="commonData.radarConfig.CosignAngle1.value" ng-change="commonData.radarConfig.CosignAngle1.isDirty = true" /></div>
-                                    <div>Up Down Angle:<input style="width:45px" type="number" ng-model="commonData.radarConfig.CosignAngle2.value" ng-change="commonData.radarConfig.CosignAngle2.isDirty = true" /></div>
-                                    <div>Range:<input style="width:45px" type="number" ng-model="commonData.radarConfig.Range.value" ng-change="commonData.radarConfig.Range.isDirty = true" /></div>
-                                    <div>Message Period:<input style="width:45px" type="number" ng-model="commonData.radarConfig.MessagePeriod.value" ng-change="commonData.radarConfig.MessagePeriod.isDirty = true" /></div>
-                                    <div>Auto Clear Delay:<input style="width:45px" type="number" ng-model="commonData.radarConfig.AutoClearDelay.value" ng-change="commonData.radarConfig.AutoClearDelay.isDirty = true" /></div>
-                                    <div>Hit Speed Enable:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HitSpeedEnable.value" ng-change="commonData.radarConfig.HitSpeedEnable.isDirty = true" /></div>
-                                    <div>Target Direction:<input style="width:45px" type="number" ng-model="commonData.radarConfig.TargetDirection.value" ng-change="commonData.radarConfig.TargetDirection.isDirty = true" />0 Outbound, 1 InBound, 2 Both</div>
-                                    <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="updateRadarConfig(); commonData.editRadarConfig = false;">Save</a></div>
-                                    <div><a class="btn btn-sm btn-success" ng-click="resetRadarSettings()">Reset Radar Setting</a></div>
-                                </div>
-                                <div>
-                                    <div>Battery Voltage: {{commonData.batteryVoltage.batteryVoltage}}</div>
-                                    <div>{{commonData.batteryVoltage.time | date : 'M/d/yy hh:mm:ss'}}</div>
-                                </div>
-                                <div id="googleMap"></div>
+                                <div>{{commonData.radarConfig.ProductID.value}}</div>
+                                <div>Low Speed Threshold:<input style="width:45px" type="number" ng-model="commonData.radarConfig.LowSpeedThreshold.value" ng-change="commonData.radarConfig.LowSpeedThreshold.isDirty = true" /></div>
+                                <div>High Speed Threshold:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HighSpeedThreshold.value" ng-change="commonData.radarConfig.HighSpeedThreshold.isDirty = true" /></div>
+                                <div>Left Right Angle:<input style="width:45px" type="number" ng-model="commonData.radarConfig.CosignAngle1.value" ng-change="commonData.radarConfig.CosignAngle1.isDirty = true" /></div>
+                                <div>Up Down Angle:<input style="width:45px" type="number" ng-model="commonData.radarConfig.CosignAngle2.value" ng-change="commonData.radarConfig.CosignAngle2.isDirty = true" /></div>
+                                <div>Range:<input style="width:45px" type="number" ng-model="commonData.radarConfig.Range.value" ng-change="commonData.radarConfig.Range.isDirty = true" /></div>
+                                <div>Message Period:<input style="width:45px" type="number" ng-model="commonData.radarConfig.MessagePeriod.value" ng-change="commonData.radarConfig.MessagePeriod.isDirty = true" /></div>
+                                <div>Auto Clear Delay:<input style="width:45px" type="number" ng-model="commonData.radarConfig.AutoClearDelay.value" ng-change="commonData.radarConfig.AutoClearDelay.isDirty = true" /></div>
+                                <div>Hit Speed Enable:<input style="width:45px" type="number" ng-model="commonData.radarConfig.HitSpeedEnable.value" ng-change="commonData.radarConfig.HitSpeedEnable.isDirty = true" /></div>
+                                <div>Target Direction:<input style="width:45px" type="number" ng-model="commonData.radarConfig.TargetDirection.value" ng-change="commonData.radarConfig.TargetDirection.isDirty = true" />0 Outbound, 1 InBound, 2 Both</div>
+                                <div style="float:right"><a class="btn btn-sm btn-success" href="" ng-click="updateRadarConfig(); commonData.editRadarConfig = false;">Save</a></div>
+                                <div><a class="btn btn-sm btn-success" ng-click="resetRadarSettings()">Reset Radar Setting</a></div>
+                            </div>
+                            <div>
+                                <div>Battery Voltage: {{commonData.batteryVoltage.batteryVoltage}}</div>
+                                <div>{{commonData.batteryVoltage.time | date : 'M/d/yy hh:mm:ss'}}</div>
+                            </div>
+                            <div id="googleMap"></div>
+                        </div>
+                    </div>
+                   
+                </uib-tab>
+
+                <uib-tab index="23" ng-show="commonData.isGameAdmin" ng-click="tabClick('gameChangerWidget')">
+                    <uib-tab-heading>
+                        <i class="fa-solid fa-calendar-days"></i> GameChanger Widget
+                    </uib-tab-heading>
+                    <div class="container-fluid ">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div id="gc-schedule-widget-8a1e"></div>
+                                <script>
+                                    window.GC.team.schedule.init({
+                                        target: "#gc-schedule-widget-8a1e",
+                                        widgetId: "d48c5d8c-8f08-4fe1-8228-9c8579ff3ef7",
+                                        maxVerticalGamesVisible: 4
+                                    });
+                                </script>
                             </div>
                         </div>
                     </div>
                 </uib-tab>
+                
             </uib-tabset>
         </div>
     </div>

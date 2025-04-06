@@ -78,6 +78,9 @@
         
        .controller('scoreboardController', ['$rootScope', '$scope', '$uibModal', '$filter', '$log', '$http', 'radarMonitor', function ($rootScope, $scope, $uibModal, $filter, $log, $http, radarMonitor) {
            $scope.commonData = {
+               serverInfo :{
+                version: "0.0.0", 
+               },
                activeTabIndex : 1,
                emptyPlayer: { "firstName": "", "lastName": "", "jerseyNumber": "" },
                emptyLineup: { player: null, fieldingPosition: "99" },
@@ -650,6 +653,10 @@
                         );
                         
                         break;
+                    case "gameChangerWidget":
+                        console.log("tabGameChangerWidgetClick");
+                        break;
+
                 }
                 $scope.commonData.lastTab = tabName;
             }
@@ -1765,11 +1772,19 @@
                 }
                 $scope.$apply();
             });
+
             
+           
              $rootScope.$on('radarMonitor:radarCommand', function(event, data) {
                  console.log('radarMonitor:radarCommand Command Sent ' + data.cmd);
                  console.debug(data);
                  $scope.commonData.isradarCommandPending = false;
+                $scope.$apply();
+            });
+            $rootScope.$on('serverInfo', function(event, data) {
+                //console.log('radarMonitor:serverInfo ' + data);
+                
+                $scope.commonData.serverInfo = data;
                 $scope.$apply();
             });
              $rootScope.$on('radarMonitor:batteryVoltage', function (event, data) {

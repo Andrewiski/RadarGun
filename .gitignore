@@ -1,9 +1,5 @@
 # DataFile
-data/games
-data/nosql
-data/teams.nosql
-data/games.nosql
-data/audioFiles
+data
 config/private
 RadarGunMonitor.njsproj.FileListAbsolute.txt 
 RadarGunMonitor.njsprojAssemblyReference.cache

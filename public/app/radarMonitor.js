@@ -96,6 +96,11 @@
                 }
            };
 
+            Service.socket.on('serverInfo', function (message) {
+                //console.log('radarMonitorService received gameChanged', message);
+                $rootScope.$emit("serverInfo", message.data);
+            });
+
            Service.socket.on('gameChanged', function (message) {
                //console.log('radarMonitorService received gameChanged', message);
                $rootScope.$emit("gameChanged", message);

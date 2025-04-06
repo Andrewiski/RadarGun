@@ -25,7 +25,8 @@ const FFplay = require('./modules/ffplay.js');
 const { v4: uuidv4 } = require('uuid');
 const common = require('mongodb/lib/bulk/common');
 const { re } = require('mathjs');
-
+const packagejson = require('./package.json');
+const version = packagejson.version;
 var configFileOptions = {
     "configDirectory": "config",
     "configFileName": "config.json"
@@ -53,7 +54,7 @@ if (process.env.LOGDIRECTORY) {
 if (defaultConfig.deviceId === undefined || defaultConfig.deviceId === '') {
     defaultConfig.deviceId = uuidv4();
 }
-
+console.log("Starting radarMonitor version " + version + " (" + process.pid + ")"); 
 console.log("configDirectory is " + configFileOptions.configDirectory);
 console.log("configFileName is " + configFileOptions.configFileName);
 
@@ -113,7 +114,7 @@ if (configHandler.config.deviceId === undefined || configHandler.config.deviceId
     }
 }
 console.log("DeviceId " + configHandler.config.deviceId);
-
+logUtilHelper.log(appLogName, "app", "info", "Version " + version);
 logUtilHelper.log(appLogName, "app", "info", "DeviceId " + configHandler.config.deviceId);
 logUtilHelper.log(appLogName, "app", "info", "configDirectory is " + configFileOptions.configDirectory);
 logUtilHelper.log(appLogName, "app", "info", "configFileName is " + configFileOptions.configFileName);
@@ -125,6 +126,50 @@ var audioFileDirectory = path.join(objOptions.dataDirectory, "audioFiles");
 var walkupAudioDirectory = path.join(audioFileDirectory, "walkup");
 var fullSongAudioDirectory = path.join(audioFileDirectory, "fullSongs");
 var videoFileDirectory = path.join(objOptions.dataDirectory, "videos");
+var nosqlDirectory = path.join(objOptions.dataDirectory, "nosql");
+
+
+// ensure audio directories exist
+try {
+
+    if (!fs.existsSync(objOptions.dataDirectory)){
+        fs.mkdirSync(objOptions.dataDirectory, { recursive: true });
+        logUtilHelper.log(appLogName, "app", "info", "Created data directory: " + objOptions.dataDirectory);
+    }
+
+    if (!fs.existsSync(audioFileDirectory)){
+        fs.mkdirSync(audioFileDirectory, { recursive: true });
+        logUtilHelper.log(appLogName, "app", "info", "Created audio file directory: " + audioFileDirectory);
+    }
+
+    if (!fs.existsSync(audioFileDirectory)){
+        fs.mkdirSync(audioFileDirectory, { recursive: true });
+        logUtilHelper.log(appLogName, "app", "info", "Created audio file directory: " + audioFileDirectory);
+    }
+    if (!fs.existsSync(walkupAudioDirectory)){
+        fs.mkdirSync(walkupAudioDirectory, { recursive: true });
+        logUtilHelper.log(appLogName, "app", "info", "Created walkup audio file directory: " + walkupAudioDirectory);
+    }
+    if (!fs.existsSync(fullSongAudioDirectory)){
+        fs.mkdirSync(fullSongAudioDirectory, { recursive: true });
+        logUtilHelper.log(appLogName, "app", "info", "Created full song audio file directory: " + fullSongAudioDirectory);
+    }
+    if (!fs.existsSync(videoFileDirectory)){
+        fs.mkdirSync(videoFileDirectory, { recursive: true });
+        logUtilHelper.log(appLogName, "app", "info", "Created video file directory: " + videoFileDirectory);
+    }
+    if (!fs.existsSync(nosqlDirectory)){
+        fs.mkdirSync(nosqlDirectory, { recursive: true });
+        logUtilHelper.log(appLogName, "app", "info", "Created NoSQL file directory: " + nosqlDirectory);
+    }
+
+} catch (ex) {
+    // handle the case where the directory could not be created
+    logUtilHelper.log(appLogName, "app", "error", "Error creating data file directories.", ex);
+    console.error("Error creating audio file directories: " + ex.message);
+    process.exit(1); // exit the process if we cannot create the directories
+}
+
 var app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: false }));
@@ -142,6 +187,10 @@ var videoOverlayParser = new VideoOverlayParser(objOptions.videoOverlayParser, l
 var radarDatabase = new RadarDatabase(objOptions.radarDatabase, logUtilHelper, objOptions.dataDirectory);
 
 var commonData = {
+    serverInfo: {
+        version: version, // version of the application
+        deviceId: configHandler.config.deviceId, // deviceId from the config file
+    },
     game: null,
     currentRadarSpeedData: null,
     radar: {log:[]},
@@ -648,6 +697,7 @@ var videoStreamYoutubeStart = function (options) {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream', 'videoStreamYoutubeStart');           
         if(privateData.videoStreams.youtube ===null){
+            objOptions.videoStreams.youtube.overlayFileName = path.join(videoFileDirectory, path.basename(objOptions.videoStreams.youtube.overlayFileName || "youtubeOverlay.txt")); // ensure the overlay file exists in the video directory
             privateData.videoStreams.youtube = new FfmpegRtmp(objOptions.videoStreams.youtube, videoOverlayParser, logUtilHelper);
             privateData.videoStreams.youtube.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube was Stopped');
@@ -708,6 +758,7 @@ var videoStreamGamechangerStart = function (options) {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamGamechangerStart');           
         if(privateData.videoStreams.gamechanger ===null){
+            objOptions.videoStreams.gamechanger.overlayFileName = path.join(videoFileDirectory, path.basename(objOptions.videoStreams.gamechanger.overlayFileName || "gameChangerOverlay.txt")); // ensure the overlay file exists in the video directory
             privateData.videoStreams.gamechanger = new FfmpegRtmp(objOptions.videoStreams.gamechanger, videoOverlayParser, logUtilHelper);
             privateData.videoStreams.gamechanger.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Gamechanger was Stopped');
@@ -785,7 +836,7 @@ var videoStreamFileStart = function (options) {
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamFileStart');  
                  
         if(privateData.videoStreams.file ===null){
-            
+            objOptions.videoStreams.file.overlayFileName = path.join(videoFileDirectory, path.basename(objOptions.videoStreams.file.overlayFileName || "fileOverlay.txt")); // ensure the overlay file exists in the video directory
             privateData.videoStreams.file = new FfmpegVideoInput(objOptions.videoStreams.file, videoOverlayParser, logUtilHelper);
             privateData.videoStreams.file.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File was Stopped');
@@ -820,7 +871,7 @@ var videoStreamFileStart = function (options) {
                 sendToSocketClients("videoStreams", { cmd: "settingsUpdated", data: objOptions.videoStreams });
             }
             let fileName = getDateFileName() + "_" + objOptions.videoStreams.teamName.replace(/[^a-zA-Z0-9]/g,"_") + "_vs_" + objOptions.videoStreams.opponentTeamName.replace(/[^a-zA-Z0-9]/g,"_")  +  ".flv";
-            fileName = path.join(objOptions.videoStreams.videosFolder, fileName);
+            fileName = path.join(videoFileDirectory, fileName);
             //objOptions.videoStreams.file.outputs.ffmpegVideoOutputFile.outputFile = fileName; 
             privateData.videoStreams.file.options.outputs.ffmpegVideoOutputFile.outputFile = fileName;
         }
@@ -1221,6 +1272,8 @@ io.on('connection', function(socket) {
 
         if (socket.client.request.headers["origin"] !== "ArduinoSocketIo") {
             //send the current Config to the new client Connections
+            socket.emit('serverInfo', {data:commonData.serverInfo}); // send server info, this can be used to identify the server
+            
             socket.emit('radarConfig', radarStalker2.getRadarConfig());
             socket.emit('softwareConfig', radarStalker2.getSoftwareConfig());
             socket.emit('radarSpeedDataHistory', radarStalker2.getradarSpeedDataHistory());
