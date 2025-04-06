@@ -59,6 +59,7 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
     };
 
     var command = null;
+    var overlayFileNameFullPath =  path.join(__dirname, '..', self.options.overlayFileName);
     var parseStdOutput = function (stderr) {
         //assumes // Assumes .outputOptions('-loglevel level')  so loglevel proceeds information
         var data = {
@@ -285,6 +286,7 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
     };
 
     var startIncomingStream = function () {
+        
         commonData.shouldRestartStream = false;
         
         if (!(command === null || command === undefined)) {
@@ -310,8 +312,17 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
         command.on('stderr', commandStdError);
         command.on('end', commandEnd);
         
-        if (self.options.videoFilters) {
-            command.videoFilters(self.options.videoFilters);
+        if ( self.options.videoFilters) {
+            
+            let excapedOverlayFileName = overlayFileNameFullPath;
+            
+            excapedOverlayFileName = excapedOverlayFileName.replace(/\\/g, "\\\\"); // escape backslashes for windows paths
+            excapedOverlayFileName = excapedOverlayFileName.replace(/:/g, "\\:"); // escape colons for windows paths
+            let videoFilters = self.options.videoFilters.replace(/{{overlayFileName}}/g,excapedOverlayFileName)
+           
+            logUtilHelper.log(appLogName, "app", 'info', 'videoFilters', videoFilters);
+            command.videoFilters(videoFilters);
+            //command.addOutputOption("-vf " + videoFilters);
         }
         command.output(self.options.rtmpUrl);
         command.run();
@@ -379,10 +390,10 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
         try {
             if(self.videoOverlayParser && self.videoOverlayParser.getOverlayText){
                 var overlayText = self.videoOverlayParser.getOverlayText(options)
-                if(self.options.overlayFileName != null ){
-                    var overlayFilePath = path.join(__dirname, '..', self.options.overlayFileName);
+                if(overlayFileNameFullPath != null ){
+                    
                     try {
-                        fs.writeFileSync(overlayFilePath, overlayText);
+                        fs.writeFileSync(overlayFileNameFullPath, overlayText);
                     } catch (ex) {
                         logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error Writing OverlayText File", ex);
                     }
