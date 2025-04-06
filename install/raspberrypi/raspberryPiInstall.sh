@@ -29,6 +29,16 @@ sudo chown radar:radar /opt/de/appdata/radar/config
 sudo chown radar:radar /opt/de/appdata/radar/data
 sudo chown radar:radar /opt/de/appdata/radar/logs
 
+mkdir /opt/de/appdata/radar/data/audioFiles
+mkdir /opt/de/appdata/radar/data/nosql
+mkdir /opt/de/appdata/radar/data/overlays
+mkdir /opt/de/appdata/radar/data/videos
+
+sudo chown radar:radar /opt/de/appdata/radar/data/audioFiles
+sudo chown radar:radar /opt/de/appdata/radar/data/nosql
+sudo chown radar:radar /opt/de/appdata/radar/data/overlays
+sudo chown radar:radar /opt/de/appdata/radar/data/videos
+
 cd /opt/de/radar
 echo downloading latest version of code
 curl -s https://api.github.com/repos/Andrewiski/RadarGun/releases/latest | sed -n 's/.*"tarball_url": "\(.*\)",.*/\1/p' | xargs -n1 wget -O - -q | tar -xz --strip-components=1
