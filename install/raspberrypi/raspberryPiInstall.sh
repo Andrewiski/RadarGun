@@ -48,6 +48,11 @@ sudo systemctl daemon-reload
 sudo systemctl start radar
 sudo systemctl enable radar
 
+#If the port is changed to something under port 1024 then needs to be allowed
+# which node  
+#allow Node to use Port 80 and port 443
+#sudo setcap 'cap_nat_bind_service=+ep' /user/bin/node
+
 #Test Config do this as Radar after su radar
 # DEBUG=app,dataDisplay,radar,adafruitLedBackpack,gpsMonitor,radarEmulato CONFIGDIRECTORY=/opt/de/appdata/radar/config DATADIRECTORY=/opt/de/appdata/radar/data LOGDIRECTORY=/opt/de/appdata/radar/logs npm start
 sudo nmcli device wifi hotspot ssid "DE Radar" password "radarradar"
