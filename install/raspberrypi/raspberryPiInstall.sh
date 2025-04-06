@@ -29,6 +29,16 @@ sudo chown radar:radar /opt/de/appdata/radar/config
 sudo chown radar:radar /opt/de/appdata/radar/data
 sudo chown radar:radar /opt/de/appdata/radar/logs
 
+mkdir /opt/de/appdata/radar/data/audioFiles
+mkdir /opt/de/appdata/radar/data/nosql
+mkdir /opt/de/appdata/radar/data/overlays
+mkdir /opt/de/appdata/radar/data/videos
+
+sudo chown radar:radar /opt/de/appdata/radar/data/audioFiles
+sudo chown radar:radar /opt/de/appdata/radar/data/nosql
+sudo chown radar:radar /opt/de/appdata/radar/data/overlays
+sudo chown radar:radar /opt/de/appdata/radar/data/videos
+
 cd /opt/de/radar
 echo downloading latest version of code
 curl -s https://api.github.com/repos/Andrewiski/RadarGun/releases/latest | sed -n 's/.*"tarball_url": "\(.*\)",.*/\1/p' | xargs -n1 wget -O - -q | tar -xz --strip-components=1
@@ -37,6 +47,11 @@ sudo cp /opt/de/radar/install/raspberrypi/service/radar.service /lib/systemd/sys
 sudo systemctl daemon-reload
 sudo systemctl start radar
 sudo systemctl enable radar
+
+#If the port is changed to something under port 1024 then needs to be allowed
+# which node  
+#allow Node to use Port 80 and port 443
+#sudo setcap 'cap_nat_bind_service=+ep' /user/bin/node
 
 #Test Config do this as Radar after su radar
 # DEBUG=app,dataDisplay,radar,adafruitLedBackpack,gpsMonitor,radarEmulato CONFIGDIRECTORY=/opt/de/appdata/radar/config DATADIRECTORY=/opt/de/appdata/radar/data LOGDIRECTORY=/opt/de/appdata/radar/logs npm start
