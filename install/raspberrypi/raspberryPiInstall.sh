@@ -1,6 +1,6 @@
 #!/bin/bash     
-echo Add Node.JS 16 repo
-curl -sSL https://deb.nodesource.com/setup_16.x | sudo bash -
+echo Add Node.JS 22 repo
+curl -sSL https://deb.nodesource.com/setup_22.x | sudo bash -
 echo Install Node.JS
 sudo apt install -y nodejs
 
@@ -37,42 +37,18 @@ sudo cp /opt/de/radar/install/raspberrypi/service/radar.service /lib/systemd/sys
 sudo systemctl daemon-reload
 sudo systemctl start radar
 sudo systemctl enable radar
-#echo install precompiled ffmpeg to fix fault segment error in built in version proboly not needed once raspberry 64bit lite is patched as I reported 
-#sudo apt-get -y install libaom-dev libass-dev libfreetype6-dev libgnutls28-dev libsdl2-dev libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev pkg-config texinfo wget yasm zlib1g-dev libunistring-dev libdrm-dev libopus-dev libvpx-dev libwebp-dev libx264-dev libx265-dev libxml2-dev libfdk-aac-dev libmp3lame-dev
-#tar -xf /opt/de/radar/ffmpeg/raspberryPi/ffmpeg-pi-4.3.3.tar.gz
-#sudo cp -R ~/install/* /usr/local
-# Make it so Node can use Port 80 no Root/Sudo user
-#sudo apt-get install libcap2-bin
-#sudo setcap cap_net_bind_service=+ep /usr/bin/node
-#
-#Change Radar Password
-#sudo passwd radar
-#Set Radar Bash Sell
-#sudo chsh -s /bin/bash radar
-#Change to radar User
-#su radar
-#Set Radar Bash
-#
+
 #Test Config do this as Radar after su radar
 # DEBUG=app,dataDisplay,radar,adafruitLedBackpack,gpsMonitor,radarEmulato CONFIGDIRECTORY=/opt/de/appdata/radar/config DATADIRECTORY=/opt/de/appdata/radar/data LOGDIRECTORY=/opt/de/appdata/radar/logs npm start
+sudo nmcli device wifi hotspot ssid "DE Radar" password "radarradar"
+#To disable the hotspot network and resume use of your Pi as a wireless client, run the following command:
+#sudo nmcli device disconnect wlan0
+#sudo nmcli device up wlan0
 
-
-
-sudo apt-get install hostapd
-sudo apt-get install dnsmasq
-sudo apt-get install bridge-utils
-
-sudo systemctl stop hostapd
-sudo systemctl stop dnsmasq
-
-sudo nano /etc/dhcpcd.conf
-sudo brctl addbr br0
-
-
-sudo apt-get install iptables
-
-sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-
-sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
-
-sudo iptables-restore < /etc/iptables.ipv4.nat
+#First, create a network bridge interface:
+#sudo nmcli connection add type bridge con-name 'Bridge' ifname bridge0
+#sudo nmcli connection modify 'Hotspot' master bridge0
+#Now that you’ve configured your bridge, it’s time to activate it. Run the following command to activate the bridge:
+#sudo nmcli connection add con-name 'Hotspot' ifname wlan0 type wifi slave-type bridge master bridge0  wifi.mode ap wifi.ssid "DE Radar" wifi-sec.key-mgmt wpa-psk  wifi-sec.proto rsn wifi-sec.pairwise ccmp wifi-sec.psk "radarradar"
+#And run the following command to start hosting your wireless network:
+#sudo nmcli connection up Bridge
