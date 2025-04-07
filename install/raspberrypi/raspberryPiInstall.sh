@@ -19,7 +19,7 @@ mkdir /opt/de/appdata/radar
 sudo chown radar:radar /opt/de/appdata/radar
 sudo chmod g+rw /opt/de/appdata/radar
 sudo chown radar:radar /opt/de/radar
-sudo chmod g+rw /opt/de/radar
+
 
 mkdir /opt/de/appdata/radar/config
 mkdir /opt/de/appdata/radar/data
@@ -40,9 +40,11 @@ sudo chown radar:radar /opt/de/appdata/radar/data/overlays
 sudo chown radar:radar /opt/de/appdata/radar/data/videos
 
 cd /opt/de/radar
+sudo su radar
 echo downloading latest version of code
 curl -s https://api.github.com/repos/Andrewiski/RadarGun/releases/latest | sed -n 's/.*"tarball_url": "\(.*\)",.*/\1/p' | xargs -n1 wget -O - -q | tar -xz --strip-components=1
 npm install
+exit
 sudo cp /opt/de/radar/install/raspberrypi/service/radar.service /lib/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl start radar
