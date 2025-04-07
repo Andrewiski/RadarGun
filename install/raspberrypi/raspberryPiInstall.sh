@@ -16,29 +16,20 @@ newgrp radar
 mkdir /opt/de/radar
 mkdir /opt/de/appdata
 mkdir /opt/de/appdata/radar
-sudo chown radar:radar /opt/de/appdata/radar
-sudo chmod g+rw /opt/de/appdata/radar
-sudo chown radar:radar /opt/de/radar
-
 
 mkdir /opt/de/appdata/radar/config
 mkdir /opt/de/appdata/radar/data
 mkdir /opt/de/appdata/radar/logs
 
-sudo chown radar:radar /opt/de/appdata/radar/config
-sudo chown radar:radar /opt/de/appdata/radar/data
-sudo chown radar:radar /opt/de/appdata/radar/logs
-
 mkdir /opt/de/appdata/radar/data/audioFiles
 mkdir /opt/de/appdata/radar/data/nosql
 mkdir /opt/de/appdata/radar/data/overlays
 mkdir /opt/de/appdata/radar/data/videos
-
-sudo chown radar:radar /opt/de/appdata/radar/data/audioFiles
-sudo chown radar:radar /opt/de/appdata/radar/data/nosql
-sudo chown radar:radar /opt/de/appdata/radar/data/overlays
-sudo chown radar:radar /opt/de/appdata/radar/data/videos
-
+# Set permissions for the directories
+sudo chown -R radar:radar /opt/de/appdata/radar
+sudo chmod -R g+rw /opt/de/appdata/radar
+sudo chown -R radar:radar /opt/de/radar
+sudo chmod -R g+rw /opt/de/radar
 cd /opt/de/radar
 sudo su radar
 echo downloading latest version of code
