@@ -304,7 +304,7 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
             if(fs.existsSync(overlayFileNameFullPath) === false){
                 try {
                     // create the file if it does not exist
-                    fs.writeFileSync(overlayFileNameFullPath, ""); // create empty file
+                    fs.writeFileSync(overlayFileNameFullPath, "PV:"); // create empty file
                 } catch (ex) {
                     logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error Creating OverlayText File", ex);
                 }

@@ -126,6 +126,7 @@ var audioFileDirectory = path.join(objOptions.dataDirectory, "audioFiles");
 var walkupAudioDirectory = path.join(audioFileDirectory, "walkup");
 var fullSongAudioDirectory = path.join(audioFileDirectory, "fullSongs");
 var videoFileDirectory = path.join(objOptions.dataDirectory, "videos");
+var overlaysFileDirectory = path.join(objOptions.dataDirectory, "overlays");
 var nosqlDirectory = path.join(objOptions.dataDirectory, "nosql");
 
 
@@ -697,7 +698,7 @@ var videoStreamYoutubeStart = function (options) {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream', 'videoStreamYoutubeStart');           
         if(privateData.videoStreams.youtube ===null){
-            objOptions.videoStreams.youtube.overlayFileName = path.join(videoFileDirectory, path.basename(objOptions.videoStreams.youtube.overlayFileName || "youtubeOverlay.txt")); // ensure the overlay file exists in the video directory
+            objOptions.videoStreams.youtube.overlayFileName = path.join(overlaysFileDirectory, path.basename(objOptions.videoStreams.youtube.overlayFileName || "youtubeOverlay.txt")); // ensure the overlay file exists in the video directory
             privateData.videoStreams.youtube = new FfmpegRtmp(objOptions.videoStreams.youtube, videoOverlayParser, logUtilHelper);
             privateData.videoStreams.youtube.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube was Stopped');
@@ -758,7 +759,7 @@ var videoStreamGamechangerStart = function (options) {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamGamechangerStart');           
         if(privateData.videoStreams.gamechanger ===null){
-            objOptions.videoStreams.gamechanger.overlayFileName = path.join(videoFileDirectory, path.basename(objOptions.videoStreams.gamechanger.overlayFileName || "gameChangerOverlay.txt")); // ensure the overlay file exists in the video directory
+            objOptions.videoStreams.gamechanger.overlayFileName = path.join(overlaysFileDirectory, path.basename(objOptions.videoStreams.gamechanger.overlayFileName || "gameChangerOverlay.txt")); // ensure the overlay file exists in the video directory
             privateData.videoStreams.gamechanger = new FfmpegRtmp(objOptions.videoStreams.gamechanger, videoOverlayParser, logUtilHelper);
             privateData.videoStreams.gamechanger.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Gamechanger was Stopped');
@@ -836,7 +837,7 @@ var videoStreamFileStart = function (options) {
         logUtilHelper.log(appLogName, "app", "info",'videoStream',  'videoStreamFileStart');  
                  
         if(privateData.videoStreams.file ===null){
-            objOptions.videoStreams.file.overlayFileName = path.join(videoFileDirectory, path.basename(objOptions.videoStreams.file.overlayFileName || "fileOverlay.txt")); // ensure the overlay file exists in the video directory
+            objOptions.videoStreams.file.overlayFileName = path.join(overlaysFileDirectory, path.basename(objOptions.videoStreams.file.overlayFileName || "fileOverlay.txt")); // ensure the overlay file exists in the video directory
             privateData.videoStreams.file = new FfmpegVideoInput(objOptions.videoStreams.file, videoOverlayParser, logUtilHelper);
             privateData.videoStreams.file.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'File was Stopped');
