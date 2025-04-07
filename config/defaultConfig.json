@@ -60,7 +60,7 @@
             "input": "rtsp://10.100.34.112:554/s0",
             "rtmpUrl": "rtmp://a.rtmp.youtube.com/live2/cmpp-d657-4j03-9ema-9m1r",
             "inputOptions": [ "-rtsp_transport tcp" ],
-            "outputOptions": [ "-c:v libx264", "-c:a copy", "-f flv" ],
+            "outputOptions": [ "-c:v libx264", "-c:a copy", "-preset ultrafast", "-crf 0", "-f flv" ],
             "overlayFileName": "data/overlays/youtubeOverlay.txt",
             "videoFilters": "drawtext=fontfile='arial.ttf':fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile='{{overlayFileName}}':reload=30"
         },
@@ -68,7 +68,7 @@
             "input": "rtsp://10.100.34.112:554/s2",
             "rtmpUrl": "rtmps://601c62c19c9e.global-contribute.live-video.net:443/app/sk_us-east-1_a8gQblEYUN3V_iHEQ0mXeSm1VROYp7YHqGapllvvXd5",
             "inputOptions": [ "-rtsp_transport tcp" ],
-            "outputOptions": [ "-c:v libx264", "-c:a copy", "-f flv" ],
+            "outputOptions": [ "-c:v libx264", "-c:a copy", "-preset ultrafast", "-crf 0", "-f flv" ],
             "overlayFileName": "data/overlays/youtubeOverlay.txt",
             "videoFilters": "drawtext=fontfile='arial.ttf':fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile='{{overlayFileName}}':reload=30"
         },
@@ -82,7 +82,7 @@
                     "ffmpegVideoOutputRtmp2" : null,
                     "ffmpegVideoOutputFile" :  {
                         "inputOptions": [],
-                        "outputOptions": [ "-c:a copy", "-c:v libx264", "-f flv", "-y" ],
+                        "outputOptions": [ "-c:a copy", "-c:v libx264", "-preset ultrafast", "-crf 0", "-f flv", "-y" ],
                         "outputFile": "dynamicalyCreatedFile.flv", 
                         "overlayFileName": "data/overlays/fileOverlay.txt",
                         "videoFilters": "drawtext=fontfile='arial.ttf':fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile='{{overlayFileName}}':reload=30"
