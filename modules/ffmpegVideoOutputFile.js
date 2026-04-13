@@ -51,7 +51,7 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
 
     var command = null;
 
-    var overlayFileNameFullPath =  path.join(__dirname, '..', self.options.overlayFileName);
+    
 
     var parseStdOutput = function (stderr) {
 
@@ -301,16 +301,16 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
         command.outputOptions(self.options.outputOptions)
         if ( self.options.videoFilters) {
             
-            if(fs.existsSync(overlayFileNameFullPath) === false){
+            if(fs.existsSync(self.options.overlayFileName) === false){
                 try {
                     // create the file if it does not exist
-                    fs.writeFileSync(overlayFileNameFullPath, "PV:"); // create empty file
+                    fs.writeFileSync(self.options.overlayFileName, "PV:"); // create empty file
                 } catch (ex) {
                     logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error Creating OverlayText File", ex);
                 }
             }
-
-            let excapedOverlayFileName = overlayFileNameFullPath;
+             // ensure the file path is resolved, this will help ffmpeg find the file on windows when using relative paths
+            let excapedOverlayFileName = fs.realpathSync(self.options.overlayFileName);
             
             excapedOverlayFileName = excapedOverlayFileName.replace(/\\/g, "\\\\"); // escape backslashes for windows paths
             excapedOverlayFileName = excapedOverlayFileName.replace(/:/g, "\\:"); // escape colons for windows paths
@@ -393,7 +393,7 @@ var FfmpegVideoOutputFile = function (options, videoOverlayParser, logUtilHelper
                 if(self.options.overlayFileName != null ){
                    
                     try {
-                        fs.writeFileSync(overlayFileNameFullPath, overlayText);
+                        fs.writeFileSync(self.options.overlayFileName, overlayText);
 
                     } catch (ex) {
                         logUtilHelper.log(appLogName, "app", "error", "Error Writing OverlayText File", ex);

@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by , GNU Texinfo 7.1.1 -->
   <head>
     <meta charset="utf-8">
     <title>
@@ -15,22 +15,20 @@
       <h1>
       Using Git to develop FFmpeg
       </h1>
-<div align="center">
-</div>
 
 
 
 <a name="SEC_Top"></a>
 
-<div class="Contents_element" id="SEC_Contents">
+<div class="element-contents" id="SEC_Contents">
 <h2 class="contents-heading">Table of Contents</h2>
 
 <div class="contents">
 
-<ul class="no-bullet">
+<ul class="toc-numbered-mark">
   <li><a id="toc-Introduction" href="#Introduction">1 Introduction</a></li>
   <li><a id="toc-Basics-Usage" href="#Basics-Usage">2 Basics Usage</a>
-  <ul class="no-bullet">
+  <ul class="toc-numbered-mark">
     <li><a id="toc-Get-Git" href="#Get-Git">2.1 Get Git</a></li>
     <li><a id="toc-Cloning-the-source-tree" href="#Cloning-the-source-tree">2.2 Cloning the source tree</a></li>
     <li><a id="toc-Updating-the-source-tree-to-the-latest-revision-1" href="#Updating-the-source-tree-to-the-latest-revision-1">2.3 Updating the source tree to the latest revision</a></li>
@@ -46,12 +44,12 @@
     <li><a id="toc-Renaming_002fmoving_002fcopying-files-or-contents-of-files" href="#Renaming_002fmoving_002fcopying-files-or-contents-of-files">2.13 Renaming/moving/copying files or contents of files</a></li>
   </ul></li>
   <li><a id="toc-Git-configuration" href="#Git-configuration">3 Git configuration</a>
-  <ul class="no-bullet">
+  <ul class="toc-numbered-mark">
     <li><a id="toc-Personal-Git-installation" href="#Personal-Git-installation">3.1 Personal Git installation</a></li>
     <li><a id="toc-Repository-configuration" href="#Repository-configuration">3.2 Repository configuration</a></li>
   </ul></li>
   <li><a id="toc-FFmpeg-specific" href="#FFmpeg-specific">4 FFmpeg specific</a>
-  <ul class="no-bullet">
+  <ul class="toc-numbered-mark">
     <li><a id="toc-Reverting-broken-commits" href="#Reverting-broken-commits">4.1 Reverting broken commits</a></li>
     <li><a id="toc-Pushing-changes-to-remote-trees" href="#Pushing-changes-to-remote-trees">4.2 Pushing changes to remote trees</a></li>
     <li><a id="toc-Finding-a-specific-svn-revision" href="#Finding-a-specific-svn-revision">4.3 Finding a specific svn revision</a></li>
@@ -71,24 +69,24 @@ commands. You should always use the extensive and detailed documentation
 provided directly by Git:
 </p>
 <div class="example">
-<pre class="example">git --help
+<pre class="example-preformatted">git --help
 man git
 </pre></div>
 
 <p>shows you the available subcommands,
 </p>
 <div class="example">
-<pre class="example">git &lt;command&gt; --help
+<pre class="example-preformatted">git &lt;command&gt; --help
 man git-&lt;command&gt;
 </pre></div>
 
 <p>shows information about the subcommand &lt;command&gt;.
 </p>
 <p>Additional information could be found on the
-<a href="http://gitref.org">Git Reference</a> website.
+<a class="url" href="http://gitref.org">Git Reference</a> website.
 </p>
 <p>For more information about the Git project, visit the
-<a href="http://git-scm.com/">Git website</a>.
+<a class="url" href="http://git-scm.com/">Git website</a>.
 </p>
 <p>Consult these resources whenever you have problems, they are quite exhaustive.
 </p>
@@ -101,7 +99,7 @@ guidelines to ease the contribution to the project.
 <a name="Get-Git"></a>
 <h3 class="section">2.1 Get Git<span class="pull-right"><a class="anchor hidden-xs" href="#Get-Git" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Get-Git" aria-hidden="true">TOC</a></span></h3>
 
-<p>You can get Git from <a href="http://git-scm.com/">http://git-scm.com/</a>
+<p>You can get Git from <a class="url" href="http://git-scm.com/">http://git-scm.com/</a>
 Most distribution and operating system provide a package for it.
 </p>
 
@@ -109,31 +107,31 @@ Most distribution and operating system provide a package for it.
 <h3 class="section">2.2 Cloning the source tree<span class="pull-right"><a class="anchor hidden-xs" href="#Cloning-the-source-tree" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Cloning-the-source-tree" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git clone git://source.ffmpeg.org/ffmpeg &lt;target&gt;
+<pre class="example-preformatted">git clone https://git.ffmpeg.org/ffmpeg.git &lt;target&gt;
 </pre></div>
 
-<p>This will put the FFmpeg sources into the directory <var>&lt;target&gt;</var>.
+<p>This will put the FFmpeg sources into the directory <var class="var">&lt;target&gt;</var>.
 </p>
 <div class="example">
-<pre class="example">git clone git@source.ffmpeg.org:ffmpeg &lt;target&gt;
+<pre class="example-preformatted">git clone git@source.ffmpeg.org:ffmpeg &lt;target&gt;
 </pre></div>
 
-<p>This will put the FFmpeg sources into the directory <var>&lt;target&gt;</var> and let
+<p>This will put the FFmpeg sources into the directory <var class="var">&lt;target&gt;</var> and let
 you push back your changes to the remote repository.
 </p>
 <div class="example">
-<pre class="example">git clone gil@ffmpeg.org:ffmpeg-web &lt;target&gt;
+<pre class="example-preformatted">git clone git@ffmpeg.org:ffmpeg-web &lt;target&gt;
 </pre></div>
 
 <p>This will put the source of the FFmpeg website into the directory
-<var>&lt;target&gt;</var> and let you push back your changes to the remote repository.
-(Note that <var>gil</var> stands for GItoLite and is not a typo of <var>git</var>.)
+<var class="var">&lt;target&gt;</var> and let you push back your changes to the remote repository.
+(Note that <var class="var">gil</var> stands for GItoLite and is not a typo of <var class="var">git</var>.)
 </p>
 <p>If you don&rsquo;t have write-access to the ffmpeg-web repository, you can
 create patches after making a read-only ffmpeg-web clone:
 </p>
 <div class="example">
-<pre class="example">git clone git://ffmpeg.org/ffmpeg-web &lt;target&gt;
+<pre class="example-preformatted">git clone git://ffmpeg.org/ffmpeg-web &lt;target&gt;
 </pre></div>
 
 <p>Make sure that you do not have Windows line endings in your checkouts,
@@ -141,15 +139,15 @@ otherwise you may experience spurious compilation failures. One way to
 achieve this is to run
 </p>
 <div class="example">
-<pre class="example">git config --global core.autocrlf false
+<pre class="example-preformatted">git config --global core.autocrlf false
 </pre></div>
 
 
-<span id="Updating-the-source-tree-to-the-latest-revision"></span><a name="Updating-the-source-tree-to-the-latest-revision-1"></a>
+<a class="anchor" id="Updating-the-source-tree-to-the-latest-revision"></a><a name="Updating-the-source-tree-to-the-latest-revision-1"></a>
 <h3 class="section">2.3 Updating the source tree to the latest revision<span class="pull-right"><a class="anchor hidden-xs" href="#Updating-the-source-tree-to-the-latest-revision-1" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Updating-the-source-tree-to-the-latest-revision-1" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git pull (--rebase)
+<pre class="example-preformatted">git pull (--rebase)
 </pre></div>
 
 <p>pulls in the latest changes from the tracked branch. The tracked branch
@@ -157,13 +155,13 @@ can be remote. By default the master branch tracks the branch master in
 the remote origin.
 </p>
 <div class="warning">
-<p><code>--rebase</code> (see below) is recommended.
+<p><code class="command">--rebase</code> (see below) is recommended.
 </p></div>
 <a name="Rebasing-your-local-branches"></a>
 <h3 class="section">2.4 Rebasing your local branches<span class="pull-right"><a class="anchor hidden-xs" href="#Rebasing-your-local-branches" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Rebasing-your-local-branches" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git pull --rebase
+<pre class="example-preformatted">git pull --rebase
 </pre></div>
 
 <p>fetches the changes from the main repository and replays your local commits
@@ -175,7 +173,7 @@ FFmpeg&rsquo;s master tree. The master tree will reject pushes with merge commit
 <h3 class="section">2.5 Adding/removing files/directories<span class="pull-right"><a class="anchor hidden-xs" href="#Adding_002fremoving-files_002fdirectories" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Adding_002fremoving-files_002fdirectories" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git add [-A] &lt;filename/dirname&gt;
+<pre class="example-preformatted">git add [-A] &lt;filename/dirname&gt;
 git rm [-r] &lt;filename/dirname&gt;
 </pre></div>
 
@@ -188,7 +186,7 @@ Line moves across files are automatically tracked.
 <h3 class="section">2.6 Showing modifications<span class="pull-right"><a class="anchor hidden-xs" href="#Showing-modifications" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Showing-modifications" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git diff &lt;filename(s)&gt;
+<pre class="example-preformatted">git diff &lt;filename(s)&gt;
 </pre></div>
 
 <p>will show all local modifications in your working directory as unified diff.
@@ -198,17 +196,17 @@ Line moves across files are automatically tracked.
 <h3 class="section">2.7 Inspecting the changelog<span class="pull-right"><a class="anchor hidden-xs" href="#Inspecting-the-changelog" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Inspecting-the-changelog" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git log &lt;filename(s)&gt;
+<pre class="example-preformatted">git log &lt;filename(s)&gt;
 </pre></div>
 
-<p>You may also use the graphical tools like <code>gitview</code> or <code>gitk</code>
-or the web interface available at <a href="http://source.ffmpeg.org/">http://source.ffmpeg.org/</a>.
+<p>You may also use the graphical tools like <code class="command">gitview</code> or <code class="command">gitk</code>
+or the web interface available at <a class="url" href="http://source.ffmpeg.org/">http://source.ffmpeg.org/</a>.
 </p>
 <a name="Checking-source-tree-status"></a>
 <h3 class="section">2.8 Checking source tree status<span class="pull-right"><a class="anchor hidden-xs" href="#Checking-source-tree-status" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Checking-source-tree-status" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git status
+<pre class="example-preformatted">git status
 </pre></div>
 
 <p>detects all the changes you made and lists what actions will be taken in case
@@ -219,7 +217,7 @@ of a commit (additions, modifications, deletions, etc.).
 <h3 class="section">2.9 Committing<span class="pull-right"><a class="anchor hidden-xs" href="#Committing" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Committing" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git diff --check
+<pre class="example-preformatted">git diff --check
 </pre></div>
 
 <p>to double check your changes before committing them to avoid trouble later
@@ -233,25 +231,25 @@ please avoid problems through this extra level of scrutiny.
 <p>For cosmetics-only commits you should get (almost) empty output from
 </p>
 <div class="example">
-<pre class="example">git diff -w -b &lt;filename(s)&gt;
+<pre class="example-preformatted">git diff -w -b &lt;filename(s)&gt;
 </pre></div>
 
 <p>Also check the output of
 </p>
 <div class="example">
-<pre class="example">git status
+<pre class="example-preformatted">git status
 </pre></div>
 
 <p>to make sure you don&rsquo;t have untracked files or deletions.
 </p>
 <div class="example">
-<pre class="example">git add [-i|-p|-A] &lt;filenames/dirnames&gt;
+<pre class="example-preformatted">git add [-i|-p|-A] &lt;filenames/dirnames&gt;
 </pre></div>
 
 <p>Make sure you have told Git your name, email address and GPG key
 </p>
 <div class="example">
-<pre class="example">git config --global user.name &quot;My Name&quot;
+<pre class="example-preformatted">git config --global user.name &quot;My Name&quot;
 git config --global user.email my@email.invalid
 git config --global user.signingkey ABCDEF0123245
 </pre></div>
@@ -259,10 +257,10 @@ git config --global user.signingkey ABCDEF0123245
 <p>Enable signing all commits or use -S
 </p>
 <div class="example">
-<pre class="example">git config --global commit.gpgsign true
+<pre class="example-preformatted">git config --global commit.gpgsign true
 </pre></div>
 
-<p>Use <samp>--global</samp> to set the global configuration for all your Git checkouts.
+<p>Use <samp class="option">--global</samp> to set the global configuration for all your Git checkouts.
 </p>
 <p>Git will select the changes to the files for commit. Optionally you can use
 the interactive or the patch mode to select hunk by hunk what should be
@@ -270,7 +268,7 @@ added to the commit.
 </p>
 
 <div class="example">
-<pre class="example">git commit
+<pre class="example-preformatted">git commit
 </pre></div>
 
 <p>Git will commit the selected changes to your current local branch.
@@ -279,11 +277,11 @@ added to the commit.
 set in your personal configuration file through
 </p>
 <div class="example">
-<pre class="example">git config --global core.editor
+<pre class="example-preformatted">git config --global core.editor
 </pre></div>
 
 <p>or set by one of the following environment variables:
-<var>GIT_EDITOR</var>, <var>VISUAL</var> or <var>EDITOR</var>.
+<var class="var">GIT_EDITOR</var>, <var class="var">VISUAL</var> or <var class="var">EDITOR</var>.
 </p>
 <a name="Writing-a-commit-message"></a>
 <h3 class="section">2.10 Writing a commit message<span class="pull-right"><a class="anchor hidden-xs" href="#Writing-a-commit-message" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Writing-a-commit-message" aria-hidden="true">TOC</a></span></h3>
@@ -298,7 +296,7 @@ per line, except when containing code.
 <p>Example of a good commit message:
 </p>
 <div class="example">
-<pre class="example">avcodec/cbs: add a helper to read extradata within packet side data
+<pre class="example-preformatted">avcodec/cbs: add a helper to read extradata within packet side data
 
 Using ff_cbs_read() on the raw buffer will not parse it as extradata,
 resulting in parsing errors for example when handling ISOBMFF avcC.
@@ -306,7 +304,7 @@ This helper works around that.
 </pre></div>
 
 <div class="example">
-<pre class="example">ptr might be NULL
+<pre class="example-preformatted">ptr might be NULL
 </pre></div>
 
 <p>If the summary on the first line is not enough, in the body of the message,
@@ -317,12 +315,12 @@ reading through your code. Don&rsquo;t include filenames in log messages except 
 the context, Git provides that information.
 </p>
 <p>If the commit fixes a registered issue, state it in a separate line of the
-body: <code>Fix Trac ticket #42.</code>
+body: <code class="code">Fix Trac ticket #42.</code>
 </p>
 <p>The first line will be used to name
-the patch by <code>git format-patch</code>.
+the patch by <code class="command">git format-patch</code>.
 </p>
-<p>Common mistakes for the first line, as seen in <code>git log --oneline</code>
+<p>Common mistakes for the first line, as seen in <code class="command">git log --oneline</code>
 include: missing context at the beginning; description of what the code did
 before the patch; line too long or wrapped to the second line.
 </p>
@@ -330,14 +328,14 @@ before the patch; line too long or wrapped to the second line.
 <h3 class="section">2.11 Preparing a patchset<span class="pull-right"><a class="anchor hidden-xs" href="#Preparing-a-patchset" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Preparing-a-patchset" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git format-patch &lt;commit&gt; [-o directory]
+<pre class="example-preformatted">git format-patch &lt;commit&gt; [-o directory]
 </pre></div>
 
-<p>will generate a set of patches for each commit between <var>&lt;commit&gt;</var> and
-current <var>HEAD</var>. E.g.
+<p>will generate a set of patches for each commit between <var class="var">&lt;commit&gt;</var> and
+current <var class="var">HEAD</var>. E.g.
 </p>
 <div class="example">
-<pre class="example">git format-patch origin/master
+<pre class="example-preformatted">git format-patch origin/master
 </pre></div>
 
 <p>will generate patches for all commits on current branch which are not
@@ -345,23 +343,23 @@ present in upstream.
 A useful shortcut is also
 </p>
 <div class="example">
-<pre class="example">git format-patch -n
+<pre class="example-preformatted">git format-patch -n
 </pre></div>
 
-<p>which will generate patches from last <var>n</var> commits.
+<p>which will generate patches from last <var class="var">n</var> commits.
 By default the patches are created in the current directory.
 </p>
 <a name="Sending-patches-for-review"></a>
 <h3 class="section">2.12 Sending patches for review<span class="pull-right"><a class="anchor hidden-xs" href="#Sending-patches-for-review" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Sending-patches-for-review" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git send-email &lt;commit list|directory&gt;
+<pre class="example-preformatted">git send-email &lt;commit list|directory&gt;
 </pre></div>
 
-<p>will send the patches created by <code>git format-patch</code> or directly
+<p>will send the patches created by <code class="command">git format-patch</code> or directly
 generates them. All the email fields can be configured in the global/local
 configuration or overridden by command line.
-Note that this tool must often be installed separately (e.g. <var>git-email</var>
+Note that this tool must often be installed separately (e.g. <var class="var">git-email</var>
 package on Debian-based distros).
 </p>
 
@@ -371,7 +369,7 @@ package on Debian-based distros).
 <p>Git automatically tracks such changes, making those normal commits.
 </p>
 <div class="example">
-<pre class="example">mv/cp path/file otherpath/otherfile
+<pre class="example-preformatted">mv/cp path/file otherpath/otherfile
 git add [-A] .
 git commit
 </pre></div>
@@ -386,23 +384,23 @@ your personal Git installation and your local FFmpeg repository.
 <a name="Personal-Git-installation"></a>
 <h3 class="section">3.1 Personal Git installation<span class="pull-right"><a class="anchor hidden-xs" href="#Personal-Git-installation" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Personal-Git-installation" aria-hidden="true">TOC</a></span></h3>
 
-<p>Add the following to your <samp>~/.gitconfig</samp> to help <code>git send-email</code>
-and <code>git format-patch</code> detect renames:
+<p>Add the following to your <samp class="file">~/.gitconfig</samp> to help <code class="command">git send-email</code>
+and <code class="command">git format-patch</code> detect renames:
 </p>
 <div class="example">
-<pre class="example">[diff]
+<pre class="example-preformatted">[diff]
         renames = copy
 </pre></div>
 
 <a name="Repository-configuration"></a>
 <h3 class="section">3.2 Repository configuration<span class="pull-right"><a class="anchor hidden-xs" href="#Repository-configuration" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Repository-configuration" aria-hidden="true">TOC</a></span></h3>
 
-<p>In order to have <code>git send-email</code> automatically send patches
+<p>In order to have <code class="command">git send-email</code> automatically send patches
 to the ffmpeg-devel mailing list, add the following stanza
-to <samp>/path/to/ffmpeg/repository/.git/config</samp>:
+to <samp class="file">/path/to/ffmpeg/repository/.git/config</samp>:
 </p>
 <div class="example">
-<pre class="example">[sendemail]
+<pre class="example-preformatted">[sendemail]
         to = ffmpeg-devel@ffmpeg.org
 </pre></div>
 
@@ -413,92 +411,92 @@ to <samp>/path/to/ffmpeg/repository/.git/config</samp>:
 <h3 class="section">4.1 Reverting broken commits<span class="pull-right"><a class="anchor hidden-xs" href="#Reverting-broken-commits" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Reverting-broken-commits" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git reset &lt;commit&gt;
+<pre class="example-preformatted">git reset &lt;commit&gt;
 </pre></div>
 
-<p><code>git reset</code> will uncommit the changes till <var>&lt;commit&gt;</var> rewriting
+<p><code class="command">git reset</code> will uncommit the changes till <var class="var">&lt;commit&gt;</var> rewriting
 the current branch history.
 </p>
 <div class="example">
-<pre class="example">git commit --amend
+<pre class="example-preformatted">git commit --amend
 </pre></div>
 
 <p>allows one to amend the last commit details quickly.
 </p>
 <div class="example">
-<pre class="example">git rebase -i origin/master
+<pre class="example-preformatted">git rebase -i origin/master
 </pre></div>
 
 <p>will replay local commits over the main repository allowing to edit, merge
 or remove some of them in the process.
 </p>
 <div class="info">
-<p><code>git reset</code>, <code>git commit --amend</code> and <code>git rebase</code>
+<p><code class="command">git reset</code>, <code class="command">git commit --amend</code> and <code class="command">git rebase</code>
 rewrite history, so you should use them ONLY on your local or topic branches.
 The main repository will reject those changes.
 </p></div>
 <div class="example">
-<pre class="example">git revert &lt;commit&gt;
+<pre class="example-preformatted">git revert &lt;commit&gt;
 </pre></div>
 
-<p><code>git revert</code> will generate a revert commit. This will not make the
+<p><code class="command">git revert</code> will generate a revert commit. This will not make the
 faulty commit disappear from the history.
 </p>
 <a name="Pushing-changes-to-remote-trees"></a>
 <h3 class="section">4.2 Pushing changes to remote trees<span class="pull-right"><a class="anchor hidden-xs" href="#Pushing-changes-to-remote-trees" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Pushing-changes-to-remote-trees" aria-hidden="true">TOC</a></span></h3>
 
 <div class="example">
-<pre class="example">git push origin master --dry-run
+<pre class="example-preformatted">git push origin master --dry-run
 </pre></div>
 
 <p>Will simulate a push of the local master branch to the default remote
-(<var>origin</var>). And list which branches and ranges or commits would have been
+(<var class="var">origin</var>). And list which branches and ranges or commits would have been
 pushed.
 Git will prevent you from pushing changes if the local and remote trees are
-out of sync. Refer to <a href="#Updating-the-source-tree-to-the-latest-revision">Updating the source tree to the latest revision</a>.
+out of sync. Refer to <a class="ref" href="#Updating-the-source-tree-to-the-latest-revision">Updating the source tree to the latest revision</a>.
 </p>
 <div class="example">
-<pre class="example">git remote add &lt;name&gt; &lt;url&gt;
+<pre class="example-preformatted">git remote add &lt;name&gt; &lt;url&gt;
 </pre></div>
 
 <p>Will add additional remote with a name reference, it is useful if you want
 to push your local branch for review on a remote host.
 </p>
 <div class="example">
-<pre class="example">git push &lt;remote&gt; &lt;refspec&gt;
+<pre class="example-preformatted">git push &lt;remote&gt; &lt;refspec&gt;
 </pre></div>
 
-<p>Will push the changes to the <var>&lt;remote&gt;</var> repository.
-Omitting <var>&lt;refspec&gt;</var> makes <code>git push</code> update all the remote
+<p>Will push the changes to the <var class="var">&lt;remote&gt;</var> repository.
+Omitting <var class="var">&lt;refspec&gt;</var> makes <code class="command">git push</code> update all the remote
 branches matching the local ones.
 </p>
 <a name="Finding-a-specific-svn-revision"></a>
 <h3 class="section">4.3 Finding a specific svn revision<span class="pull-right"><a class="anchor hidden-xs" href="#Finding-a-specific-svn-revision" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Finding-a-specific-svn-revision" aria-hidden="true">TOC</a></span></h3>
 
-<p>Since version 1.7.1 Git supports &lsquo;<samp>:/foo</samp>&rsquo; syntax for specifying commits
+<p>Since version 1.7.1 Git supports &lsquo;<samp class="samp">:/foo</samp>&rsquo; syntax for specifying commits
 based on a regular expression. see man gitrevisions
 </p>
 <div class="example">
-<pre class="example">git show :/'as revision 23456'
+<pre class="example-preformatted">git show :/'as revision 23456'
 </pre></div>
 
-<p>will show the svn changeset &lsquo;<samp>r23456</samp>&rsquo;. With older Git versions searching in
-the <code>git log</code> output is the easiest option (especially if a pager with
+<p>will show the svn changeset &lsquo;<samp class="samp">r23456</samp>&rsquo;. With older Git versions searching in
+the <code class="command">git log</code> output is the easiest option (especially if a pager with
 search capabilities is used).
 </p>
 <p>This commit can be checked out with
 </p>
 <div class="example">
-<pre class="example">git checkout -b svn_23456 :/'as revision 23456'
+<pre class="example-preformatted">git checkout -b svn_23456 :/'as revision 23456'
 </pre></div>
 
 <p>or for Git &lt; 1.7.1 with
 </p>
 <div class="example">
-<pre class="example">git checkout -b svn_23456 $SHA1
+<pre class="example-preformatted">git checkout -b svn_23456 $SHA1
 </pre></div>
 
-<p>where <var>$SHA1</var> is the commit hash from the <code>git log</code> output.
+<p>where <var class="var">$SHA1</var> is the commit hash from the <code class="command">git log</code> output.
 </p>
 
 <a name="gpg-key-generation"></a>
@@ -508,7 +506,7 @@ search capabilities is used).
 is small, fast and secure. Especially it results in small signatures in git.
 </p>
 <div class="example">
-<pre class="example">gpg --default-new-key-algo &quot;ed25519/cert,sign+cv25519/encr&quot; --quick-generate-key &quot;human@server.com&quot;
+<pre class="example-preformatted">gpg --default-new-key-algo &quot;ed25519/cert,sign+cv25519/encr&quot; --quick-generate-key &quot;human@server.com&quot;
 </pre></div>
 
 <p>When generating a key, make sure the email specified matches the email used in git as some sites like
@@ -527,17 +525,17 @@ Apply your common sense, but if in doubt, err on the side of caution.
 <p>First, make sure that the commits and branches you are going to push
 match what you want pushed and that nothing is missing, extraneous or
 wrong. You can see what will be pushed by running the git push command
-with <samp>--dry-run</samp> first. And then inspecting the commits listed with
-<code>git log -p 1234567..987654</code>. The <code>git status</code> command
+with <samp class="option">--dry-run</samp> first. And then inspecting the commits listed with
+<code class="command">git log -p 1234567..987654</code>. The <code class="command">git status</code> command
 may help in finding local changes that have been forgotten to be added.
 </p>
 <p>Next let the code pass through a full run of our test suite.
 </p>
-<ul>
-<li> <code>make distclean</code>
-</li><li> <code>/path/to/ffmpeg/configure</code>
-</li><li> <code>make fate</code>
-</li><li> if fate fails due to missing samples run <code>make fate-rsync</code> and retry
+<ul class="itemize mark-bullet">
+<li><code class="command">make distclean</code>
+</li><li><code class="command">/path/to/ffmpeg/configure</code>
+</li><li><code class="command">make fate</code>
+</li><li>if fate fails due to missing samples run <code class="command">make fate-rsync</code> and retry
 </li></ul>
 
 <p>Make sure all your changes have been checked before pushing them, the
@@ -555,10 +553,10 @@ recommended.
 <a name="Server-Issues"></a>
 <h2 class="chapter">7 Server Issues<span class="pull-right"><a class="anchor hidden-xs" href="#Server-Issues" aria-hidden="true">#</a> <a class="anchor hidden-xs"href="#toc-Server-Issues" aria-hidden="true">TOC</a></span></h2>
 
-<p>Contact the project admins at <a href="mailto:root@ffmpeg.org">root@ffmpeg.org</a> if you have technical
+<p>Contact the project admins at <a class="email" href="mailto:root@ffmpeg.org">root@ffmpeg.org</a> if you have technical
 problems with the Git server.
 </p>      <p style="font-size: small;">
-        This document was generated using <a href="https://www.gnu.org/software/texinfo/"><em>makeinfo</em></a>.
+        This document was generated using <a class="uref" href="https://www.gnu.org/software/texinfo/"><em class="emph">makeinfo</em></a>.
       </p>
     </div>
   </body>

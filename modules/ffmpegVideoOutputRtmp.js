@@ -51,7 +51,7 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
     };
 
     var command = null;
-    var overlayFileNameFullPath =  path.join(__dirname, '..', self.options.overlayFileName);
+   
 
     var parseStdOutput = function (stderr) {
 
@@ -305,16 +305,16 @@ var FfmpegVideoOutputRtmp = function (options, videoOverlayParser, logUtilHelper
         command.outputOptions(self.options.outputOptions);
         if ( self.options.videoFilters) {
             
-            if(fs.existsSync(overlayFileNameFullPath) === false){
+            if(fs.existsSync(self.options.overlayFileName) === false){
                 try {
                     // create the file if it does not exist
-                    fs.writeFileSync(overlayFileNameFullPath, "PV:"); // create empty file
+                    fs.writeFileSync(self.options.overlayFileName, "PV:"); // create empty file
                 } catch (ex) {
                     logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error Creating OverlayText File", ex);
                 }
             }
 
-            let excapedOverlayFileName = overlayFileNameFullPath;
+            let excapedOverlayFileName = fs.realpathSync(self.options.overlayFileName);
             
             excapedOverlayFileName = excapedOverlayFileName.replace(/\\/g, "\\\\"); // escape backslashes for windows paths
             excapedOverlayFileName = excapedOverlayFileName.replace(/:/g, "\\:"); // escape colons for windows paths

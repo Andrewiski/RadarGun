@@ -698,7 +698,7 @@ var videoStreamYoutubeStart = function (options) {
     try{
         logUtilHelper.log(appLogName, "app", "info",'videoStream', 'videoStreamYoutubeStart');           
         if(privateData.videoStreams.youtube ===null){
-            objOptions.videoStreams.youtube.overlayFileName = path.join(overlaysFileDirectory, path.basename(objOptions.videoStreams.youtube.overlayFileName || "youtubeOverlay.txt")); // ensure the overlay file exists in the video directory
+            objOptions.videoStreams.youtube.overlayFileName = path.combine(overlaysFileDirectory, path.basename(objOptions.videoStreams.youtube.overlayFileName || "youtubeOverlay.txt")); // ensure the overlay file exists in the video directory
             privateData.videoStreams.youtube = new FfmpegRtmp(objOptions.videoStreams.youtube, videoOverlayParser, logUtilHelper);
             privateData.videoStreams.youtube.on("stopped", function(){
                 logUtilHelper.log(appLogName, "app", "info",'videoStream', 'Youtube was Stopped');

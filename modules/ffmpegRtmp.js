@@ -25,7 +25,7 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
         "rtmpUrl": "",
         "inputOptions": [ "-rtsp_transport tcp" ],
         "outputOptions": [ "-c:v copy", "-c:a aac", "-f flv" ],
-        "overlayFileName": "overlay.txt",
+        "overlayFileName": "rtmpOverlay.txt",
         "videoFilters": {
           "filter": "drawtext",
           "options": "fontfile=arial.ttf:fontsize=50:box=1:boxcolor=black@0.75:boxborderw=5:fontcolor=white:x=(w-text_w)/2:y=((h-text_h)/2)+((h-text_h)/2):textfile=overlay.txt:reload=1"
@@ -59,7 +59,7 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
     };
 
     var command = null;
-    var overlayFileNameFullPath =  path.join(__dirname, '..', self.options.overlayFileName);
+    
     var parseStdOutput = function (stderr) {
         //assumes // Assumes .outputOptions('-loglevel level')  so loglevel proceeds information
         var data = {
@@ -314,16 +314,16 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
         
         if ( self.options.videoFilters) {
             
-            if(fs.existsSync(overlayFileNameFullPath) === false){
+            if(fs.existsSync(self.options.overlayFileName) === false){
                 try {
                     // create the file if it does not exist
-                    fs.writeFileSync(overlayFileNameFullPath, "PV:"); // create file
+                    fs.writeFileSync(self.options.overlayFileName, "PV:"); // create file
                 } catch (ex) {
                     logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error Creating OverlayText File", ex);
                 }
             }
 
-            let excapedOverlayFileName = overlayFileNameFullPath;
+            let excapedOverlayFileName = fs.realpathSync(self.options.overlayFileName); // get the real path of the file, this is needed for ffmpeg to find the file on windows
             
             
             excapedOverlayFileName = excapedOverlayFileName.replace(/\\/g, "\\\\"); // escape backslashes for windows paths
@@ -400,10 +400,10 @@ var FfmpegRtmp = function (options, videoOverlayParser, logUtilHelper) {
         try {
             if(self.videoOverlayParser && self.videoOverlayParser.getOverlayText){
                 var overlayText = self.videoOverlayParser.getOverlayText(options)
-                if(overlayFileNameFullPath != null ){
+                if(self.options.overlayFileName != null ){
                     
                     try {
-                        fs.writeFileSync(overlayFileNameFullPath, overlayText);
+                        fs.writeFileSync(self.options.overlayFileName, overlayText);
                     } catch (ex) {
                         logUtilHelper.log(appLogName, "app", "error", self.options.rtmpUrl, "Error Writing OverlayText File", ex);
                     }
