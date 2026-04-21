@@ -1,5 +1,4 @@
 ﻿<!DOCTYPE html>
-
 <html>
 <head>
     <meta charset="utf-8" />
@@ -9,134 +8,1036 @@
     <title>Stalker Radar Baseball</title>
     <base href="/">
 
-    <!--<link href="stylesheets/bootstrap.min.css" rel="stylesheet" />
-    <link href="stylesheets/bootstrap-theme.min.css" rel="stylesheet" />-->
     <link href="/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/javascript/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
-    <link href="/javascript/angular-ui-bootstrap/ui-bootstrap-csp.css" rel="stylesheet" />
     <link href="/javascript/fontawesome/css/fontawesome.min.css" rel="stylesheet" />
     <link href="/javascript/fontawesome/css/all.min.css" rel="stylesheet" />
-    <!--<link href="/javascript/dragtable/dragtable.css" rel="stylesheet" />
-    <link href="/javascript/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />-->
     <link href="/javascript/jsoneditor/jsoneditor.min.css" rel="stylesheet" type="text/css">
-    
     <link href="/stylesheets/style.css" rel="stylesheet" />
     <script src="https://widgets.gc.com/static/js/sdk.v1.js"></script>
 
     <script type="text/javascript">
-
-        //Chrome passes the error object (5th param) which we must use since it now truncates the Msg (1st param).
         window.onerror = function (errorMsg, url, lineNumber, columnNumber, errorObject) {
             var errMsg;
-            //check the errorObject as IE and FF don't pass it through (yet)
             if (errorObject && errorObject !== undefined) {
                 errMsg = errorObject.message;
-            }
-            else {
+            } else {
                 errMsg = errorMsg;
             }
-            //alert('Error: ' + errMsg);
             var $errelm = $("#errormsg");
             if ($errelm.length > 0) {
                 try {
-                    $errelm.append('<div>' + url + "<br/>" + lineNumber + "<br/>" + columnNumber + "<br/>" + + decodeURI(errMsg) + '</div>');
-                } catch (err) {
-
-                }
+                    $errelm.append('<div>' + url + "<br/>" + lineNumber + "<br/>" + columnNumber + "<br/>" + decodeURI(errMsg) + '</div>');
+                } catch (err) {}
             }
-            try {
-                console.log(errMsg);
-            } catch (err) {
-
-            }
+            try { console.log(errMsg); } catch (err) {}
         }
     </script>
+
     <script src="/javascript/jquery/jquery.min.js"></script>
-    <!--<script src="/javascript/bootstrap/js/bootstrap.min.js"></script>-->
-    <!--<script src="/javascript/bootstrap-notify/bootstrap-notify.min.js"></script>-->
-    <script src="/javascript/angular/angular.js"></script>
-    <script src="/javascript/angular-route/angular-route.min.js"></script>
-    <script src="/javascript/angular-animate/angular-animate.min.js"></script>
-    <script src="/javascript/angular-ui-router/angular-ui-router.min.js"></script>
-    <script src="/javascript/angular-ui-bootstrap/ui-bootstrap-tpls.js"></script>
-    <script src="/javascript/angular-sanitize/angular-sanitize.min.js"></script>
-    <script src="/javascript/angular-ui-event/event.min.js"></script>
-    <script src="/javascript/angular-ui-date/date.js"></script>
-    <!--<script src="/javascript/angular-ui-utils/utils.js"></script>-->
-    <script src="/javascript/angular-ui-select/select.min.js"></script>
-    <link href="/javascript/angular-ui-select/select.min.css" rel="stylesheet" />
-    <link href="/javascript/angular-ui-switch/angular-ui-switch.min.css" rel="stylesheet" />
-    <script src="/javascript/angular-ui-switch/angular-ui-switch.min.js"></script>
-
+    <script src="/javascript/bootstrap/js/bootstrap.min.js"></script>
     <script src="/javascript/moment/moment.min.js"></script>
-
-    <!--<script src="/javascript/bootstrap-table/bootstrap-table.min.js"></script>
-    <script src="/javascript/dragtable/jquery.dragtable.js"></script>-->
-    <!--Served up by the socket.io service directly as part of the IO service process-->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/javascript/jsoneditor/jsoneditor.min.js"></script>
     <!-- App Files -->
-    <script src="/app/app.js"></script>
-    <script src="/app/filters.js"></script>
-    <script src="/app/mw-confirm-click.js"></script>
-    <script src="/app/scoreboard/scoreboardController.js"></script>
-    <script src="/app/scoreboard/scoreboardDirective.js"></script>
-    <script src="/app/scoreboard/scoreboardViewController.js"></script>
     <script src="/app/radarMonitor.js"></script>
-    <script src="/app/errorHandlerProvider.js"></script>
-    
-    
-    
-    <script>
-        // var googleIsInited = false;
-        // function initMap() {
-        //     googleIsInited = true;
-        //     console.log("initMap Complete");
-        // }
-        
+    <script src="/app/scoreboard/scoreboardController.js"></script>
+    <script src="/app/app.js"></script>
 
-    </script> 
-    
     <style>
-
-
-        .select2 > .select2-choice.ui-select-match {
-            /* Because of the inclusion of Bootstrap */
-            height: 29px;
-        }
-
-        .selectize-control > .selectize-dropdown {
-            top: 36px;
-        }
-        /* Some additional styling to demonstrate that append-to-body helps achieve the proper z-index layering. */
-        .select-box {
-            background: #fff;
-            position: relative;
-            z-index: 1;
-        }
-
         .alert-info.positioned {
             margin-top: 1em;
             position: relative;
-            z-index: 10000; /* The select2 dropdown has a z-index of 9999 */
+            z-index: 10000;
         }
     </style>
-
 </head>
 
 <body>
     <div class="container-fluid">
         <div id="errormsg"></div>
         <form name="radarmonitor" id="radarmonitor" class="sb">
-            <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2023</div>
-            <div data-ng-cloak class="barsandmain">
+            <div class="header">Stalker Radar Monitor - Digital Example, LLC Copyright &copy; 2013-2026</div>
+            <div class="barsandmain">
                 <div class="main">
-                    <div data-ui-view>                    
-                    </div>
-                </div>
-            </div>
+
+                    <!-- ── Speed Display ──────────────────────────────────── -->
+                    <div class="speedData">
+                        <div class="speedsContainer row">
+                            <div class="col-sm-12">
+                                <div class="speedBox col-sm-5">
+                                    <div class="speedLabel">In</div>
+                                    <div class="speedSecondary" id="speedInMin">00.0</div>
+                                    <div class="speed" id="speedInMax">00.0</div>
+                                </div>
+                                <div class="speedBox col-sm-5">
+                                    <div class="speedLabel">Out</div>
+                                    <div class="speedSecondary" id="speedOutMin">00.0</div>
+                                    <div class="speed" id="speedOutMax">00.0</div>
+                                </div>
+                                <div class="speedBox col-sm-2" style="overflow-y:hidden">
+                                    <table class="table table-striped speedBoxHistoryTable">
+                                        <thead>
+                                            <tr><th>Time</th><th>In</th><th>Out</th></tr>
+                                        </thead>
+                                        <tbody id="speedBoxHistoryTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Status Bar ─────────────────────────────────── -->
+                        <div class="clear"></div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <span id="connectionStatus"><i class="fa fa-wifi"></i></span>
+                                &nbsp;<span id="batteryVoltageDisplay"></span>&nbsp;<i class="fa fa-battery-full"></i>
+                                &nbsp;|&nbsp;<span id="gpsPositionDisplay"></span>
+                                &nbsp;|&nbsp;<span id="lastSpeedDisplay"></span>
+                                &nbsp;|&nbsp;<span id="serverVersionDisplay"></span>
+                            </div>
+                        </div>
+
+                        <!-- ── Login / Logout ─────────────────────────────── -->
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div style="float:right">
+                                    <button id="loginBtn" class="btn btn-primary" href="#">Login</button>
+                                    <button id="logoutBtn" class="btn btn-danger" style="display:none">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Non-admin game display ─────────────────────── -->
+                        <div id="gameDisplaySection" style="display:none">
+                            <div class="clear"></div>
+                            <div class="row form-inline">
+                                <div class="col-sm-1">
+                                    <div class="form-group">
+                                        <label class="control-label">Inning</label>
+                                        <span class="form-control" id="displayInning">1</span>&nbsp;
+                                        <i class="fa fa-sort-up" style="font-size:larger" id="displayInningTopIcon"></i>
+                                        <i class="fa fa-sort-down" style="font-size:larger" id="displayInningBottomIcon"></i>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label class="control-label">Home</label>
+                                    <span class="form-control" id="displayHomeScore">0</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label class="control-label">Guest</label>
+                                    <span class="form-control" id="displayGuestScore">0</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label class="control-label">Outs</label>
+                                    <span class="form-control" id="displayOuts">0</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label class="control-label">Balls</label>
+                                    <span class="form-control" id="displayBalls">0</span>
+                                </div>
+                                <div class="col-sm-1">
+                                    <label class="control-label">Strikes</label>
+                                    <span class="form-control" id="displayStrikes">0</span>
+                                </div>
+                            </div>
+                            <div class="row form-inline">
+                                <div class="col-sm-6">
+                                    <label class="control-label">Pitcher</label>
+                                    <span class="form-control" id="displayPitcher"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="control-label">Batter</label>
+                                    <span class="form-control" id="displayBatter"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Admin section ──────────────────────────────── -->
+                        <div id="adminSection" style="display:none">
+
+                            <!-- Radar emulator -->
+                            <div id="radarEmulatorSection" class="row" style="display:none">
+                                <div class="col-lg-12 radarEmulator">
+                                    In:<input id="radarEmulatorInSpeed" type="text" value="57.4" />
+                                    Out:<input id="radarEmulatorOutSpeed" type="text" value="67.8" />
+                                    <button id="radarEmulatorGoBtn" class="btn btn-danger">Go</button>
+                                </div>
+                            </div>
+
+                            <!-- Game select dropdown -->
+                            <div id="gameSelectSection" style="display:none">
+                                <select id="gameSelectDropdown" class="form-control">
+                                    <option value="">Select game...</option>
+                                </select>
+                            </div>
+
+                            <!-- Game score controls -->
+                            <div id="gameScoreSection" style="display:none">
+                                <div class="row form-inline">
+                                    <div class="col-sm-1">
+                                        <label class="control-label">Inning</label>
+                                        <select id="scoreInning" class="form-control" style="width:auto;">
+                                            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                                            <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                                            <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+                                            <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label class="control-label">Top/Bottom</label>
+                                        <select id="scoreInningPosition" class="form-control" style="width:auto;">
+                                            <option value="top">Top</option>
+                                            <option value="bottom">Bottom</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label class="control-label">Home</label>
+                                        <select id="scoreHome" class="form-control" style="width:auto;">
+                                            <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+                                            <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+                                            <option>10</option><option>11</option><option>12</option><option>13</option><option>14</option>
+                                            <option>15</option><option>16</option><option>17</option><option>18</option><option>19</option>
+                                            <option>20</option><option>21</option><option>22</option><option>23</option><option>24</option>
+                                            <option>25</option><option>26</option><option>27</option><option>28</option><option>29</option>
+                                            <option>30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label class="control-label">Guest</label>
+                                        <select id="scoreGuest" class="form-control" style="width:auto;">
+                                            <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+                                            <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+                                            <option>10</option><option>11</option><option>12</option><option>13</option><option>14</option>
+                                            <option>15</option><option>16</option><option>17</option><option>18</option><option>19</option>
+                                            <option>20</option><option>21</option><option>22</option><option>23</option><option>24</option>
+                                            <option>25</option><option>26</option><option>27</option><option>28</option><option>29</option>
+                                            <option>30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label class="control-label">Outs</label>
+                                        <select id="scoreOuts" class="form-control" style="width:auto;">
+                                            <option>0</option><option>1</option><option>2</option><option>3</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label class="control-label">Balls</label>
+                                        <select id="scoreBalls" class="form-control" style="width:auto;">
+                                            <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label class="control-label">Strikes</label>
+                                        <select id="scoreStrikes" class="form-control" style="width:auto;">
+                                            <option>0</option><option>1</option><option>2</option><option>3</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <button type="button" id="btnBall" class="btn btn-primary" title="Ball">B</button>
+                                            <button type="button" id="btnStrike" class="btn btn-primary" title="Strike">S</button>
+                                            <button type="button" id="btnFoul" class="btn btn-primary" title="Foul">F</button>
+                                            <button type="button" id="btnWildPitch" class="btn btn-primary" title="Wild Pitch">WP</button>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" id="btnGroundBall" class="btn btn-success" title="Batter Safe Ground Ball">GB</button>
+                                            <button type="button" id="btnFlyBall" class="btn btn-success" title="Batter Safe Fly Ball">FB</button>
+                                            <button type="button" id="btnLineDrive" class="btn btn-success" title="Batter Safe Line Drive">LD</button>
+                                            <button type="button" id="btnHBP" class="btn btn-success" title="Batter Safe Hit By Pitch">HBP</button>
+                                            <button type="button" id="btnBaulk" class="btn btn-success" title="Batter Safe Baulk">Baulk</button>
+                                            <button type="button" id="btnError" class="btn btn-success" title="Batter Safe Error">E</button>
+                                            <button type="button" id="btnNextBatter" class="btn btn-success" title="Next Batter">NB</button>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" id="btnGroundOut" class="btn btn-danger" title="Ground Out">GO</button>
+                                            <button type="button" id="btnFlyOut" class="btn btn-danger" title="Fly Out">FO</button>
+                                            <button type="button" id="btnLineOut" class="btn btn-danger" title="Line Out">LO</button>
+                                            <button type="button" id="btnFieldersChoice" class="btn btn-danger" title="Fielders Choice">FC</button>
+                                            <button type="button" id="btnDoublePlay" class="btn btn-danger" title="Double Play">DP</button>
+                                            <button type="button" id="btnTriplePlay" class="btn btn-danger" title="Triple Play">TP</button>
+                                            <button type="button" id="btnBatterOut" class="btn btn-danger" title="Batter Out">O</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <button type="button" id="btnInning" class="btn btn-danger" title="Inning Over">I</button>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" id="btnStolenBase2" class="btn btn-success" title="Stole Second">SB2</button>
+                                            <button type="button" id="btnStolenBase3" class="btn btn-success" title="Stole Third">SB3</button>
+                                            <button type="button" id="btnStolenBase4" class="btn btn-success" title="Stole Home">SB4</button>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" id="btnRunnerOut" class="btn btn-danger" title="Runner Out (BP/CS)">BP/CS</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pitcher / Batter selects -->
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <label class="control-label">Pitcher</label>
+                                        <div>
+                                            <button type="button" id="pitcherClearBtn" class="btn" title="Clear Pitcher"><i class="fa fa-ban"></i></button>
+                                            <select id="pitcherSelectDropdown" class="form-control" style="display:inline-block;width:auto;">
+                                                <option value="">Select pitcher...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="control-label">Batter</label>
+                                        <div>
+                                            <button type="button" id="batterClearBtn" class="btn" title="Clear Batter"><i class="fa fa-ban"></i></button>
+                                            <button type="button" id="batterWalkupPlayBtn" class="btn" style="display:none" title="Play Walkup"><i class="fa fa-play"></i></button>
+                                            <button type="button" id="batterWalkupStopBtn" class="btn" style="display:none" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                            <span id="batterWalkupFileName" style="display:none"></span>
+                                            <select id="batterSelectDropdown" class="form-control" style="display:inline-block;width:auto;">
+                                                <option value="">Select batter...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- end gameScoreSection -->
+
+                            <!-- Game action buttons -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div style="float:right">
+                                        <button id="gameScoreBtn" class="btn btn-primary">Score Game</button>
+                                        <button id="gameSelectBtn" class="btn btn-primary">Select Game</button>
+                                        <button id="gameSaveBtn" class="btn btn-primary">Save Game</button>
+                                        <button id="gameEditBtn" class="btn btn-primary" style="display:none">Edit Game</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row"><br /></div>
+
+                            <!-- ── Tabs ────────────────────────────────────── -->
+                            <div style="min-height:800px;">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li role="presentation" class="active">
+                                        <a href="#tab-radarHistory" data-toggle="tab"><i class="fa fa-database"></i> Radar History</a>
+                                    </li>
+                                    <li role="presentation" class="game-tab">
+                                        <a href="#tab-lineup" data-toggle="tab"><i class="fa fa-user"></i> Line Up</a>
+                                    </li>
+                                    <li role="presentation" class="game-tab">
+                                        <a href="#tab-roster" data-toggle="tab"><i class="fa fa-bars"></i> Roster</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-teams" data-toggle="tab"><i class="fa fa-bars"></i> Teams</a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a href="#tab-walkupSongs" data-toggle="tab"><i class="fa fa-music"></i> Walkup Songs</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-fullSongs" data-toggle="tab"><i class="fa fa-music"></i> Full Songs</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-playlists" data-toggle="tab"><i class="fa fa-music"></i> Playlists</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-practiceMode" data-toggle="tab"><i class="fa fa-baseball-bat-ball"></i> Practice Mode</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-videoStreams" data-toggle="tab"><i class="fa-solid fa-video"></i> Video Streams</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-videoFiles" data-toggle="tab"><i class="fa-solid fa-clapperboard"></i> Video Files</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-serverLogs" data-toggle="tab"><i class="fa-regular fa-file-lines"></i> Logs</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-config" data-toggle="tab"><i class="fa-solid fa-gear"></i> Config</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-radarConfig" data-toggle="tab"><i class="fa-solid fa-satellite-dish"></i> Radar Config</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
+                                        <a href="#tab-gameChangerWidget" data-toggle="tab"><i class="fa-solid fa-calendar-days"></i> GameChanger Widget</a>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content">
+
+                                    <!-- Radar History -->
+                                    <div role="tabpanel" class="tab-pane active" id="tab-radarHistory">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <button type="button" class="btn" id="historySaveBtn">Save</button>
+                                                    <button type="button" class="btn" id="historyClearBtn">Clear</button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <table class="table table-striped speedHistoryTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Time</th><th>Pitcher</th><th>Max In</th><th>Min In</th>
+                                                                <th>Batter</th><th>Max Out</th><th>Min Out</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="radarHistoryTableBody"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Line Up -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-lineup">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <label class="control-label">Home Team</label><br />
+                                                <label class="control-label" id="homeTeamLineupLabel">Home Team Name</label>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-primary" id="homeLineupAddBtn">Add</button>
+                                                </div>
+                                                <table class="table table-bordered table-striped">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <td><label class="control-label">Order</label></td>
+                                                            <td><label class="control-label">Player</label></td>
+                                                            <td><label class="control-label">Fielding</label></td>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="homeLineupTableBody"></tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="control-label">Guest Team</label><br />
+                                                <label class="control-label" id="guestTeamLineupLabel">Guest Team Name</label>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-primary" id="guestLineupAddBtn">Add</button>
+                                                </div>
+                                                <table class="table table-bordered table-striped">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <td><label class="control-label">Order</label></td>
+                                                            <td><label class="control-label">Player</label></td>
+                                                            <td><label class="control-label">Fielding</label></td>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="guestLineupTableBody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Roster -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-roster">
+                                        <div class="row">
+                                            <!-- Home Team -->
+                                            <div class="col-sm-6">
+                                                <div>
+                                                    <label class="control-label">Home Team</label>
+                                                    <div style="float:right">
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-primary" id="homeTeamEditBtn">Edit</button>
+                                                            <button type="button" class="btn btn-primary" id="homeTeamSelectBtn">Select</button>
+                                                            <button type="button" class="btn btn-primary" id="homeTeamSaveBtn" style="display:none">Save</button>
+                                                            <button type="button" class="btn btn-danger" id="homeTeamCancelBtn" style="display:none">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <label class="control-label" id="homeTeamRosterLabel">Home Team Name</label>
+                                                <div id="homeTeamSelectSection" style="display:none">
+                                                    <select id="homeTeamSelectDropdown" class="form-control">
+                                                        <option value="">Select team...</option>
+                                                    </select>
+                                                </div>
+                                                <div id="homeRosterViewSection">
+                                                    <table class="table table-bordered table-striped">
+                                                        <thead class="thead-light">
+                                                            <tr>
+                                                                <td><label class="control-label">#</label></td>
+                                                                <td><label class="control-label">First Name</label></td>
+                                                                <td><label class="control-label">Last Name</label></td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="homeRosterViewTableBody"></tbody>
+                                                    </table>
+                                                </div>
+                                                <div id="homeRosterEditSection" style="display:none">
+                                                    <div class="form-group">
+                                                        <label class="control-label">Team Name</label>
+                                                        <input class="form-control" id="homeTeamNameInput" placeholder="Team Name" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="control-label">Short Name</label>
+                                                        <input class="form-control" id="homeTeamShortNameInput" placeholder="Team Short Name" />
+                                                    </div>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-primary" id="homeRosterAddBtn">Add</button>
+                                                    </div>
+                                                    <table class="table table-bordered table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <td><label class="control-label">Jersey Number</label></td>
+                                                                <td><label class="control-label">First Name</label></td>
+                                                                <td><label class="control-label">Last Name</label></td>
+                                                                <td><label class="control-label">Walkup</label></td>
+                                                                <td>&nbsp;</td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="homeRosterEditTableBody"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <!-- Guest Team -->
+                                            <div class="col-sm-6">
+                                                <div>
+                                                    <label class="control-label">Guest Team</label>
+                                                    <div style="float:right">
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-primary" id="guestTeamEditBtn">Edit</button>
+                                                            <button type="button" class="btn btn-primary" id="guestTeamSelectBtn">Select</button>
+                                                            <button type="button" class="btn btn-primary" id="guestTeamSaveBtn" style="display:none">Save</button>
+                                                            <button type="button" class="btn btn-danger" id="guestTeamCancelBtn" style="display:none">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <label class="control-label" id="guestTeamRosterLabel">Guest Team Name</label>
+                                                <div id="guestTeamSelectSection" style="display:none">
+                                                    <select id="guestTeamSelectDropdown" class="form-control">
+                                                        <option value="">Select team...</option>
+                                                    </select>
+                                                </div>
+                                                <div id="guestRosterViewSection">
+                                                    <table class="table table-bordered table-striped">
+                                                        <thead class="thead-light">
+                                                            <tr>
+                                                                <td><label class="control-label">#</label></td>
+                                                                <td><label class="control-label">First Name</label></td>
+                                                                <td><label class="control-label">Last Name</label></td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="guestRosterViewTableBody"></tbody>
+                                                    </table>
+                                                </div>
+                                                <div id="guestRosterEditSection" style="display:none">
+                                                    <div class="form-group">
+                                                        <label class="control-label">Team Name</label>
+                                                        <input class="form-control" id="guestTeamNameInput" placeholder="Team Name" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="control-label">Short Name</label>
+                                                        <input class="form-control" id="guestTeamShortNameInput" placeholder="Team Short Name" />
+                                                    </div>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-primary" id="guestRosterAddBtn">Add</button>
+                                                    </div>
+                                                    <table class="table table-bordered table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <td><label class="control-label">Jersey Number</label></td>
+                                                                <td><label class="control-label">First Name</label></td>
+                                                                <td><label class="control-label">Last Name</label></td>
+                                                                <td><label class="control-label">Walkup</label></td>
+                                                                <td>&nbsp;</td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="guestRosterEditTableBody"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Teams -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-teams">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div>
+                                                    <div style="display:inline-block" id="teamSelectSection">
+                                                        <select id="teamSelectDropdown" class="form-control">
+                                                            <option value="">Select team...</option>
+                                                        </select>
+                                                    </div>
+                                                    <span style="float:right">
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-primary" id="teamEditBtn">Edit</button>
+                                                            <button type="button" class="btn btn-primary" id="teamSelectBtn">Select</button>
+                                                            <button type="button" class="btn btn-primary" id="teamSaveBtn" style="display:none">Save</button>
+                                                            <button type="button" class="btn btn-danger" id="teamCancelBtn" style="display:none">Cancel</button>
+                                                            <button type="button" class="btn btn-danger" id="teamDeleteBtn" style="display:none">Delete</button>
+                                                            <button type="button" class="btn btn-danger" id="teamSelectCancelBtn" style="display:none">Cancel</button>
+                                                            <button type="button" class="btn btn-info" id="teamRefreshBtn" style="display:none"><i class="fa fa-refresh"></i></button>
+                                                        </div>
+                                                    </span>
+                                                </div>
+                                                <!-- Team view -->
+                                                <div id="teamViewSection" style="display:none">
+                                                    <label class="control-label" id="teamViewLabel">Team Name</label>
+                                                    <table class="table table-bordered table-striped">
+                                                        <thead class="thead-light">
+                                                            <tr>
+                                                                <td><label class="control-label">#</label></td>
+                                                                <td><label class="control-label">First Name</label></td>
+                                                                <td><label class="control-label">Last Name</label></td>
+                                                                <td><label class="control-label">Walkup</label></td>
+                                                                <td><label class="control-label">Play</label></td>
+                                                                <td><label class="control-label">Preview</label></td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="teamRosterViewTableBody"></tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- Team edit -->
+                                                <div id="teamEditSection" style="display:none">
+                                                    <div class="form-group">
+                                                        <label class="control-label">Team Name</label>
+                                                        <input class="form-control" id="teamNameInput" placeholder="Team Name" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="control-label">Short Name</label>
+                                                        <input class="form-control" id="teamShortNameInput" placeholder="Team Short Name" />
+                                                    </div>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-primary" id="teamRosterAddBtn">Add</button>
+                                                    </div>
+                                                    <table class="table table-bordered table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <td><label class="control-label">Jersey Number</label></td>
+                                                                <td><label class="control-label">First Name</label></td>
+                                                                <td><label class="control-label">Last Name</label></td>
+                                                                <td><label class="control-label">Walkup</label>
+                                                                    <button type="button" class="btn" id="refreshWalkupBtnTeams"><i class="fa fa-refresh"></i></button>
+                                                                </td>
+                                                                <td>&nbsp;</td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="teamRosterEditTableBody"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Walkup Songs -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-walkupSongs">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="input-group-btn">
+                                                    <button type="button" class="btn" id="refreshWalkupBtn"><i class="fa fa-refresh"></i></button>
+                                                </div>
+                                                <table class="table table-bordered table-striped">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <td><label class="control-label">Song</label></td>
+                                                            <td><label class="control-label">Length</label></td>
+                                                            <td><label class="control-label">Play</label></td>
+                                                            <td><label class="control-label">Preview</label></td>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="walkupSongsTableBody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Full Songs -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-fullSongs">
+                                        <div class="col-sm-6">
+                                            <div class="input-group-btn">
+                                                <button type="button" class="btn" id="refreshFullSongsBtn"><i class="fa fa-refresh"></i></button>
+                                            </div>
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <td><label class="control-label">Song</label></td>
+                                                        <td><label class="control-label">Length</label></td>
+                                                        <td><label class="control-label">Play</label></td>
+                                                        <td><label class="control-label">Preview</label></td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="fullSongsTableBody"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Playlists -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-playlists">
+                                        <div class="col-sm-6">
+                                            <div style="display:inline-block">
+                                                <div class="input-group-btn">
+                                                    <button type="button" class="btn" id="refreshPlaylistsBtn"><i class="fa fa-refresh"></i></button>
+                                                    <button type="button" class="btn btn-success" id="playlistPlayBtn" title="Play Playlist"><i class="fa fa-play"></i></button>
+                                                    <button type="button" class="btn btn-danger" id="playlistStopBtn" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                                    <button type="button" class="btn btn-info" id="playlistSaveBtn" title="Save Playlist"><i class="fa-solid fa-floppy-disk"></i></button>
+                                                </div>
+                                            </div>
+                                            <div style="display:inline-block">
+                                                <input type="checkbox" value="true" id="playlistFullSongLoop" checked="checked" /> <span>Loop</span>
+                                            </div>
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <td><label class="control-label">Playlist</label></td>
+                                                        <td><label class="control-label">Song</label></td>
+                                                        <td><label class="control-label">Length</label></td>
+                                                        <td><label class="control-label">Preview</label></td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="playlistsTableBody"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Practice Mode -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-practiceMode">
+                                        <div>
+                                            <select id="practiceTeamSelectDropdown" class="form-control" style="width:300px">
+                                                <option value="">Select team...</option>
+                                            </select>
+                                            <div id="practicePitcherSection" style="display:none">
+                                                <div class="form-group">
+                                                    <label class="control-label">Pitcher</label>
+                                                    <select id="practicePitcherSelectDropdown" class="form-control" style="display:inline-block;width:auto;">
+                                                        <option value="">Select pitcher...</option>
+                                                    </select>
+                                                    <button type="button" id="practicePitcherClearBtn" class="btn btn-default">
+                                                        <span class="glyphicon glyphicon-trash"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div id="practiceBatterSection" style="display:none">
+                                                <div class="form-group">
+                                                    <label class="control-label">Batter</label>
+                                                    <select id="practiceBatterSelectDropdown" class="form-control" style="display:inline-block;width:auto;">
+                                                        <option value="">Select batter...</option>
+                                                    </select>
+                                                    <button type="button" id="practiceBatterClearBtn" class="btn btn-default">
+                                                        <span class="glyphicon glyphicon-trash"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Video Streams -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-videoStreams">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="well well-sm">
+                                                    <div><label><i class="fa-solid fa-video"></i> Team Names</label></div>
+                                                    <div class="form-group">
+                                                        <label>Our Name</label>
+                                                        <input type="text" class="form-control" id="videoTeamNameInput" placeholder="Your Team Name" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Opponent Name</label>
+                                                        <input type="text" class="form-control" id="videoOpponentNameInput" placeholder="Opponent Team Name" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button class="btn btn-primary" id="videoStreamStartBtn">Start All Streams</button>
+                                                        <button class="btn btn-primary" id="videoStreamStopBtn">Stop All Streams</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="well well-sm">
+                                                    <div><label><i class="fa-solid fa-clapperboard"></i> File</label></div>
+                                                    <div class="form-group">
+                                                        <label>Input:</label>
+                                                        <input type="text" readonly class="form-control" id="fileRtspInput" placeholder="Rtsp Camera Stream URL" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button class="btn btn-primary" id="fileStreamStartBtn">Start Stream</button>
+                                                        <button class="btn btn-primary" id="fileStreamStopBtn">Stop Stream</button>
+                                                    </div>
+                                                    <div id="fileStreamStats">
+                                                        <div class="fileIncomingBlock">
+                                                            <label>Incoming:</label>
+                                                            <span><span class="statStatus"></span></span>
+                                                            <div class="infoBlock" style="display:none">
+                                                                <label>time:</label><span class="statTime"></span>
+                                                                <label>frame:</label><span class="statFrame"></span>
+                                                                <label>size:</label><span class="statSize"></span>
+                                                                <label>fps:</label><span class="statFps"></span>
+                                                                <label>bitrate:</label><span class="statBitrate"></span>
+                                                                <label>speed:</label><span class="statSpeed"></span>
+                                                            </div>
+                                                            <div class="warningBlock" style="display:none"><label>warning:</label><span class="statWarning"></span></div>
+                                                            <div class="errorBlock" style="display:none"><label>error:</label><span class="statError"></span></div>
+                                                            <div class="commandErrorBlock" style="display:none"><label>exit error:</label><span class="statCommandError"></span></div>
+                                                            <div class="restartingBlock" style="display:none"><label>restarting:</label><span class="statRestarting"></span></div>
+                                                        </div>
+                                                        <div class="fileFileBlock">
+                                                            <label>File:</label>
+                                                            <span><span class="statStatus"></span></span>
+                                                            <div class="infoBlock" style="display:none">
+                                                                <label>time:</label><span class="statTime"></span>
+                                                                <label>frame:</label><span class="statFrame"></span>
+                                                                <label>size:</label><span class="statSize"></span>
+                                                                <label>fps:</label><span class="statFps"></span>
+                                                                <label>bitrate:</label><span class="statBitrate"></span>
+                                                                <label>speed:</label><span class="statSpeed"></span>
+                                                            </div>
+                                                            <div class="warningBlock" style="display:none"><label>warning:</label><span class="statWarning"></span></div>
+                                                            <div class="errorBlock" style="display:none"><label>error:</label><span class="statError"></span></div>
+                                                            <div class="commandErrorBlock" style="display:none"><label>exit error:</label><span class="statCommandError"></span></div>
+                                                            <div class="restartingBlock" style="display:none"><label>restarting:</label><span class="statRestarting"></span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="well well-sm">
+                                                    <div><label><i class="fa-brands fa-youtube"></i> YouTube</label></div>
+                                                    <div class="form-group">
+                                                        <label>Input:</label>
+                                                        <input type="text" readonly class="form-control" id="youtubeRtspInput" placeholder="Rtsp Camera Stream URL" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>RTMP:</label>
+                                                        <input type="text" class="form-control" id="youtubeRtmpInput" placeholder="YouTube Stream URL" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button class="btn btn-primary" id="youtubeStreamStartBtn">Start Stream</button>
+                                                        <button class="btn btn-primary" id="youtubeStreamStopBtn">Stop Stream</button>
+                                                    </div>
+                                                    <div id="youtubeStreamStats">
+                                                        <div class="youtubeBlock">
+                                                            <span><span class="statStatus"></span></span>
+                                                            <div class="infoBlock" style="display:none">
+                                                                <label>time:</label><span class="statTime"></span>
+                                                                <label>frame:</label><span class="statFrame"></span>
+                                                                <label>size:</label><span class="statSize"></span>
+                                                                <label>fps:</label><span class="statFps"></span>
+                                                                <label>bitrate:</label><span class="statBitrate"></span>
+                                                                <label>speed:</label><span class="statSpeed"></span>
+                                                            </div>
+                                                            <div class="warningBlock" style="display:none"><label>warning:</label><span class="statWarning"></span></div>
+                                                            <div class="errorBlock" style="display:none"><label>error:</label><span class="statError"></span></div>
+                                                            <div class="commandErrorBlock" style="display:none"><label>exit error:</label><span class="statCommandError"></span></div>
+                                                            <div class="restartingBlock" style="display:none"><label>restarting:</label><span class="statRestarting"></span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="well well-sm">
+                                                    <div><label><img src="/app/img/GameChanger-icon.svg" style="width:20px" alt="" class="gamechanger-logo"> GameChanger</label></div>
+                                                    <div class="form-group">
+                                                        <label>Input:</label>
+                                                        <input type="text" readonly class="form-control" id="gamechangerRtspInput" placeholder="Rtsp Camera Stream URL" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>RTMP:</label>
+                                                        <input type="text" class="form-control" id="gamechangerRtmpInput" placeholder="Gamechanger RTMP URL" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button class="btn btn-primary" id="gamechangerStreamStartBtn">Start Stream</button>
+                                                        <button class="btn btn-primary" id="gamechangerStreamStopBtn">Stop Stream</button>
+                                                    </div>
+                                                    <div id="gamechangerStreamStats">
+                                                        <div class="gamechangerBlock">
+                                                            <span><span class="statStatus"></span></span>
+                                                            <div class="infoBlock" style="display:none">
+                                                                <label>time:</label><span class="statTime"></span>
+                                                                <label>frame:</label><span class="statFrame"></span>
+                                                                <label>size:</label><span class="statSize"></span>
+                                                                <label>fps:</label><span class="statFps"></span>
+                                                                <label>bitrate:</label><span class="statBitrate"></span>
+                                                                <label>speed:</label><span class="statSpeed"></span>
+                                                            </div>
+                                                            <div class="warningBlock" style="display:none"><label>warning:</label><span class="statWarning"></span></div>
+                                                            <div class="errorBlock" style="display:none"><label>error:</label><span class="statError"></span></div>
+                                                            <div class="commandErrorBlock" style="display:none"><label>exit error:</label><span class="statCommandError"></span></div>
+                                                            <div class="restartingBlock" style="display:none"><label>restarting:</label><span class="statRestarting"></span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Video Files -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-videoFiles">
+                                        <div class="col-sm-6">
+                                            <div class="input-group-btn">
+                                                <button type="button" class="btn" id="refreshVideoFilesBtn"><i class="fa fa-refresh"></i></button>
+                                            </div>
+                                            <table class="table table-bordered table-striped">
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <td><label class="control-label">Filename</label></td>
+                                                        <td><label class="control-label">Length</label></td>
+                                                        <td><label class="control-label">Action</label></td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="videoFilesTableBody"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Server Logs -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-serverLogs">
+                                        <div>
+                                            <select class="appLogName"></select>
+                                            <select class="appLogSubname"></select>
+                                            <select class="appLogLevelName">
+                                                <option>error</option>
+                                                <option>warning</option>
+                                                <option>info</option>
+                                                <option>debug</option>
+                                                <option>trace</option>
+                                            </select>
+                                        </div>
+                                        <div class="container-fluid">
+                                            <table class="table table-condensed">
+                                                <thead>
+                                                    <tr><th>Timestamp</th><th>Name</th><th>Sub Name</th><th>Level</th><th>Message</th></tr>
+                                                </thead>
+                                                <tbody class="serverLogs"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Config -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-config">
+                                        <div>
+                                            <div class="serverConfigJson"></div>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-info" data-action="ReadConfig">Read Config</button>
+                                            <button class="btn btn-danger" data-action="SaveConfig">Save Config</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Radar Config -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-radarConfig">
+                                        <div>
+                                            <div id="radarTransmitOffSection">
+                                                <a class="btn btn-sm btn-danger" id="radarTurnOnBtn">Off</a> (Click to Turn On)
+                                            </div>
+                                            <div id="radarTransmitOnSection" style="display:none">
+                                                <a class="btn btn-sm btn-success" id="radarTurnOffBtn">On</a> (Click to Turn Off)
+                                            </div>
+                                            <img id="radarCommandSpinner" src="app/img/spinner.gif" style="margin-left:8px;display:none" width="24" height="24" alt="" />
+
+                                            <!-- View -->
+                                            <div id="radarConfigViewSection">
+                                                <div>Radar Model: <span id="rcProductID"></span></div>
+                                                <div>Low Speed Threshold: <span id="rcLowSpeedThreshold"></span></div>
+                                                <div>High Speed Threshold: <span id="rcHighSpeedThreshold"></span></div>
+                                                <div>Left Right Angle: <span id="rcCosignAngle1"></span></div>
+                                                <div>Up Down Angle: <span id="rcCosignAngle2"></span></div>
+                                                <div>Range: <span id="rcRange"></span></div>
+                                                <div>Message Period: <span id="rcMessagePeriod"></span></div>
+                                                <div>Auto Clear Delay: <span id="rcAutoClearDelay"></span></div>
+                                                <div>Hit Speed Enable: <span id="rcHitSpeedEnable"></span></div>
+                                                <div>Target Direction: <span id="rcTargetDirection"></span></div>
+                                                <div style="float:right">
+                                                    <a class="btn btn-sm btn-success" id="radarConfigEditBtn">edit</a>
+                                                </div>
+                                            </div>
+
+                                            <!-- Edit -->
+                                            <div id="radarConfigEditSection" style="display:none">
+                                                <div>Low Speed Threshold: <input style="width:45px" type="number" id="rcEditLowSpeedThreshold" /></div>
+                                                <div>High Speed Threshold: <input style="width:45px" type="number" id="rcEditHighSpeedThreshold" /></div>
+                                                <div>Left Right Angle: <input style="width:45px" type="number" id="rcEditCosignAngle1" /></div>
+                                                <div>Up Down Angle: <input style="width:45px" type="number" id="rcEditCosignAngle2" /></div>
+                                                <div>Range: <input style="width:45px" type="number" id="rcEditRange" /></div>
+                                                <div>Message Period: <input style="width:45px" type="number" id="rcEditMessagePeriod" /></div>
+                                                <div>Auto Clear Delay: <input style="width:45px" type="number" id="rcEditAutoClearDelay" /></div>
+                                                <div>Hit Speed Enable: <input style="width:45px" type="number" id="rcEditHitSpeedEnable" /></div>
+                                                <div>Target Direction: <input style="width:45px" type="number" id="rcEditTargetDirection" /> 0 Outbound, 1 InBound, 2 Both</div>
+                                                <div style="float:right">
+                                                    <a class="btn btn-sm btn-success" id="radarConfigSaveBtn">Save</a>
+                                                </div>
+                                                <div>
+                                                    <a class="btn btn-sm btn-success" id="radarResetBtn">Reset Radar Settings</a>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <div>Battery Voltage: <span id="batteryVoltageRadar"></span></div>
+                                                <div><span id="batteryTimeRadar"></span></div>
+                                            </div>
+                                            <div id="googleMap"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- GameChanger Widget -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-gameChangerWidget">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div id="gc-schedule-widget-8a1e"></div>
+                                                    <script>
+                                                       /*  if (window.GC && window.GC.team && window.GC.team.schedule) {
+                                                            window.GC.team.schedule.init({
+                                                                target: "#gc-schedule-widget-8a1e",
+                                                                widgetId: "d48c5d8c-8f08-4fe1-8228-9c8579ff3ef7",
+                                                                maxVerticalGamesVisible: 4
+                                                            });
+                                                        } */
+                                                    </script>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div><!-- end tab-content -->
+                            </div><!-- end tabs container -->
+
+                        </div><!-- end adminSection -->
+                    </div><!-- end speedData -->
+
+                </div><!-- end main -->
+            </div><!-- end barsandmain -->
         </form>
     </div>
-    
+
+    <!-- Radar Off Modal -->
+    <div class="modal fade" id="radarOffModal" tabindex="-1" role="dialog" aria-labelledby="radarOffModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="radarOffModalLabel">Radar Off</h4>
+                </div>
+                <div class="modal-body">
+                    <p>The radar has been turned off.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="radarOffTurnOnBtn">Turn Radar On</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden templates -->
+    <div class="templates" style="display:none">
+        <div class="logTemplate">
+            <table>
+                <tr class="logRow">
+                    <td class="logTs"></td>
+                    <td class="logAppName"></td>
+                    <td class="logAppSubname"></td>
+                    <td class="logLevel"></td>
+                    <td class="logMsg"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="audioPreview">
+            <audio controls id="audioPreviewControls" src="">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+    </div>
+
 </body>
 </html>

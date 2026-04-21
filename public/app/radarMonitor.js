@@ -1,146 +1,134 @@
-﻿(function () {
+(function () {
+    'use strict';
 
-   'use strict';
+    window.radarMonitor = (function () {
+        var socket = io.connect();
+        var listeners = {};
 
-    angular.module('scoreboardapp')
-       .factory('radarMonitor', ['$q', '$rootScope', function($q, $rootScope) {
-            // We return this object to anything injecting our service
-           var Service = { socket: io.connect()};
-            // Create our socket.io object and connect it to express
-            
-           Service.socket.on('connect', function() {
-                console.log('radarMonitorService connect' );
-                 $rootScope.$emit("radarMonitor:connect");
-            });
+        function on(event, fn) {
+            if (!listeners[event]) listeners[event] = [];
+            listeners[event].push(fn);
+        }
 
-           Service.socket.on('disconnect', function () {
-                console.log('radarMonitorService disconnect',);
-                $rootScope.$emit("radarMonitor:disconnect");
-           });
+        function trigger(event, data) {
+            (listeners[event] || []).forEach(function (fn) { fn(data); });
+        }
 
-           Service.socket.on('reconnecting', function (message) {
-               console.log('radarMonitorService reconnecting', message);
-               $rootScope.$emit("radarMonitor:reconnecting", message);
-           });
-           Service.socket.on('reconnect', function (message) {
-               console.log('radarMonitorService reconnect', message);
-               $rootScope.$emit("radarMonitor:reconnect", message);
-           });
+        socket.on('connect', function () {
+            console.log('radarMonitor connect');
+            trigger('connect');
+        });
+        socket.on('disconnect', function () {
+            console.log('radarMonitor disconnect');
+            trigger('disconnect');
+        });
+        socket.on('reconnecting', function (msg) {
+            console.log('radarMonitor reconnecting', msg);
+            trigger('reconnecting', msg);
+        });
+        socket.on('reconnect', function (msg) {
+            console.log('radarMonitor reconnect', msg);
+            trigger('reconnect', msg);
+        });
+        socket.on('ping', function (msg) {
+            trigger('ping', msg);
+        });
+        socket.on('pong', function (msg) {
+            trigger('ping', msg);
+        });
+        socket.on('radarSpeed', function (msg) {
+            console.log('radarMonitor radarSpeed', msg);
+            trigger('radarSpeed', msg);
+        });
+        socket.on('radarTimeout', function (msg) {
+            console.log('radarMonitor radarTimeout', msg);
+            trigger('radarTimeout', msg);
+        });
+        socket.on('radarSpeedDataHistory', function (msg) {
+            console.log('radarMonitor radarSpeedDataHistory', msg);
+            trigger('radarSpeedDataHistory', msg);
+        });
+        socket.on('radarConfig', function (msg) {
+            console.log('radarMonitor radarConfig', msg);
+            trigger('radarConfig', msg);
+        });
+        socket.on('radarConfigProperty', function (msg) {
+            console.log('radarMonitor radarConfigProperty', msg);
+            trigger('radarConfigProperty', msg);
+        });
+        socket.on('radarCommand', function (msg) {
+            console.log('radarMonitor radarCommand', msg);
+            trigger('radarCommand', msg);
+        });
+        socket.on('softwareConfig', function (msg) {
+            console.log('radarMonitor softwareConfig', msg);
+            trigger('softwareConfig', msg);
+        });
+        socket.on('softwareConfigProperty', function (msg) {
+            console.log('radarMonitor softwareConfigProperty', msg);
+            trigger('softwareConfigProperty', msg);
+        });
+        socket.on('batteryVoltage', function (msg) {
+            console.log('radarMonitor batteryVoltage', msg);
+            trigger('batteryVoltage', msg);
+        });
+        socket.on('serverInfo', function (msg) {
+            trigger('serverInfo', msg.data);
+        });
+        socket.on('gameChanged', function (msg) {
+            trigger('gameChanged', msg);
+        });
+        socket.on('videoStreams', function (msg) {
+            trigger('videoStreams', msg);
+        });
+        socket.on('practiceMode', function (msg) {
+            trigger('practiceMode', msg);
+        });
+        socket.on('serverLogs', function (msg) {
+            trigger('serverLogs', msg);
+        });
 
-           Service.socket.on('ping', function (message) {
-               //console.log('radarMonitorService ping', message);
-               $rootScope.$emit("radarMonitor:ping", message);
-           });
+        function sendRadarConfigCommand(cmd, data) {
+            socket.emit('radarConfigCommand', { cmd: cmd, data: data });
+        }
 
-           Service.socket.on('pong', function (message) {
-               //console.log('radarMonitorService pong', );
-               $rootScope.$emit("radarMonitor:ping", message);
-           });
+        function sendRadarEmulatorCommand(cmd, data) {
+            socket.emit('radarEmulatorCommand', { cmd: cmd, data: data });
+        }
 
-           Service.socket.on('radarSpeed', function(message) {
-                console.log('radarMonitorService received Speed Data', message);
-                $rootScope.$emit("radarMonitor:radarSpeed", message);
-           });
+        function sendResetRadarSettings() {
+            socket.emit('resetRadarSettings', { cmd: 'resetRadarSettings' });
+        }
 
-           Service.socket.on('radarTimeout', function (message) {
-               console.log('radarMonitorService received Radar Timeout', message);
-               $rootScope.$emit("radarMonitor:radarTimeout", message);
-           });
+        function sendServerCommand(cmd, data) {
+            socket.emit(cmd, data);
+            if (!socket.connected) {
+                console.error('Socket.IO not connected to server');
+            }
+        }
 
-           Service.socket.on('radarSpeedDataHistory', function(message) {
-               console.log('radarMonitorService received  Radar Speed Data History', message);
-               $rootScope.$emit("radarMonitor:radarSpeedDataHistory", message);
-           });
-           Service.socket.on('radarConfig', function(message) {
-                console.log('radarMonitorService received  Radar Config Data', message);
-                $rootScope.$emit("radarMonitor:radarConfig", message);
-            });
-           Service.socket.on('radarConfigProperty', function(message) {
-                console.log('radarMonitorService received Radar Config Data Property', message);
-                $rootScope.$emit("radarMonitor:radarConfigProperty", message);
-            });
-           Service.socket.on('radarCommand', function(message) {
-                 console.log('radarMonitorService received radarCommand', message);
-                $rootScope.$emit("radarMonitor:radarCommand", message);
-           });
-
-           Service.socket.on('softwareConfig', function (message) {
-               console.log('radarMonitorService received software Config Data', message);
-               $rootScope.$emit("radarMonitor:softwareConfig", message);
-           });
-           Service.socket.on('softwareConfigProperty', function (message) {
-               console.log('radarMonitorService received software Config Data Property', message);
-               $rootScope.$emit("radarMonitor:softwareConfigProperty", message);
-           });
-           
-
-           Service.socket.on('batteryVoltage',function(message){
-                console.log('radarMonitorService received batteryVoltage Data', message);
-                $rootScope.$emit("radarMonitor:batteryVoltage", message);
-            });
-           Service.sendRadarConfigCommand = function(cmd,data){
-               Service.socket.emit('radarConfigCommand',{cmd:cmd,data:data});
-           };
-           Service.sendRadarEmulatorCommand = function (cmd, data) {
-               Service.socket.emit('radarEmulatorCommand', { cmd: cmd, data: data });
-           };
-
-           Service.sendResetRadarSettings = function () {
-               Service.socket.emit('resetRadarSettings', {cmd: "resetRadarSettings"});
-           }
-           Service.sendServerCommand = function (cmd, data) {
-                
-                Service.socket.emit(cmd, data );
-                if(Service.socket.connected === false){
-                    console.error("Socket.IO not Connected to server");
+        function uuid() {
+            var chars = '0123456789abcdef'.split('');
+            var u = [], r;
+            u[8] = u[13] = u[18] = u[23] = '-';
+            u[14] = '4';
+            for (var i = 0; i < 36; i++) {
+                if (!u[i]) {
+                    r = 0 | Math.random() * 16;
+                    u[i] = chars[(i === 19) ? (r & 0x3) | 0x8 : r & 0xf];
                 }
-           };
+            }
+            return u.join('');
+        }
 
-            Service.socket.on('serverInfo', function (message) {
-                //console.log('radarMonitorService received gameChanged', message);
-                $rootScope.$emit("serverInfo", message.data);
-            });
-
-           Service.socket.on('gameChanged', function (message) {
-               //console.log('radarMonitorService received gameChanged', message);
-               $rootScope.$emit("gameChanged", message);
-           });
-
-           Service.socket.on('videoStreams', function (message) {
-                //console.log('radarMonitorService received videoStreams', message);
-                $rootScope.$emit("videoStreams", message);
-           });
-
-            Service.socket.on('practiceMode', function (message) {
-                $rootScope.$emit("practiceMode", message);
-            });
-
-           Service.socket.on('serverLogs', function (message) {
-                //console.log('radarMonitorService received videoStreams', message);
-                $rootScope.$emit("serverLogs", message);
-           });
-           
-           
-           /** Generate a guid / uuid  --  682db637-0f31-4847-9cdf-25ba9613a75c
-            */
-           Service.uuid = function uuid() {
-               var chars = '0123456789abcdef'.split('');
-
-               var uuid = [], rnd = Math.random, r;
-               uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-               uuid[14] = '4'; // version 4
-
-               for (var i = 0; i < 36; i++) {
-                   if (!uuid[i]) {
-                       r = 0 | rnd() * 16;
-
-                       uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
-                   }
-               }
-
-               return uuid.join('');
-           }
-
-            return Service;
-        }]);
+        return {
+            socket: socket,
+            on: on,
+            sendRadarConfigCommand: sendRadarConfigCommand,
+            sendRadarEmulatorCommand: sendRadarEmulatorCommand,
+            sendResetRadarSettings: sendResetRadarSettings,
+            sendServerCommand: sendServerCommand,
+            uuid: uuid
+        };
+    })();
 })();
