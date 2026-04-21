@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git add -A && (git diff --cached --quiet || git commit -m \"auto-commit before Claude prompt\")"
+          }
+        ]
+      }
+    ]
+  }
+}
