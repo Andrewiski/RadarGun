@@ -815,13 +815,16 @@
         function renderPlaylistsTab() {
             var $tbody = $('#savedPlaylistsTableBody').empty();
             if (!commonData.playlists || !commonData.playlists.length) {
-                $tbody.append('<tr><td colspan="3" class="text-muted" style="padding:12px">No playlists saved. Click "New Playlist" to create one.</td></tr>');
+                $tbody.append('<tr><td colspan="4" class="text-muted" style="padding:12px">No playlists saved. Click "New Playlist" to create one.</td></tr>');
                 return;
             }
             $.each(commonData.playlists, function (i, pl) {
                 $tbody.append('<tr>' +
                     '<td>' + escHtml(pl.name) + '</td>' +
                     '<td>' + ((pl.songs && pl.songs.length) || 0) + '</td>' +
+                    '<td>' +
+                        '<button class="btn btn-xs btn-warning playlist-preview-btn" data-id="' + escHtml(pl.id) + '" title="Preview in browser"><i class="fa fa-headphones"></i></button>' +
+                    '</td>' +
                     '<td>' +
                         '<button class="btn btn-xs btn-success playlist-play-btn" data-id="' + escHtml(pl.id) + '" title="Play"><i class="fa fa-play"></i></button> ' +
                         '<button class="btn btn-xs btn-info playlist-edit-btn" data-id="' + escHtml(pl.id) + '" title="Edit"><i class="fa fa-edit"></i></button> ' +
@@ -831,18 +834,88 @@
             });
         }
 
-        function renderPlaylistSongSelect() {
-            var $tbody = $('#playlistSongSelectBody').empty();
-            if (!commonData.fullSongFiles) return;
-            var songs = (commonData.editingPlaylist && commonData.editingPlaylist.songs) || [];
-            $.each(commonData.fullSongFiles, function (i, f) {
-                var checked = songs.indexOf(f.fileName) !== -1 ? ' checked' : '';
-                $tbody.append('<tr>' +
-                    '<td><input type="checkbox" value="' + escHtml(f.fileName) + '" name="playlistSongSelect"' + checked + '></td>' +
-                    '<td>' + escHtml(f.fileName) + '</td>' +
-                    '<td><button class="btn btn-xs playlist-song-preview" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-play"></i></button><div class="previewControl"></div></td>' +
-                    '</tr>');
-            });
+        // ── Playlist edit panel ───────────────────────────────────────────────
+        var _plDragSrcIdx = -1;
+
+        function renderPlaylistEditPanel() {
+            var songs   = (commonData.editingPlaylist && commonData.editingPlaylist.songs) || [];
+            var allFiles = commonData.fullSongFiles || [];
+            var inSet   = {};
+            songs.forEach(function (s) { inSet[s] = true; });
+
+            // Ordered songs in the playlist (draggable)
+            var $orderBody = $('#playlistSongOrderBody').empty();
+            if (!songs.length) {
+                $orderBody.append('<tr><td class="text-muted" style="padding:8px">No songs yet — add from the list below.</td></tr>');
+            } else {
+                songs.forEach(function (song, idx) {
+                    var $row = $('<tr draggable="true">' +
+                        '<td style="width:26px;cursor:grab;text-align:center;color:#888"><i class="fa fa-bars"></i></td>' +
+                        '<td>' + escHtml(song) + '</td>' +
+                        '<td style="width:32px"><button class="btn btn-xs btn-danger playlist-song-remove" data-song="' + escHtml(song) + '" title="Remove"><i class="fa fa-times"></i></button></td>' +
+                        '</tr>');
+                    var el = $row[0];
+                    el._plIdx = idx;
+                    el.addEventListener('dragstart', function (e) {
+                        _plDragSrcIdx = this._plIdx;
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', _plDragSrcIdx);
+                        this.style.opacity = '0.4';
+                    });
+                    el.addEventListener('dragover', function (e) {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        this.classList.add('playlist-drag-over');
+                    });
+                    el.addEventListener('dragleave', function () {
+                        this.classList.remove('playlist-drag-over');
+                    });
+                    el.addEventListener('drop', function (e) {
+                        e.preventDefault();
+                        this.classList.remove('playlist-drag-over');
+                        var tgtIdx = this._plIdx;
+                        if (_plDragSrcIdx === tgtIdx) return;
+                        var arr = commonData.editingPlaylist.songs;
+                        var moved = arr.splice(_plDragSrcIdx, 1)[0];
+                        arr.splice(tgtIdx, 0, moved);
+                        renderPlaylistEditPanel();
+                    });
+                    el.addEventListener('dragend', function () {
+                        this.style.opacity = '';
+                        $('#playlistSongOrderBody tr').each(function () { this.classList.remove('playlist-drag-over'); });
+                    });
+                    $orderBody.append($row);
+                });
+            }
+
+            // Available songs (not yet in playlist)
+            var $availBody = $('#playlistSongAvailableBody').empty();
+            var available = allFiles.filter(function (f) { return !inSet[f.fileName]; });
+            if (!available.length) {
+                $availBody.append('<tr><td class="text-muted" style="padding:8px">All songs are already in this playlist.</td></tr>');
+            } else {
+                available.forEach(function (f) {
+                    $availBody.append('<tr>' +
+                        '<td style="width:32px"><button class="btn btn-xs btn-success playlist-song-add" data-song="' + escHtml(f.fileName) + '" title="Add"><i class="fa fa-plus"></i></button></td>' +
+                        '<td>' + escHtml(f.fileName) + '</td>' +
+                        '</tr>');
+                });
+            }
+        }
+
+        function addSongToPlaylist(song) {
+            if (!commonData.editingPlaylist) return;
+            if (!commonData.editingPlaylist.songs) commonData.editingPlaylist.songs = [];
+            if (commonData.editingPlaylist.songs.indexOf(song) === -1) {
+                commonData.editingPlaylist.songs.push(song);
+                renderPlaylistEditPanel();
+            }
+        }
+
+        function removeSongFromPlaylist(song) {
+            if (!commonData.editingPlaylist) return;
+            commonData.editingPlaylist.songs = (commonData.editingPlaylist.songs || []).filter(function (s) { return s !== song; });
+            renderPlaylistEditPanel();
         }
 
         function openNewPlaylist() {
@@ -851,7 +924,7 @@
             $('#playlistNameInput').val('');
             $('#playlistEditPanel').show();
             var ready = commonData.fullSongFiles ? $.when() : refreshFullSongFiles();
-            ready.then(function () { renderPlaylistSongSelect(); });
+            ready.then(function () { renderPlaylistEditPanel(); });
         }
 
         function openEditPlaylist(id) {
@@ -862,16 +935,14 @@
             $('#playlistNameInput').val(pl.name);
             $('#playlistEditPanel').show();
             var ready = commonData.fullSongFiles ? $.when() : refreshFullSongFiles();
-            ready.then(function () { renderPlaylistSongSelect(); });
+            ready.then(function () { renderPlaylistEditPanel(); });
         }
 
         function saveCurrentPlaylist() {
             if (!commonData.editingPlaylist) return;
             var name = $('#playlistNameInput').val().trim();
             if (!name) { alert('Please enter a playlist name.'); return; }
-            var songs = [];
-            $('input[name=playlistSongSelect]:checked').each(function () { songs.push($(this).val()); });
-            var pl = { id: commonData.editingPlaylist.id || Date.now().toString(), name: name, songs: songs };
+            var pl = { id: commonData.editingPlaylist.id || Date.now().toString(), name: name, songs: commonData.editingPlaylist.songs || [] };
             radarMonitor.sendServerCommand('audio', { cmd: 'savePlaylist', data: pl });
             if (!commonData.playlists) commonData.playlists = [];
             var idx = -1;
@@ -882,6 +953,33 @@
             commonData.editingPlaylist = null;
             $('#playlistEditPanel').hide();
             renderPlaylistsTab();
+        }
+
+        // ── Playlist browser preview (sequential) ─────────────────────────────
+        var _plPreviewQueue = [];
+        var _plPreviewIdx   = 0;
+
+        function previewPlaylist(id) {
+            var pl = (commonData.playlists || []).filter(function (p) { return p.id === id; })[0];
+            if (!pl || !pl.songs || !pl.songs.length) return;
+            _plPreviewQueue = pl.songs.slice();
+            _plPreviewIdx   = 0;
+            playlistPreviewAdvance();
+        }
+
+        function playlistPreviewAdvance() {
+            var $audio = $('#playlistPreviewAudio');
+            if (_plPreviewIdx >= _plPreviewQueue.length) {
+                $audio[0].pause();
+                $('#playlistPreviewContainer').hide();
+                return;
+            }
+            var song = _plPreviewQueue[_plPreviewIdx];
+            _plPreviewIdx++;
+            $audio.attr('src', '/data/audioFiles/fullSongs/' + encodeURIComponent(song));
+            $audio[0].load();
+            $audio[0].play().catch(function () {});
+            $('#playlistPreviewContainer').show();
         }
 
         function deletePlaylist(id) {
@@ -1593,11 +1691,12 @@
             $(document).on('click', '#savePlaylistBtn',        function () { saveCurrentPlaylist(); });
             $(document).on('click', '#cancelPlaylistBtn',      function () { commonData.editingPlaylist = null; $('#playlistEditPanel').hide(); });
             $(document).on('click', '.playlist-play-btn',      function () { playNamedPlaylist($(this).attr('data-id')); });
+            $(document).on('click', '.playlist-preview-btn',   function () { previewPlaylist($(this).attr('data-id')); });
             $(document).on('click', '.playlist-edit-btn',      function () { openEditPlaylist($(this).attr('data-id')); });
             $(document).on('click', '.playlist-delete-btn',    function () { deletePlaylist($(this).attr('data-id')); });
-            $(document).on('click', '.playlist-song-preview',  function () {
-                audioFilePreview($(this), $(this).attr('data-filename'), 'fullSongs');
-            });
+            $(document).on('click', '.playlist-song-add',      function () { addSongToPlaylist($(this).attr('data-song')); });
+            $(document).on('click', '.playlist-song-remove',   function () { removeSongFromPlaylist($(this).attr('data-song')); });
+            $('#playlistPreviewAudio').on('ended',              function () { playlistPreviewAdvance(); });
 
             // Video Streams tab
             $(document).on('click', '#videoStreamStartBtn',          function () {

@@ -674,11 +674,17 @@
                                                     <button type="button" class="btn btn-sm btn-primary" id="newPlaylistBtn" title="New Playlist"><i class="fa fa-plus"></i> New Playlist</button>
                                                     <span style="margin-left:10px"><input type="checkbox" id="playlistFullSongLoop" checked="checked" /> <label for="playlistFullSongLoop" style="font-weight:normal">Loop</label></span>
                                                 </div>
+                                                <div id="playlistPreviewContainer" style="display:none;margin-bottom:8px">
+                                                    <audio controls id="playlistPreviewAudio" style="width:100%">
+                                                        Your browser does not support the audio element.
+                                                    </audio>
+                                                </div>
                                                 <table class="table table-bordered table-striped table-condensed">
                                                     <thead class="thead-light">
                                                         <tr>
                                                             <th>Name</th>
                                                             <th>Songs</th>
+                                                            <th>Preview</th>
                                                             <th>Actions</th>
                                                         </tr>
                                                     </thead>
@@ -700,15 +706,13 @@
                                                             <button type="button" class="btn btn-sm btn-success" id="savePlaylistBtn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
                                                             <button type="button" class="btn btn-sm btn-default" id="cancelPlaylistBtn">Cancel</button>
                                                         </div>
-                                                        <table class="table table-bordered table-striped table-condensed">
-                                                            <thead class="thead-light">
-                                                                <tr>
-                                                                    <th style="width:36px"></th>
-                                                                    <th>Song</th>
-                                                                    <th style="width:70px">Preview</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="playlistSongSelectBody"></tbody>
+                                                        <label class="control-label">Songs in Playlist <small class="text-muted">(drag <i class="fa fa-bars"></i> to reorder)</small></label>
+                                                        <table class="table table-bordered table-condensed" style="margin-bottom:6px">
+                                                            <tbody id="playlistSongOrderBody"></tbody>
+                                                        </table>
+                                                        <label class="control-label">Available Songs</label>
+                                                        <table class="table table-bordered table-condensed">
+                                                            <tbody id="playlistSongAvailableBody"></tbody>
                                                         </table>
                                                     </div>
                                                 </div>
