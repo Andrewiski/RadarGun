@@ -1004,15 +1004,16 @@
                                         <div class="container-fluid">
                                             <div class="row">
                                                 <div class="col-sm-12">
-                                                    <div id="gc-schedule-widget-8a1e"></div>
+                                                    <!-- Put this div wherever you want the widget to be embedded -->
+                                                    <div id="gc-schedule-widget-w5e0"></div>
+                                                    <!-- Put this before the closing </body> tag -->
+                                                    <script src="https://widgets.gc.com/static/js/sdk.v1.js"></script>
                                                     <script>
-                                                       /*  if (window.GC && window.GC.team && window.GC.team.schedule) {
-                                                            window.GC.team.schedule.init({
-                                                                target: "#gc-schedule-widget-8a1e",
-                                                                widgetId: "d48c5d8c-8f08-4fe1-8228-9c8579ff3ef7",
-                                                                maxVerticalGamesVisible: 4
-                                                            });
-                                                        } */
+                                                        window.GC.team.schedule.init({
+                                                            target: "#gc-schedule-widget-w5e0",
+                                                            widgetId: "955374b7-e68b-4b88-8032-12abbde04364",
+                                                            maxVerticalGamesVisible: 4,
+                                                        })
                                                     </script>
                                                 </div>
                                             </div>

@@ -758,7 +758,7 @@
                 var walkupFileDisplay = hasWalkup ? escHtml(player.walkupFile.fileName) : '';
                 var playBtn  = hasWalkup ? '<button type="button" class="btn teams-walkup-play" data-file=\'' + escHtml(JSON.stringify(player.walkupFile)) + '\' title="Play Walkup"><i class="fa fa-play"></i></button>' : '';
                 var stopBtn  = hasWalkup ? '<button type="button" class="btn teams-walkup-stop" title="Stop"><i class="fa fa-stop"></i></button>' : '';
-                var prevBtn  = hasWalkup ? '<button type="button" class="btn teams-walkup-preview" data-filename="' + escHtml(player.walkupFile.fileName) + '" title="Preview"><i class="fa fa-play"></i></button>' : '';
+                var prevBtn  = hasWalkup ? '<button type="button" class="btn teams-walkup-preview" data-filename="' + escHtml(player.walkupFile.fileName) + '" title="Preview"><i class="fa fa-headphones"></i></button>' : '';
                 $tbody.append('<tr>' +
                     '<td>' + escHtml(player.jerseyNumber) + '</td>' +
                     '<td>' + escHtml(player.firstName) + '</td>' +
@@ -781,7 +781,7 @@
                     '<button class="btn walkup-play-song" data-file=\'' + escHtml(JSON.stringify(f)) + '\' title="Play"><i class="fa fa-play"></i></button>' +
                     '<button class="btn walkup-stop-song" title="Stop"><i class="fa fa-stop"></i></button>' +
                     '</td>' +
-                    '<td><button class="btn walkup-preview-song" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-play"></i></button><div class="previewControl"></div></td>' +
+                    '<td><button class="btn walkup-preview-song" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-headphones"></i></button><div class="previewControl"></div></td>' +
                     '</tr>');
             });
         }
@@ -797,7 +797,7 @@
                     '<button class="btn fullsong-play" data-file=\'' + escHtml(JSON.stringify(f)) + '\' title="Play"><i class="fa fa-play"></i></button>' +
                     '<button class="btn fullsong-stop" title="Stop"><i class="fa fa-stop"></i></button>' +
                     '</td>' +
-                    '<td><button class="btn fullsong-preview" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-play"></i></button><div class="previewControl"></div></td>' +
+                    '<td><button class="btn fullsong-preview" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-headphones"></i></button><div class="previewControl"></div></td>' +
                     '</tr>');
             });
         }
