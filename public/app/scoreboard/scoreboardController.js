@@ -15,6 +15,8 @@
             batters: null,
             walkupFiles: null,
             fullSongFiles: null,
+            playlists: null,
+            editingPlaylist: null,
             videoFiles: null,
             isGameAdmin: false,
             isGameSelect: false,
@@ -800,17 +802,100 @@
             });
         }
 
+        function refreshPlaylists() {
+            $.getJSON('/data/playlists', function (data) {
+                commonData.playlists = data || [];
+                renderPlaylistsTab();
+            }).fail(function () {
+                commonData.playlists = [];
+                renderPlaylistsTab();
+            });
+        }
+
         function renderPlaylistsTab() {
-            var $tbody = $('#playlistsTableBody').empty();
-            if (!commonData.fullSongFiles) return;
-            $.each(commonData.fullSongFiles, function (i, f) {
+            var $tbody = $('#savedPlaylistsTableBody').empty();
+            if (!commonData.playlists || !commonData.playlists.length) {
+                $tbody.append('<tr><td colspan="3" class="text-muted" style="padding:12px">No playlists saved. Click "New Playlist" to create one.</td></tr>');
+                return;
+            }
+            $.each(commonData.playlists, function (i, pl) {
                 $tbody.append('<tr>' +
-                    '<td><input type="checkbox" value="' + escHtml(f.fileName) + '" name="playlistFullSong"></td>' +
-                    '<td>' + escHtml(f.fileName) + '</td>' +
-                    '<td>' + escHtml(f.length) + '</td>' +
-                    '<td><button class="btn playlist-preview" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-play"></i></button><div class="previewControl"></div></td>' +
+                    '<td>' + escHtml(pl.name) + '</td>' +
+                    '<td>' + ((pl.songs && pl.songs.length) || 0) + '</td>' +
+                    '<td>' +
+                        '<button class="btn btn-xs btn-success playlist-play-btn" data-id="' + escHtml(pl.id) + '" title="Play"><i class="fa fa-play"></i></button> ' +
+                        '<button class="btn btn-xs btn-info playlist-edit-btn" data-id="' + escHtml(pl.id) + '" title="Edit"><i class="fa fa-edit"></i></button> ' +
+                        '<button class="btn btn-xs btn-danger playlist-delete-btn" data-id="' + escHtml(pl.id) + '" title="Delete"><i class="fa fa-trash"></i></button>' +
+                    '</td>' +
                     '</tr>');
             });
+        }
+
+        function renderPlaylistSongSelect() {
+            var $tbody = $('#playlistSongSelectBody').empty();
+            if (!commonData.fullSongFiles) return;
+            var songs = (commonData.editingPlaylist && commonData.editingPlaylist.songs) || [];
+            $.each(commonData.fullSongFiles, function (i, f) {
+                var checked = songs.indexOf(f.fileName) !== -1 ? ' checked' : '';
+                $tbody.append('<tr>' +
+                    '<td><input type="checkbox" value="' + escHtml(f.fileName) + '" name="playlistSongSelect"' + checked + '></td>' +
+                    '<td>' + escHtml(f.fileName) + '</td>' +
+                    '<td><button class="btn btn-xs playlist-song-preview" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-play"></i></button><div class="previewControl"></div></td>' +
+                    '</tr>');
+            });
+        }
+
+        function openNewPlaylist() {
+            commonData.editingPlaylist = { id: null, name: '', songs: [] };
+            $('#playlistEditTitle').text('New Playlist');
+            $('#playlistNameInput').val('');
+            $('#playlistEditPanel').show();
+            var ready = commonData.fullSongFiles ? $.when() : refreshFullSongFiles();
+            ready.then(function () { renderPlaylistSongSelect(); });
+        }
+
+        function openEditPlaylist(id) {
+            var pl = (commonData.playlists || []).filter(function (p) { return p.id === id; })[0];
+            if (!pl) return;
+            commonData.editingPlaylist = { id: pl.id, name: pl.name, songs: (pl.songs || []).slice() };
+            $('#playlistEditTitle').text('Edit: ' + pl.name);
+            $('#playlistNameInput').val(pl.name);
+            $('#playlistEditPanel').show();
+            var ready = commonData.fullSongFiles ? $.when() : refreshFullSongFiles();
+            ready.then(function () { renderPlaylistSongSelect(); });
+        }
+
+        function saveCurrentPlaylist() {
+            if (!commonData.editingPlaylist) return;
+            var name = $('#playlistNameInput').val().trim();
+            if (!name) { alert('Please enter a playlist name.'); return; }
+            var songs = [];
+            $('input[name=playlistSongSelect]:checked').each(function () { songs.push($(this).val()); });
+            var pl = { id: commonData.editingPlaylist.id || Date.now().toString(), name: name, songs: songs };
+            radarMonitor.sendServerCommand('audio', { cmd: 'savePlaylist', data: pl });
+            if (!commonData.playlists) commonData.playlists = [];
+            var idx = -1;
+            for (var i = 0; i < commonData.playlists.length; i++) {
+                if (commonData.playlists[i].id === pl.id) { idx = i; break; }
+            }
+            if (idx !== -1) { commonData.playlists[idx] = pl; } else { commonData.playlists.push(pl); }
+            commonData.editingPlaylist = null;
+            $('#playlistEditPanel').hide();
+            renderPlaylistsTab();
+        }
+
+        function deletePlaylist(id) {
+            if (!confirm('Delete this playlist?')) return;
+            radarMonitor.sendServerCommand('audio', { cmd: 'deletePlaylist', data: { id: id } });
+            commonData.playlists = (commonData.playlists || []).filter(function (p) { return p.id !== id; });
+            renderPlaylistsTab();
+        }
+
+        function playNamedPlaylist(id) {
+            var pl = (commonData.playlists || []).filter(function (p) { return p.id === id; })[0];
+            if (!pl) return;
+            var shouldLoop = $('#playlistFullSongLoop').prop('checked');
+            radarMonitor.sendServerCommand('audio', { cmd: 'playNamedPlaylist', data: { playlist: pl, loop: shouldLoop } });
         }
 
         function renderPracticeModeTab() {
@@ -976,6 +1061,7 @@
                     break;
                 case 'playlists':
                     if (!commonData.fullSongFiles) refreshFullSongFiles();
+                    if (!commonData.playlists) refreshPlaylists();
                     break;
                 case 'videoFiles':
                     refreshVideoFiles();
@@ -1128,23 +1214,6 @@
             $ap[0].play();
         }
 
-        function audioFileSaveFullSongPlaylist() {
-            var audioFiles = [];
-            $('input[name=playlistFullSong]:checked').each(function () { audioFiles.push($(this).val()); });
-            if (audioFiles.length > 0) {
-                // shuffle
-                for (var i = audioFiles.length - 1; i > 0; i--) {
-                    var j = Math.floor(Math.random() * (i + 1));
-                    var tmp = audioFiles[i]; audioFiles[i] = audioFiles[j]; audioFiles[j] = tmp;
-                }
-            }
-            radarMonitor.sendServerCommand('audio', { cmd: 'audioFileSaveFullSongPlaylist', data: { fileName: 'playlist.txt', audioFiles: audioFiles } });
-        }
-
-        function audioFilePlayFullSongPlaylist() {
-            var shouldLoop = $('#playlistFullSongLoop').prop('checked');
-            radarMonitor.sendServerCommand('audio', { cmd: 'audioFilePlayFullSongPlaylist', data: { fileName: 'playlist.txt', loop: shouldLoop } });
-        }
 
         // ── Radar ─────────────────────────────────────────────────────────────
         var radarOffModalOpen = false;
@@ -1518,11 +1587,15 @@
             });
 
             // Playlists tab
-            $(document).on('click', '#refreshPlaylistsBtn',    function () { refreshFullSongFiles(); });
-            $(document).on('click', '#playlistPlayBtn',        function () { audioFilePlayFullSongPlaylist(); });
+            $(document).on('click', '#refreshPlaylistsBtn',    function () { refreshPlaylists(); refreshFullSongFiles(); });
             $(document).on('click', '#playlistStopBtn',        function () { audioFileStop(); });
-            $(document).on('click', '#playlistSaveBtn',        function () { audioFileSaveFullSongPlaylist(); });
-            $(document).on('click', '.playlist-preview',       function () {
+            $(document).on('click', '#newPlaylistBtn',         function () { openNewPlaylist(); });
+            $(document).on('click', '#savePlaylistBtn',        function () { saveCurrentPlaylist(); });
+            $(document).on('click', '#cancelPlaylistBtn',      function () { commonData.editingPlaylist = null; $('#playlistEditPanel').hide(); });
+            $(document).on('click', '.playlist-play-btn',      function () { playNamedPlaylist($(this).attr('data-id')); });
+            $(document).on('click', '.playlist-edit-btn',      function () { openEditPlaylist($(this).attr('data-id')); });
+            $(document).on('click', '.playlist-delete-btn',    function () { deletePlaylist($(this).attr('data-id')); });
+            $(document).on('click', '.playlist-song-preview',  function () {
                 audioFilePreview($(this), $(this).attr('data-filename'), 'fullSongs');
             });
 

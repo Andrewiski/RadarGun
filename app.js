@@ -128,6 +128,7 @@ var fullSongAudioDirectory = path.join(audioFileDirectory, "fullSongs");
 var videoFileDirectory = path.join(objOptions.dataDirectory, "videos");
 var overlaysFileDirectory = path.join(objOptions.dataDirectory, "overlays");
 var nosqlDirectory = path.join(objOptions.dataDirectory, "nosql");
+var playlistsFilePath = path.join(objOptions.dataDirectory, "playlists.json");
 
 
 // ensure audio directories exist
@@ -469,6 +470,13 @@ routes.get('/data/audioFiles/fullSongs/:filename', (req, res) => {
         res.sendStatus(500);
     }
   });
+
+routes.get('/data/playlists', function (req, res) {
+    fs.readFile(playlistsFilePath, 'utf8', function (err, data) {
+        if (err) { return res.json([]); }
+        try { res.json(JSON.parse(data)); } catch (e) { res.json([]); }
+    });
+});
 
   routes.get('/data/audioFiles/walkup/:filename', (req, res) => {
     try{
@@ -1128,6 +1136,38 @@ io.on('connection', function(socket) {
                     case "audioFileStop":
                         audioFileStop();
                         break;
+                    case "savePlaylist": {
+                        let playlists = [];
+                        try { playlists = JSON.parse(fs.readFileSync(playlistsFilePath, 'utf8')); } catch (e) { playlists = []; }
+                        let savePl = message.data;
+                        let saveIdx = playlists.findIndex(function (p) { return p.id === savePl.id; });
+                        if (saveIdx !== -1) { playlists[saveIdx] = savePl; } else { playlists.push(savePl); }
+                        fs.writeFileSync(playlistsFilePath, JSON.stringify(playlists, null, 2), 'utf8');
+                        break;
+                    }
+                    case "deletePlaylist": {
+                        let playlists = [];
+                        try { playlists = JSON.parse(fs.readFileSync(playlistsFilePath, 'utf8')); } catch (e) { playlists = []; }
+                        playlists = playlists.filter(function (p) { return p.id !== message.data.id; });
+                        fs.writeFileSync(playlistsFilePath, JSON.stringify(playlists, null, 2), 'utf8');
+                        break;
+                    }
+                    case "playNamedPlaylist": {
+                        let namedPl = message.data.playlist;
+                        let namedLoop = message.data.loop;
+                        let tempFile = path.join(fullSongAudioDirectory, '_playlist_temp.txt');
+                        let tempContent = '';
+                        for (let s = 0; s < namedPl.songs.length; s++) {
+                            tempContent += "file '" + namedPl.songs[s] + "'\n";
+                        }
+                        fs.writeFileSync(tempFile, tempContent, 'utf8');
+                        if (namedLoop) {
+                            audioFilePlay(fullSongAudioDirectory, { fileName: '_playlist_temp.txt' }, ['-hide_banner', '-nodisp', '-f', 'concat', '-safe', '0', '-loop', '0']);
+                        } else {
+                            audioFilePlay(fullSongAudioDirectory, { fileName: '_playlist_temp.txt' }, ['-hide_banner', '-nodisp', '-f', 'concat', '-safe', '0', '-autoexit']);
+                        }
+                        break;
+                    }
                 }
             } catch (ex) {
                 logUtilHelper.log(appLogName, "socketio", 'error', 'audio', ex);

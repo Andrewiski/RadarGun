@@ -665,29 +665,54 @@
 
                                     <!-- Playlists -->
                                     <div role="tabpanel" class="tab-pane" id="tab-playlists">
-                                        <div class="col-sm-6">
-                                            <div style="display:inline-block">
-                                                <div class="input-group-btn">
-                                                    <button type="button" class="btn" id="refreshPlaylistsBtn"><i class="fa fa-refresh"></i></button>
-                                                    <button type="button" class="btn btn-success" id="playlistPlayBtn" title="Play Playlist"><i class="fa fa-play"></i></button>
-                                                    <button type="button" class="btn btn-danger" id="playlistStopBtn" title="Stop Audio"><i class="fa fa-stop"></i></button>
-                                                    <button type="button" class="btn btn-info" id="playlistSaveBtn" title="Save Playlist"><i class="fa-solid fa-floppy-disk"></i></button>
+                                        <div class="row">
+                                            <!-- Saved playlists list -->
+                                            <div class="col-sm-5">
+                                                <div style="margin-bottom:8px">
+                                                    <button type="button" class="btn btn-sm" id="refreshPlaylistsBtn" title="Refresh"><i class="fa fa-refresh"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-danger" id="playlistStopBtn" title="Stop Audio"><i class="fa fa-stop"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-primary" id="newPlaylistBtn" title="New Playlist"><i class="fa fa-plus"></i> New Playlist</button>
+                                                    <span style="margin-left:10px"><input type="checkbox" id="playlistFullSongLoop" checked="checked" /> <label for="playlistFullSongLoop" style="font-weight:normal">Loop</label></span>
+                                                </div>
+                                                <table class="table table-bordered table-striped table-condensed">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Songs</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="savedPlaylistsTableBody"></tbody>
+                                                </table>
+                                            </div>
+                                            <!-- Edit / create playlist panel -->
+                                            <div class="col-sm-7" id="playlistEditPanel" style="display:none">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <strong id="playlistEditTitle">New Playlist</strong>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Playlist Name</label>
+                                                            <input type="text" class="form-control" id="playlistNameInput" placeholder="Enter playlist name..." style="max-width:300px" />
+                                                        </div>
+                                                        <div style="margin-bottom:10px">
+                                                            <button type="button" class="btn btn-sm btn-success" id="savePlaylistBtn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                                                            <button type="button" class="btn btn-sm btn-default" id="cancelPlaylistBtn">Cancel</button>
+                                                        </div>
+                                                        <table class="table table-bordered table-striped table-condensed">
+                                                            <thead class="thead-light">
+                                                                <tr>
+                                                                    <th style="width:36px"></th>
+                                                                    <th>Song</th>
+                                                                    <th style="width:70px">Preview</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="playlistSongSelectBody"></tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div style="display:inline-block">
-                                                <input type="checkbox" value="true" id="playlistFullSongLoop" checked="checked" /> <span>Loop</span>
-                                            </div>
-                                            <table class="table table-bordered table-striped">
-                                                <thead class="thead-light">
-                                                    <tr>
-                                                        <td><label class="control-label">Playlist</label></td>
-                                                        <td><label class="control-label">Song</label></td>
-                                                        <td><label class="control-label">Length</label></td>
-                                                        <td><label class="control-label">Preview</label></td>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="playlistsTableBody"></tbody>
-                                            </table>
                                         </div>
                                     </div>
 
