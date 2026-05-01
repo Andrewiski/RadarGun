@@ -1758,6 +1758,7 @@
                 videoStreamGameChangerStart();
             });
             $(document).on('click', '#gamechangerStreamStopBtn',     function () { videoStreamGameChangerStop(); });
+            $(document).on('click', '#gamechangerRtmpClearBtn',      function () { $('#gamechangerRtmpInput').val(''); });
             $(document).on('click', '#fileStreamStartBtn',           function () { videoStreamFileStart(); });
             $(document).on('click', '#fileStreamStopBtn',            function () { videoStreamFileStop(); });
 
