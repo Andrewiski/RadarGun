@@ -213,8 +213,13 @@ var privateData = {
         gamechanger: null,
         file: null
     },
+    cameras: {
+        firstBase: (objOptions.cameras && objOptions.cameras.firstBase) || "",
+        thirdBase: (objOptions.cameras && objOptions.cameras.thirdBase) || "",
+        homePlate: (objOptions.cameras && objOptions.cameras.homePlate) || "",
+        outfield:  (objOptions.cameras && objOptions.cameras.outfield)  || ""
+    },
     subscribedSocketIOClients: {}
-    
 }
 
 //app.set('views', path.join(__dirname, 'views'));
@@ -608,6 +613,15 @@ routes.get('/data/settings/videostreams', function (req, res) {
     }catch(err){
         logUtilHelper.log(appLogName, "browser", "error", "Error getting video stream settings.", err);
         res.json(500, { err: err })
+    }
+});
+
+routes.get('/data/settings/cameras', function (req, res) {
+    try {
+        res.json(privateData.cameras);
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "Error getting camera settings.", err);
+        res.json(500, { err: err });
     }
 });
 
@@ -1280,7 +1294,17 @@ io.on('connection', function(socket) {
             switch(message.cmd){
                 case "get":
                     break;
-
+                case "saveCameras":
+                    privateData.cameras = {
+                        firstBase: message.data.firstBase || "",
+                        thirdBase: message.data.thirdBase || "",
+                        homePlate: message.data.homePlate || "",
+                        outfield:  message.data.outfield  || ""
+                    };
+                    objOptions.cameras = privateData.cameras;
+                    configHandler.configFileSave();
+                    socket.emit('config', { cmd: 'saveCameras', data: privateData.cameras });
+                    break;
             }
         });
 

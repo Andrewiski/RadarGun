@@ -17,6 +17,7 @@
             fullSongFiles: null,
             playlists: null,
             editingPlaylist: null,
+            cameras: { firstBase: '', thirdBase: '', homePlate: '', outfield: '' },
             videoFiles: null,
             isGameAdmin: false,
             isGameSelect: false,
@@ -226,6 +227,42 @@
             return $.ajax({ url: '/data/settings/videostreams', type: 'GET' }).then(function (data) {
                 updateVideoStreamSettings(data);
             });
+        }
+
+        function updateCameraSettings(data) {
+            try {
+                if (data.firstBase !== undefined) commonData.cameras.firstBase = data.firstBase;
+                if (data.thirdBase !== undefined) commonData.cameras.thirdBase = data.thirdBase;
+                if (data.homePlate !== undefined) commonData.cameras.homePlate = data.homePlate;
+                if (data.outfield  !== undefined) commonData.cameras.outfield  = data.outfield;
+                renderGameCamerasTab();
+            } catch (ex) {
+                console.log('error', 'updateCameraSettings', ex.message);
+            }
+        }
+
+        function refreshCameraSettings() {
+            return $.ajax({ url: '/data/settings/cameras', type: 'GET' }).then(function (data) {
+                updateCameraSettings(data);
+            });
+        }
+
+        function renderGameCamerasTab() {
+            $('#cameraFirstBaseUrl').val(commonData.cameras.firstBase || '');
+            $('#cameraThirdBaseUrl').val(commonData.cameras.thirdBase || '');
+            $('#cameraHomePlateUrl').val(commonData.cameras.homePlate || '');
+            $('#cameraOutfieldUrl').val(commonData.cameras.outfield   || '');
+        }
+
+        function saveCameraSettings() {
+            var data = {
+                firstBase: $('#cameraFirstBaseUrl').val().trim(),
+                thirdBase: $('#cameraThirdBaseUrl').val().trim(),
+                homePlate: $('#cameraHomePlateUrl').val().trim(),
+                outfield:  $('#cameraOutfieldUrl').val().trim()
+            };
+            radarMonitor.sendServerCommand('config', { cmd: 'saveCameras', data: data });
+            updateCameraSettings(data);
         }
 
         function getAppLogLevels() {
@@ -1161,6 +1198,9 @@
                     if (!commonData.fullSongFiles) refreshFullSongFiles();
                     if (!commonData.playlists) refreshPlaylists();
                     break;
+                case 'gameCameras':
+                    refreshCameraSettings();
+                    break;
                 case 'videoFiles':
                     refreshVideoFiles();
                     break;
@@ -1698,6 +1738,9 @@
             $(document).on('click', '.playlist-song-remove',   function () { removeSongFromPlaylist($(this).attr('data-song')); });
             $('#playlistPreviewAudio').on('ended',              function () { playlistPreviewAdvance(); });
 
+            // Game Camera Feeds tab
+            $(document).on('click', '#saveCamerasBtn', function () { saveCameraSettings(); });
+
             // Video Streams tab
             $(document).on('click', '#videoStreamStartBtn',          function () {
                 commonData.videoStreams.teamName         = $('#videoTeamNameInput').val();
@@ -2205,6 +2248,11 @@
             });
             radarMonitor.on('serverLogs', function (message) {
                 addLogRow(message.data, $('.serverLogs'), true);
+            });
+            radarMonitor.on('config', function (message) {
+                switch (message.cmd) {
+                    case 'saveCameras': updateCameraSettings(message.data); break;
+                }
             });
             radarMonitor.on('videoStreams', function (message) {
                 switch (message.cmd) {

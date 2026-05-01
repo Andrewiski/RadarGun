@@ -90,6 +90,12 @@
                 }     
         }
     },
+    "cameras": {
+        "firstBase": "",
+        "thirdBase": "",
+        "homePlate": "",
+        "outfield":  ""
+    },
     "appLogLevels":{
         "radarMonitor": {
             "app":"info",
