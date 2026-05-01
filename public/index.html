@@ -339,6 +339,9 @@
                                         <a href="#tab-playlists" data-toggle="tab"><i class="fa fa-music"></i> Playlists</a>
                                     </li>
                                     <li role="presentation" class="admin-tab">
+                                        <a href="#tab-gameCameras" data-toggle="tab"><i class="fa-solid fa-camera"></i> Game Camera Feeds</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
                                         <a href="#tab-practiceMode" data-toggle="tab"><i class="fa fa-baseball-bat-ball"></i> Practice Mode</a>
                                     </li>
                                     <li role="presentation" class="admin-tab">
@@ -716,6 +719,28 @@
                                                         </table>
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Game Camera Feeds -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-gameCameras">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="control-label">First Base Camera (RTSP URL)</label>
+                                                <input type="text" class="form-control" id="cameraFirstBaseUrl" placeholder="rtsp://" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Third Base Camera (RTSP URL)</label>
+                                                <input type="text" class="form-control" id="cameraThirdBaseUrl" placeholder="rtsp://" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Home Plate Camera (RTSP URL)</label>
+                                                <input type="text" class="form-control" id="cameraHomePlateUrl" placeholder="rtsp://" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">Outfield Camera (RTSP URL)</label>
+                                                <input type="text" class="form-control" id="cameraOutfieldUrl" placeholder="rtsp://" />
                                             </div>
                                         </div>
                                     </div>
