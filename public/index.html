@@ -339,6 +339,9 @@
                                         <a href="#tab-playlists" data-toggle="tab"><i class="fa fa-music"></i> Playlists</a>
                                     </li>
                                     <li role="presentation" class="admin-tab">
+                                        <a href="#tab-fileManager" data-toggle="tab"><i class="fa-solid fa-folder-open"></i> Audio Files</a>
+                                    </li>
+                                    <li role="presentation" class="admin-tab">
                                         <a href="#tab-gameCameras" data-toggle="tab"><i class="fa-solid fa-camera"></i> Game Camera Feeds</a>
                                     </li>
                                     <li role="presentation" class="admin-tab">
@@ -720,6 +723,31 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Audio File Manager -->
+                                    <div role="tabpanel" class="tab-pane" id="tab-fileManager">
+                                        <div class="col-sm-10">
+                                            <div style="margin-bottom:8px">
+                                                <button type="button" class="btn btn-sm" id="fileManagerRefreshBtn" title="Refresh"><i class="fa fa-refresh"></i></button>
+                                                <ol class="breadcrumb" id="fileManagerBreadcrumb" style="display:inline-flex;margin:0 8px;padding:3px 12px;vertical-align:middle"></ol>
+                                                <label class="btn btn-sm btn-success" style="margin:0;cursor:pointer" title="Upload file to current folder">
+                                                    <i class="fa fa-upload"></i> Upload File
+                                                    <input type="file" id="fileManagerUploadInput" style="display:none" multiple accept=".mp3,.m4a,.wav,.ogg,.flac,audio/*" />
+                                                </label>
+                                            </div>
+                                            <table class="table table-bordered table-striped table-condensed">
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th style="width:90px">Size</th>
+                                                        <th style="width:110px">Modified</th>
+                                                        <th style="width:80px">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="fileManagerTableBody"></tbody>
+                                            </table>
                                         </div>
                                     </div>
 

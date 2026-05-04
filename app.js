@@ -633,6 +633,87 @@ routes.get("/data/serverLogs", function (req, res) {
     res.json(logUtilHelper.memoryData.logs);
 });
 
+// ── Audio File Manager ────────────────────────────────────────────────────────
+var resolvedAudioFileDir = path.resolve(audioFileDirectory);
+
+function fileManagerSafePath(subPath) {
+    var resolved = path.resolve(path.join(audioFileDirectory, subPath || ''));
+    return resolved.startsWith(resolvedAudioFileDir) ? resolved : null;
+}
+
+routes.get('/data/filemanager', function (req, res) {
+    try {
+        var fullPath = fileManagerSafePath(req.query.path || '');
+        if (!fullPath) return res.status(400).json({ err: 'Invalid path' });
+        fs.readdir(fullPath, function (err, files) {
+            if (err) return res.json([]);
+            var items = [];
+            files.forEach(function (file) {
+                if (file.startsWith('.')) return;
+                try {
+                    var stat = fs.statSync(path.join(fullPath, file));
+                    items.push({ name: file, isDirectory: stat.isDirectory(), size: stat.size, modified: stat.mtime });
+                } catch (e) {}
+            });
+            res.json(items);
+        });
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "filemanager list error", err);
+        res.status(500).json({ err: err.message });
+    }
+});
+
+routes.post('/data/filemanager/rename', function (req, res) {
+    try {
+        var fullPath = fileManagerSafePath(req.body.path || '');
+        if (!fullPath) return res.status(400).json({ err: 'Invalid path' });
+        var newName = path.basename(req.body.newName || '');
+        if (!newName) return res.status(400).json({ err: 'Invalid name' });
+        var newPath = path.join(path.dirname(fullPath), newName);
+        fs.rename(fullPath, newPath, function (err) {
+            if (err) return res.status(500).json({ err: err.message });
+            res.json({ success: true });
+        });
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "filemanager rename error", err);
+        res.status(500).json({ err: err.message });
+    }
+});
+
+routes.post('/data/filemanager/delete', function (req, res) {
+    try {
+        var fullPath = fileManagerSafePath(req.body.path || '');
+        if (!fullPath) return res.status(400).json({ err: 'Invalid path' });
+        var trashDir = path.join(path.dirname(fullPath), '.trash');
+        if (!fs.existsSync(trashDir)) fs.mkdirSync(trashDir, { recursive: true });
+        var trashName = Date.now() + '_' + path.basename(fullPath);
+        fs.rename(fullPath, path.join(trashDir, trashName), function (err) {
+            if (err) return res.status(500).json({ err: err.message });
+            res.json({ success: true });
+        });
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "filemanager delete error", err);
+        res.status(500).json({ err: err.message });
+    }
+});
+
+routes.post('/data/filemanager/upload', function (req, res) {
+    try {
+        var fullDir = fileManagerSafePath(req.body.path || '');
+        if (!fullDir) return res.status(400).json({ err: 'Invalid path' });
+        var fileName = path.basename(req.body.fileName || '');
+        if (!fileName) return res.status(400).json({ err: 'Invalid file name' });
+        var buffer = Buffer.from(req.body.fileData || '', 'base64');
+        fs.writeFile(path.join(fullDir, fileName), buffer, function (err) {
+            if (err) return res.status(500).json({ err: err.message });
+            res.json({ success: true });
+        });
+    } catch (err) {
+        logUtilHelper.log(appLogName, "browser", "error", "filemanager upload error", err);
+        res.status(500).json({ err: err.message });
+    }
+});
+
 
 
 app.use('/', routes);

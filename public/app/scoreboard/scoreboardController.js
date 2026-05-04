@@ -18,6 +18,7 @@
             playlists: null,
             editingPlaylist: null,
             cameras: { firstBase: '', thirdBase: '', homePlate: '', outfield: '' },
+            fileManager: { currentPath: '', items: [] },
             videoFiles: null,
             isGameAdmin: false,
             isGameSelect: false,
@@ -263,6 +264,130 @@
             };
             radarMonitor.sendServerCommand('config', { cmd: 'saveCameras', data: data });
             updateCameraSettings(data);
+        }
+
+        // ── Audio File Manager ────────────────────────────────────────────────
+        function refreshFileManager() {
+            $.getJSON('/data/filemanager?path=' + encodeURIComponent(commonData.fileManager.currentPath), function (items) {
+                commonData.fileManager.items = items;
+                renderFileManager();
+            }).fail(function () {
+                commonData.fileManager.items = [];
+                renderFileManager();
+            });
+        }
+
+        function renderFileManager() {
+            // Breadcrumb
+            var parts = commonData.fileManager.currentPath ? commonData.fileManager.currentPath.split('/') : [];
+            var $bc = $('#fileManagerBreadcrumb').empty();
+            $bc.append('<li><a class="fm-nav" data-path="" href="#">audioFiles</a></li>');
+            var cum = '';
+            parts.forEach(function (p, i) {
+                if (!p) return;
+                cum = cum ? cum + '/' + p : p;
+                if (i === parts.length - 1) {
+                    $bc.append('<li class="active">' + escHtml(p) + '</li>');
+                } else {
+                    $bc.append('<li><a class="fm-nav" data-path="' + escHtml(cum) + '" href="#">' + escHtml(p) + '</a></li>');
+                }
+            });
+
+            // Table
+            var $tbody = $('#fileManagerTableBody').empty();
+            var items = commonData.fileManager.items || [];
+            if (!items.length) {
+                $tbody.append('<tr><td colspan="4" class="text-muted" style="padding:12px">Folder is empty.</td></tr>');
+                return;
+            }
+            var dirs  = items.filter(function (x) { return  x.isDirectory; });
+            var files = items.filter(function (x) { return !x.isDirectory; });
+            dirs.concat(files).forEach(function (item) {
+                var itemPath = commonData.fileManager.currentPath
+                    ? commonData.fileManager.currentPath + '/' + item.name
+                    : item.name;
+                var icon = item.isDirectory
+                    ? '<i class="fa fa-folder" style="color:#e6a817"></i>'
+                    : '<i class="fa fa-music" style="color:#5b9bd5"></i>';
+                var nameCell = item.isDirectory
+                    ? icon + ' <a class="fm-nav" data-path="' + escHtml(itemPath) + '" href="#">' + escHtml(item.name) + '</a>'
+                    : icon + ' ' + escHtml(item.name);
+                $tbody.append('<tr>' +
+                    '<td>' + nameCell + '</td>' +
+                    '<td>' + (item.isDirectory ? '—' : fmFormatSize(item.size)) + '</td>' +
+                    '<td>' + (item.modified ? new Date(item.modified).toLocaleDateString() : '—') + '</td>' +
+                    '<td>' +
+                        '<button class="btn btn-xs btn-info fm-rename-btn" data-path="' + escHtml(itemPath) + '" data-name="' + escHtml(item.name) + '" title="Rename"><i class="fa fa-edit"></i></button>' +
+                        (!item.isDirectory ? ' <button class="btn btn-xs btn-danger fm-delete-btn" data-path="' + escHtml(itemPath) + '" data-name="' + escHtml(item.name) + '" title="Move to trash"><i class="fa fa-trash"></i></button>' : '') +
+                    '</td>' +
+                    '</tr>');
+            });
+        }
+
+        function fmFormatSize(bytes) {
+            if (!bytes) return '0 B';
+            if (bytes < 1024)    return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        function fmNavigate(subPath) {
+            commonData.fileManager.currentPath = subPath;
+            refreshFileManager();
+        }
+
+        function fmRename(itemPath, currentName) {
+            var newName = prompt('Rename "' + currentName + '" to:', currentName);
+            if (!newName || newName === currentName) return;
+            $.ajax({
+                url: '/data/filemanager/rename', type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ path: itemPath, newName: newName })
+            }).done(function () {
+                refreshFileManager();
+            }).fail(function (xhr) {
+                alert('Rename failed: ' + ((xhr.responseJSON && xhr.responseJSON.err) || 'Unknown error'));
+            });
+        }
+
+        function fmDelete(itemPath, name) {
+            if (!confirm('Move "' + name + '" to trash?')) return;
+            $.ajax({
+                url: '/data/filemanager/delete', type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ path: itemPath })
+            }).done(function () {
+                refreshFileManager();
+            }).fail(function (xhr) {
+                alert('Delete failed: ' + ((xhr.responseJSON && xhr.responseJSON.err) || 'Unknown error'));
+            });
+        }
+
+        function fmUpload(files) {
+            var remaining = files.length;
+            if (!remaining) return;
+            Array.prototype.forEach.call(files, function (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var base64 = e.target.result.split(',')[1];
+                    $.ajax({
+                        url: '/data/filemanager/upload', type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            path:     commonData.fileManager.currentPath,
+                            fileName: file.name,
+                            fileData: base64
+                        })
+                    }).always(function (xhr) {
+                        if (xhr && xhr.responseJSON && xhr.responseJSON.err) {
+                            alert('Upload failed for "' + file.name + '": ' + xhr.responseJSON.err);
+                        }
+                        remaining--;
+                        if (remaining === 0) refreshFileManager();
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         function getAppLogLevels() {
@@ -1198,6 +1323,9 @@
                     if (!commonData.fullSongFiles) refreshFullSongFiles();
                     if (!commonData.playlists) refreshPlaylists();
                     break;
+                case 'fileManager':
+                    refreshFileManager();
+                    break;
                 case 'gameCameras':
                     refreshCameraSettings();
                     break;
@@ -1737,6 +1865,13 @@
             $(document).on('click', '.playlist-song-add',      function () { addSongToPlaylist($(this).attr('data-song')); });
             $(document).on('click', '.playlist-song-remove',   function () { removeSongFromPlaylist($(this).attr('data-song')); });
             $('#playlistPreviewAudio').on('ended',              function () { playlistPreviewAdvance(); });
+
+            // Audio File Manager tab
+            $(document).on('click',  '#fileManagerRefreshBtn', function ()    { refreshFileManager(); });
+            $(document).on('click',  '.fm-nav',                function (e)   { e.preventDefault(); fmNavigate($(this).attr('data-path')); });
+            $(document).on('click',  '.fm-rename-btn',         function ()    { fmRename($(this).attr('data-path'), $(this).attr('data-name')); });
+            $(document).on('click',  '.fm-delete-btn',         function ()    { fmDelete($(this).attr('data-path'), $(this).attr('data-name')); });
+            $(document).on('change', '#fileManagerUploadInput', function ()   { fmUpload(this.files); this.value = ''; });
 
             // Game Camera Feeds tab
             $(document).on('click', '#saveCamerasBtn', function () { saveCameraSettings(); });
