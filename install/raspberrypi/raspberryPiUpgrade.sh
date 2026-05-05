@@ -6,7 +6,10 @@ sudo chown $(id -u):$(id -g) /opt/de/radar # ensure the current user has ownersh
 cd /opt/de/radar
 #sudu su radar
 echo downloading latest version of code
-curl -s https://api.github.com/repos/Andrewiski/RadarGun/releases/latest | sed -n 's/.*"tarball_url": "\(.*\)",.*/\1/p' | xargs -n1 wget -O - -q | tar -xz --strip-components=1
+DOWNLOAD_URL=$(curl -s https://api.github.com/repos/Andrewiski/RadarGun/releases/latest | grep -o '"browser_download_url": *"[^"]*radargunmonitor\.zip"' | grep -o 'https://[^"]*')
+wget -q -O radargunmonitor.zip "$DOWNLOAD_URL"
+unzip -q radargunmonitor.zip
+rm radargunmonitor.zip
 npm install
 #exit
 #sudo chown -R radar:radar /opt/de/appdata/radar
