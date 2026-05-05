@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build release zip
+        run: |
+          ZIP_NAME="radargunmonitor-${{ github.ref_name }}.zip"
+
+          zip -r "$ZIP_NAME" . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "node_modules/*" \
+            -x "config/private/*" \
+            -x "data/audioFiles/fullSongs/*.mp3" \
+            -x "data/audioFiles/fullSongs/*.m4a" \
+            -x "data/audioFiles/fullSongs/*.wav" \
+            -x "data/audioFiles/fullSongs/*.ogg" \
+            -x "data/audioFiles/fullSongs/*.flac" \
+            -x "data/audioFiles/fullSongs/*.txt" \
+            -x "data/audioFiles/fullSongs/walkup/old/*" \
+            -x "data/audioFiles/walkup/*.mp3" \
+            -x "data/audioFiles/walkup/*.m4a" \
+            -x "data/audioFiles/walkup/*.wav" \
+            -x "data/audioFiles/walkup/*.ogg" \
+            -x "data/audioFiles/walkup/*.flac" \
+            -x "data/audioFiles/walkup/old/*" \
+            -x "data/videos/*" \
+            -x "data/nosql/*" \
+            -x "data/overlays/*" \
+            -x "docs/images/*" \
+            -x "ffmpeg/*" \
+            -x "install/*" \
+            -x "tests/*" \
+            -x "logs/*" \
+            -x "*.log"
+
+          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
+
+      - name: Attach zip to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP_NAME }}

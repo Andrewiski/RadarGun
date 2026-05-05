@@ -1,6 +1,6 @@
 #!/bin/bash     
-echo Add Node.JS 16 repo
-curl -sSL https://deb.nodesource.com/setup_16.x | sudo bash -
+echo Add Node.JS 22 repo
+curl -sSL https://deb.nodesource.com/setup_22.x | sudo bash -
 echo Install Node.JS
 sudo apt install -y nodejs
 
