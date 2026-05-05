@@ -17,7 +17,7 @@ jobs:
 
       - name: Build release zip
         run: |
-          ZIP_NAME="radargunmonitor-${{ github.ref_name }}.zip"
+          ZIP_NAME="radargunmonitor.zip"
 
           zip -r "$ZIP_NAME" . \
             -x ".git/*" \
