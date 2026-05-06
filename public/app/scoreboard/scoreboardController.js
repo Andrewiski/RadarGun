@@ -2313,6 +2313,7 @@
                 id: radarMonitor.uuid(),
                 name: teamName,
                 shortName: $('#gcImportTeamShortName').val().trim(),
+                status: 1,
                 roster: roster
             };
             $msg.html('<div class="alert alert-info">Saving...</div>');
