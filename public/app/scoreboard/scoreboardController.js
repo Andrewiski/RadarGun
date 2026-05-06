@@ -994,19 +994,54 @@
             });
         }
 
+        function fullSongFileRow(f) {
+            return '<td>' +
+                '<button class="btn fullsong-play" data-file=\'' + escHtml(JSON.stringify(f)) + '\' title="Play"><i class="fa fa-play"></i></button>' +
+                '<button class="btn fullsong-stop" title="Stop"><i class="fa fa-stop"></i></button>' +
+                '</td>' +
+                '<td><button class="btn fullsong-preview" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-headphones"></i></button><div class="previewControl"></div></td>';
+        }
+
+        function flattenFullSongFiles(files) {
+            var flat = [];
+            (files || []).forEach(function (f) {
+                if (f.type === 'directory') {
+                    (f.files || []).forEach(function (sf) { flat.push(sf); });
+                } else {
+                    flat.push(f);
+                }
+            });
+            return flat;
+        }
+
         function renderFullSongsTab() {
             var $tbody = $('#fullSongsTableBody').empty();
             if (!commonData.fullSongFiles) return;
             $.each(commonData.fullSongFiles, function (i, f) {
-                $tbody.append('<tr>' +
-                    '<td>' + escHtml(f.fileName) + '</td>' +
-                    '<td>' + escHtml(f.length) + '</td>' +
-                    '<td>' +
-                    '<button class="btn fullsong-play" data-file=\'' + escHtml(JSON.stringify(f)) + '\' title="Play"><i class="fa fa-play"></i></button>' +
-                    '<button class="btn fullsong-stop" title="Stop"><i class="fa fa-stop"></i></button>' +
-                    '</td>' +
-                    '<td><button class="btn fullsong-preview" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-headphones"></i></button><div class="previewControl"></div></td>' +
-                    '</tr>');
+                if (f.type === 'directory') {
+                    var folderId = 'fs-' + i;
+                    $tbody.append(
+                        '<tr class="fullsong-folder-row" data-folder-id="' + folderId + '" style="cursor:pointer;background:#f5f5f5">' +
+                        '<td colspan="4"><i class="fa fa-folder" style="color:#e6b800"></i> <strong>' + escHtml(f.dirName) + '</strong>' +
+                        ' <i class="fa fa-chevron-right fullsong-chevron" style="font-size:0.8em;color:#888"></i>' +
+                        '</td></tr>'
+                    );
+                    $.each(f.files || [], function (j, sf) {
+                        $tbody.append(
+                            '<tr class="fullsong-folder-child" data-parent-folder="' + folderId + '" style="display:none">' +
+                            '<td style="padding-left:28px"><i class="fa fa-music" style="color:#888"></i> ' + escHtml(sf.fileName.split('/').pop()) + '</td>' +
+                            '<td>' + escHtml(sf.length || '') + '</td>' +
+                            fullSongFileRow(sf) +
+                            '</tr>'
+                        );
+                    });
+                } else {
+                    $tbody.append('<tr>' +
+                        '<td><i class="fa fa-music" style="color:#888"></i> ' + escHtml(f.fileName) + '</td>' +
+                        '<td>' + escHtml(f.length || '') + '</td>' +
+                        fullSongFileRow(f) +
+                        '</tr>');
+                }
             });
         }
 
@@ -1046,9 +1081,9 @@
         var _plDragSrcIdx = -1;
 
         function renderPlaylistEditPanel() {
-            var songs   = (commonData.editingPlaylist && commonData.editingPlaylist.songs) || [];
+            var songs    = (commonData.editingPlaylist && commonData.editingPlaylist.songs) || [];
             var allFiles = commonData.fullSongFiles || [];
-            var inSet   = {};
+            var inSet    = {};
             songs.forEach(function (s) { inSet[s] = true; });
 
             // Ordered songs in the playlist (draggable)
@@ -1057,9 +1092,12 @@
                 $orderBody.append('<tr><td class="text-muted" style="padding:8px">No songs yet — add from the list below.</td></tr>');
             } else {
                 songs.forEach(function (song, idx) {
+                    var displayName = song.indexOf('/') !== -1
+                        ? song.split('/').pop() + ' <small class="text-muted">(' + song.split('/')[0] + ')</small>'
+                        : escHtml(song);
                     var $row = $('<tr draggable="true">' +
                         '<td style="width:26px;cursor:grab;text-align:center;color:#888"><i class="fa fa-bars"></i></td>' +
-                        '<td>' + escHtml(song) + '</td>' +
+                        '<td>' + displayName + '</td>' +
                         '<td style="width:32px"><button class="btn btn-xs btn-danger playlist-song-remove" data-song="' + escHtml(song) + '" title="Remove"><i class="fa fa-times"></i></button></td>' +
                         '</tr>');
                     var el = $row[0];
@@ -1096,18 +1134,39 @@
                 });
             }
 
-            // Available songs (not yet in playlist)
+            // Available songs (not yet in playlist) — with folder support
             var $availBody = $('#playlistSongAvailableBody').empty();
-            var available = allFiles.filter(function (f) { return !inSet[f.fileName]; });
-            if (!available.length) {
-                $availBody.append('<tr><td class="text-muted" style="padding:8px">All songs are already in this playlist.</td></tr>');
-            } else {
-                available.forEach(function (f) {
+            var hasAny = false;
+            allFiles.forEach(function (f, i) {
+                if (f.type === 'directory') {
+                    var availChildren = (f.files || []).filter(function (sf) { return !inSet[sf.fileName]; });
+                    if (!availChildren.length) return;
+                    hasAny = true;
+                    var folderId = 'pl-folder-' + i;
+                    $availBody.append(
+                        '<tr class="pl-folder-row" data-folder-id="' + folderId + '" style="cursor:pointer;background:#f5f5f5">' +
+                        '<td></td>' +
+                        '<td colspan="1"><i class="fa fa-folder" style="color:#e6b800"></i> <strong>' + escHtml(f.dirName) + '</strong>' +
+                        ' <i class="fa fa-chevron-right pl-folder-chevron" style="font-size:0.8em;color:#888"></i>' +
+                        '</td></tr>'
+                    );
+                    availChildren.forEach(function (sf) {
+                        $availBody.append('<tr class="pl-folder-child" data-parent-folder="' + folderId + '" style="display:none">' +
+                            '<td style="width:32px"><button class="btn btn-xs btn-success playlist-song-add" data-song="' + escHtml(sf.fileName) + '" title="Add"><i class="fa fa-plus"></i></button></td>' +
+                            '<td style="padding-left:20px"><i class="fa fa-music" style="color:#888"></i> ' + escHtml(sf.fileName.split('/').pop()) + '</td>' +
+                            '</tr>');
+                    });
+                } else {
+                    if (inSet[f.fileName]) return;
+                    hasAny = true;
                     $availBody.append('<tr>' +
                         '<td style="width:32px"><button class="btn btn-xs btn-success playlist-song-add" data-song="' + escHtml(f.fileName) + '" title="Add"><i class="fa fa-plus"></i></button></td>' +
-                        '<td>' + escHtml(f.fileName) + '</td>' +
+                        '<td><i class="fa fa-music" style="color:#888"></i> ' + escHtml(f.fileName) + '</td>' +
                         '</tr>');
-                });
+                }
+            });
+            if (!hasAny) {
+                $availBody.append('<tr><td class="text-muted" style="padding:8px">All songs are already in this playlist.</td></tr>');
             }
         }
 
@@ -1902,6 +1961,18 @@
 
             // Full Songs tab
             $(document).on('click', '#refreshFullSongsBtn', function () { refreshFullSongFiles(); });
+            $(document).on('click', '.fullsong-folder-row', function () {
+                var folderId = $(this).attr('data-folder-id');
+                var $children = $('[data-parent-folder="' + folderId + '"]');
+                var opening = $children.first().is(':hidden');
+                $children.toggle(opening);
+                $(this).find('.fa-folder, .fa-folder-open')
+                    .toggleClass('fa-folder', !opening)
+                    .toggleClass('fa-folder-open', opening);
+                $(this).find('.fullsong-chevron')
+                    .toggleClass('fa-chevron-right', !opening)
+                    .toggleClass('fa-chevron-down', opening);
+            });
             $(document).on('click', '.fullsong-play', function () {
                 var file = $(this).attr('data-file');
                 if (file) audioFilePlayFullSong(JSON.parse(file));
@@ -1912,6 +1983,18 @@
             });
 
             // Playlists tab
+            $(document).on('click', '.pl-folder-row', function () {
+                var folderId = $(this).attr('data-folder-id');
+                var $children = $('[data-parent-folder="' + folderId + '"]');
+                var opening = $children.first().is(':hidden');
+                $children.toggle(opening);
+                $(this).find('.fa-folder, .fa-folder-open')
+                    .toggleClass('fa-folder', !opening)
+                    .toggleClass('fa-folder-open', opening);
+                $(this).find('.pl-folder-chevron')
+                    .toggleClass('fa-chevron-right', !opening)
+                    .toggleClass('fa-chevron-down', opening);
+            });
             $(document).on('click', '#refreshPlaylistsBtn',    function () { refreshPlaylists(); refreshFullSongFiles(); });
             $(document).on('click', '#playlistStopBtn',        function () { audioFileStop(); });
             $(document).on('click', '#newPlaylistBtn',         function () { openNewPlaylist(); });

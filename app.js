@@ -422,30 +422,41 @@ routes.get('/data/audioFiles/walkup', function (req, res) {
 });
 
 routes.get('/data/audioFiles/fullSongs', function (req, res) {
-    try{
-        let fullsongFiles = [];
-        fs.readdir(fullSongAudioDirectory, function (err, files) {
-            if (err) {
-                logUtilHelper.log(appLogName, "browser", "error", "Error getting audio directory information.", fullSongAudioDirectory);
-            } else {
-                files.forEach(function (file) {
-                    //console.log(file);
-                    if (path.extname(file) !== ".txt") {
-                        fullsongFiles.push({ fileName: file });
-                    }
-                })
-                res.json(fullsongFiles);
+    try {
+        var result = [];
+        var topEntries = fs.readdirSync(fullSongAudioDirectory);
+        topEntries.forEach(function (name) {
+            if (path.extname(name) === '.txt') return;
+            var fullPath = path.join(fullSongAudioDirectory, name);
+            var stat = fs.statSync(fullPath);
+            if (stat.isDirectory()) {
+                var children = [];
+                try {
+                    fs.readdirSync(fullPath).forEach(function (subName) {
+                        if (path.extname(subName) === '.txt') return;
+                        var subStat = fs.statSync(path.join(fullPath, subName));
+                        if (subStat.isFile()) {
+                            children.push({ type: 'file', fileName: name + '/' + subName });
+                        }
+                    });
+                } catch (e) {}
+                result.push({ type: 'directory', dirName: name, files: children });
+            } else if (stat.isFile()) {
+                result.push({ type: 'file', fileName: name });
             }
-        })   
+        });
+        res.json(result);
     } catch (err) {
         logUtilHelper.log(appLogName, "browser", "error", "Error getting audio directory information.", fullSongAudioDirectory);
         res.json(500, { err: err });
-    } 
+    }
 });
 
-routes.get('/data/audioFiles/fullSongs/:filename', (req, res) => {
+routes.get('/data/audioFiles/fullSongs/*', (req, res) => {
     try {
-        const filePath = `./data/audioFiles/fullSongs/${req.params.filename}`;
+        const subPath = req.params[0];
+        const filePath = path.join(fullSongAudioDirectory, subPath);
+        if (!filePath.startsWith(fullSongAudioDirectory)) { return res.status(400).end(); }
         const stat = fs.statSync(filePath);
         const fileSize = stat.size;
         const range = req.headers.range;
