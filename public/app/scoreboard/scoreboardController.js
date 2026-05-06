@@ -555,12 +555,35 @@
             return html;
         }
 
+        function findWalkupFile(fileName) {
+            if (!commonData.walkupFiles || !fileName) return null;
+            for (var i = 0; i < commonData.walkupFiles.length; i++) {
+                var f = commonData.walkupFiles[i];
+                if (f.type === 'file' && f.fileName === fileName) return f;
+                if (f.type === 'directory' && f.files) {
+                    for (var j = 0; j < f.files.length; j++) {
+                        if (f.files[j].fileName === fileName) return f.files[j];
+                    }
+                }
+            }
+            return null;
+        }
+
         function buildWalkupFileOptions(files, selectedFileName) {
             var html = '<option value="">None</option>';
             if (files) {
                 $.each(files, function (i, f) {
-                    var sel = (selectedFileName && f.fileName === selectedFileName) ? ' selected' : '';
-                    html += '<option value="' + escHtml(f.fileName) + '"' + sel + '>' + escHtml(f.fileName) + '</option>';
+                    if (f.type === 'directory') {
+                        html += '<optgroup label="' + escHtml(f.dirName) + '">';
+                        $.each(f.files || [], function (j, sf) {
+                            var sel = (selectedFileName && sf.fileName === selectedFileName) ? ' selected' : '';
+                            html += '<option value="' + escHtml(sf.fileName) + '"' + sel + '>' + escHtml(sf.fileName.split('/').pop()) + '</option>';
+                        });
+                        html += '</optgroup>';
+                    } else {
+                        var sel = (selectedFileName && f.fileName === selectedFileName) ? ' selected' : '';
+                        html += '<option value="' + escHtml(f.fileName) + '"' + sel + '>' + escHtml(f.fileName) + '</option>';
+                    }
                 });
             }
             return html;
@@ -932,19 +955,42 @@
             });
         }
 
+        function walkupFileRow(f) {
+            return '<td>' +
+                '<button class="btn walkup-play-song" data-file=\'' + escHtml(JSON.stringify(f)) + '\' title="Play"><i class="fa fa-play"></i></button>' +
+                '<button class="btn walkup-stop-song" title="Stop"><i class="fa fa-stop"></i></button>' +
+                '</td>' +
+                '<td><button class="btn walkup-preview-song" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-headphones"></i></button><div class="previewControl"></div></td>';
+        }
+
         function renderWalkupSongsTab() {
             var $tbody = $('#walkupSongsTableBody').empty();
             if (!commonData.walkupFiles) return;
             $.each(commonData.walkupFiles, function (i, f) {
-                $tbody.append('<tr>' +
-                    '<td>' + escHtml(f.fileName) + '</td>' +
-                    '<td>' + escHtml(f.length) + '</td>' +
-                    '<td>' +
-                    '<button class="btn walkup-play-song" data-file=\'' + escHtml(JSON.stringify(f)) + '\' title="Play"><i class="fa fa-play"></i></button>' +
-                    '<button class="btn walkup-stop-song" title="Stop"><i class="fa fa-stop"></i></button>' +
-                    '</td>' +
-                    '<td><button class="btn walkup-preview-song" data-filename="' + escHtml(f.fileName) + '" title="Preview"><i class="fa fa-headphones"></i></button><div class="previewControl"></div></td>' +
-                    '</tr>');
+                if (f.type === 'directory') {
+                    var folderId = 'wf-' + i;
+                    $tbody.append(
+                        '<tr class="walkup-folder-row" data-folder-id="' + folderId + '" style="cursor:pointer;background:#f5f5f5">' +
+                        '<td colspan="4"><i class="fa fa-folder" style="color:#e6b800"></i> <strong>' + escHtml(f.dirName) + '</strong>' +
+                        ' <i class="fa fa-chevron-right walkup-chevron" style="font-size:0.8em;color:#888"></i>' +
+                        '</td></tr>'
+                    );
+                    $.each(f.files || [], function (j, sf) {
+                        $tbody.append(
+                            '<tr class="walkup-folder-child" data-parent-folder="' + folderId + '" style="display:none">' +
+                            '<td style="padding-left:28px"><i class="fa fa-music" style="color:#888"></i> ' + escHtml(sf.fileName.split('/').pop()) + '</td>' +
+                            '<td>' + escHtml(sf.length || '') + '</td>' +
+                            walkupFileRow(sf) +
+                            '</tr>'
+                        );
+                    });
+                } else {
+                    $tbody.append('<tr>' +
+                        '<td><i class="fa fa-music" style="color:#888"></i> ' + escHtml(f.fileName) + '</td>' +
+                        '<td>' + escHtml(f.length || '') + '</td>' +
+                        walkupFileRow(f) +
+                        '</tr>');
+                }
             });
         }
 
@@ -1528,8 +1574,8 @@
                     lastName:     $row.find('.player-lastname').val()
                 };
                 var walkupFileName = $row.find('.player-walkup-select').val();
-                if (walkupFileName && commonData.walkupFiles) {
-                    player.walkupFile = commonData.walkupFiles.find(function (f) { return f.fileName === walkupFileName; }) || null;
+                if (walkupFileName) {
+                    player.walkupFile = findWalkupFile(walkupFileName);
                 }
                 roster.push(player);
             });
@@ -1833,6 +1879,18 @@
 
             // Walkup Songs tab
             $(document).on('click', '#refreshWalkupBtn', function () { refreshWalkupFiles(); });
+            $(document).on('click', '.walkup-folder-row', function () {
+                var folderId = $(this).attr('data-folder-id');
+                var $children = $('[data-parent-folder="' + folderId + '"]');
+                var opening = $children.first().is(':hidden');
+                $children.toggle(opening);
+                $(this).find('.fa-folder, .fa-folder-open')
+                    .toggleClass('fa-folder', !opening)
+                    .toggleClass('fa-folder-open', opening);
+                $(this).find('.walkup-chevron')
+                    .toggleClass('fa-chevron-right', !opening)
+                    .toggleClass('fa-chevron-down', opening);
+            });
             $(document).on('click', '.walkup-play-song', function () {
                 var file = $(this).attr('data-file');
                 if (file) audioFilePlayWalkup(JSON.parse(file));

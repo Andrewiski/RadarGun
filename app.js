@@ -391,21 +391,30 @@ routes.get('/data/game', function (req, res) {
 });
 
 routes.get('/data/audioFiles/walkup', function (req, res) {
-    try{
-        let walkupFiles = [];
-        fs.readdir(walkupAudioDirectory, function (err, files) {
-            if (err) {
-                logUtilHelper.log(appLogName, "browser", "error", "Error getting walkup directory information.", walkupAudioDirectory);
-            } else {
-                files.forEach(function (file) {
-                    //console.log(file);
-                    if (path.extname(file) !== ".txt") {
-                        walkupFiles.push({ fileName: file });
-                    }
-                })
-                res.json(walkupFiles);
+    try {
+        var result = [];
+        var topEntries = fs.readdirSync(walkupAudioDirectory);
+        topEntries.forEach(function (name) {
+            if (path.extname(name) === '.txt') return;
+            var fullPath = path.join(walkupAudioDirectory, name);
+            var stat = fs.statSync(fullPath);
+            if (stat.isDirectory()) {
+                var children = [];
+                try {
+                    fs.readdirSync(fullPath).forEach(function (subName) {
+                        if (path.extname(subName) === '.txt') return;
+                        var subStat = fs.statSync(path.join(fullPath, subName));
+                        if (subStat.isFile()) {
+                            children.push({ type: 'file', fileName: name + '/' + subName });
+                        }
+                    });
+                } catch (e) {}
+                result.push({ type: 'directory', dirName: name, files: children });
+            } else if (stat.isFile()) {
+                result.push({ type: 'file', fileName: name });
             }
-        })
+        });
+        res.json(result);
     } catch (err) {
         logUtilHelper.log(appLogName, "browser", "error", "Error getting walkup directory information.", walkupAudioDirectory);
         res.json(500, { err: err });
@@ -483,9 +492,11 @@ routes.get('/data/playlists', function (req, res) {
     });
 });
 
-  routes.get('/data/audioFiles/walkup/:filename', (req, res) => {
+  routes.get('/data/audioFiles/walkup/*', (req, res) => {
     try{
-        const filePath = `./data/audioFiles/walkup/${req.params.filename}`;
+        const subPath = req.params[0];
+        const filePath = path.join(walkupAudioDirectory, subPath);
+        if (!filePath.startsWith(walkupAudioDirectory)) { return res.status(400).end(); }
         const stat = fs.statSync(filePath);
         const fileSize = stat.size;
         const range = req.headers.range;
