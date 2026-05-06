@@ -1815,6 +1815,7 @@
             $(document).on('click', '#teamSelectCancelBtn', function () { commonData.isSelectTeam = false; renderTeamsTab(); });
             $(document).on('click', '#teamRefreshBtn',      function () { refreshTeams(); });
             $(document).on('click', '#teamRosterAddBtn',    function () { if (commonData.selectedTeam) { commonData.selectedTeam.roster.push(deepCopy(commonData.emptyPlayer)); renderTeamsTab(); } });
+            $(document).on('click', '#gcImportBtn',         function () { gcImportTeam(); });
             $(document).on('click', '#teamRosterEditTableBody .player-delete', function () {
                 var idx = parseInt($(this).closest('tr').attr('data-index'));
                 commonData.selectedTeam.roster.splice(idx, 1);
@@ -2137,6 +2138,54 @@
             if (team.id === '00000000-0000-0000-0000-000000000000') team.id = null;
             $.ajax({ url: '/data/team', type: 'PUT', contentType: 'application/json', data: JSON.stringify(team) })
                 .then(function () { commonData.isTeamEdit = false; renderTeamsTab(); });
+        }
+
+        function gcImportTeam() {
+            var $msg = $('#gcImportMsg');
+            $msg.html('');
+            var raw = $('#gcImportJson').val().trim();
+            var players;
+            try {
+                players = JSON.parse(raw);
+            } catch (e) {
+                $msg.html('<div class="alert alert-danger">Invalid JSON: ' + escHtml(e.message) + '</div>');
+                return;
+            }
+            if (!Array.isArray(players)) {
+                $msg.html('<div class="alert alert-danger">JSON must be an array of players.</div>');
+                return;
+            }
+            var active = players.filter(function (p) { return p.status === 'active'; });
+            if (active.length === 0) {
+                $msg.html('<div class="alert alert-warning">No active players found in the JSON.</div>');
+                return;
+            }
+            var teamName = $('#gcImportTeamName').val().trim();
+            if (!teamName) {
+                $msg.html('<div class="alert alert-danger">Team Name is required.</div>');
+                return;
+            }
+            var roster = active.map(function (p) {
+                return { jerseyNumber: p.number || '', firstName: p.first_name || '', lastName: p.last_name || '' };
+            });
+            var team = {
+                id: radarMonitor.uuid(),
+                name: teamName,
+                shortName: $('#gcImportTeamShortName').val().trim(),
+                roster: roster
+            };
+            $msg.html('<div class="alert alert-info">Saving...</div>');
+            $.ajax({ url: '/data/team', type: 'PUT', contentType: 'application/json', data: JSON.stringify(team) })
+                .then(function () {
+                    $msg.html('<div class="alert alert-success">Team "' + escHtml(teamName) + '" imported with ' + active.length + ' active player(s).</div>');
+                    $('#gcImportJson').val('');
+                    $('#gcImportTeamName').val('');
+                    $('#gcImportTeamShortName').val('');
+                    refreshTeams();
+                })
+                .fail(function (xhr) {
+                    $msg.html('<div class="alert alert-danger">Error: ' + escHtml(xhr.responseText || xhr.statusText) + '</div>');
+                });
         }
 
         function teamDelete() {
