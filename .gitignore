@@ -4,13 +4,13 @@ config/private
 RadarGunMonitor.njsproj.FileListAbsolute.txt 
 RadarGunMonitor.njsprojAssemblyReference.cache
 
-package-lock.jsone
+#package-lock.json
 
 obj
 bin
 
 Microsoft.NodejsTools.Webrole.dll
-package-lock.json
+#package-lock.json
 
 # Logs
 typings
