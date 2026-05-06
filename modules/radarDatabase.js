@@ -72,6 +72,9 @@ var RadarDatabase = function (options, logUtilHelper, dataDirectory, deviceId) {
         if (!team.id) {
             team.id = uuidv4();
         }
+        if (team.status === undefined || team.status === null) {
+            team.status = 1;
+        }
         teamsDb.update(team, team).make(function (filter) {
             filter.where('id', team.id);
             filter.callback(function (err, count, doc) {
