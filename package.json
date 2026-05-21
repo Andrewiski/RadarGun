@@ -56,7 +56,7 @@
     "socket.io-client": "^4.4.1",
     "stylus": "^0.54.7",
     "ui-select": "^0.19.8",
-    "uuid": "^8.3.2",
+    "uuid": "^14.0.0",
     "verror": "1.6.x",
     "winston": "^3.5",
     "winston-daily-rotate-file": "^4.6.0"
