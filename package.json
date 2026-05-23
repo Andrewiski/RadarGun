@@ -38,7 +38,7 @@
     "bootstrap": "^3.3.7",
     "cookie-parser": "^1.4.0",
     "debug": "^4.3.3",
-    "express": "^4.17.1",
+    "express": "^4.22.2",
     "extend": "^3.0.2",
     "fluent-ffmpeg": "^2.1.2",
     "gps": "^0.5.3",
